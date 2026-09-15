@@ -9,9 +9,10 @@
     "build": "npm run build:data && node scripts/build.mjs",
     "test": "node scripts/test.mjs",
     "dev": "node scripts/dev.mjs",
-    "format": "elm-format src tests/Check.elm --yes && prettier --write public/style.css public/bridge.js scripts/*.mjs"
+    "format": "elm-format src tests/Check.elm --yes && prettier --write public/style.css public/bridge.js public/video.js scripts/*.mjs"
   },
   "dependencies": {
+    "@vimeo/player": "2.30.4",
     "katex": "0.18.7"
   },
   "devDependencies": {

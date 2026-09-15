@@ -14,7 +14,7 @@ type alias Choice =
 
 
 type alias Video =
-    { provider : String, id : String, title : String }
+    { provider : String, id : String, title : String, duration : Int, start : Int, poster : String, watchUrl : String, focus : String }
 
 
 type alias Step =
@@ -97,8 +97,21 @@ lessonDecoder =
         (D.field "id" D.string)
         (D.field "title" D.string)
         (D.field "intro" D.string)
-        (D.field "video" (D.map3 Video (D.field "provider" D.string) (D.field "id" D.string) (D.field "title" D.string)))
+        (D.field "video" videoDecoder)
         (D.field "steps" (D.list stepDecoder))
+
+
+videoDecoder : Decoder Video
+videoDecoder =
+    D.map8 Video
+        (D.field "provider" D.string)
+        (D.field "id" D.string)
+        (D.field "title" D.string)
+        (D.field "duration" D.int)
+        (D.field "start" D.int)
+        (D.field "poster" D.string)
+        (D.field "watchUrl" D.string)
+        (D.field "focus" D.string)
 
 
 trackDecoder : Decoder Track

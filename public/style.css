@@ -771,95 +771,258 @@ progress::-moz-progress-bar {
   color: var(--green);
   background: #e9f3ec;
 }
-.video-section {
-  margin-top: 25px;
-  padding: 0;
-  border-top: 1px solid #193d3814;
-  border-bottom: 1px solid #193d3814;
+.lesson-modes {
+  display: flex;
+  gap: 26px;
+  margin: 25px 0 27px;
+  border-bottom: 1px solid var(--line);
 }
-.video-section summary {
+.lesson-mode {
   display: flex;
   align-items: center;
-  gap: 12px;
-  cursor: pointer;
-  list-style: none;
-  min-height: 71px;
+  gap: 9px;
+  min-height: 50px;
+  padding: 10px 2px 13px;
+  margin-bottom: -1px;
+  border-bottom: 2px solid transparent;
+  color: var(--muted);
   font-size: 0.92rem;
-  color: #4e7365;
-  padding: 15px 3px;
 }
-.video-section summary::-webkit-details-marker {
-  display: none;
+.lesson-mode:hover,
+.lesson-mode.active {
+  color: var(--green);
 }
-.video-section summary > .icon {
+.lesson-mode.active {
+  border-bottom-color: var(--green);
+  font-weight: 600;
+}
+.lesson-mode > .icon {
   font-size: 1.2rem;
-  color: #668675;
-  margin-left: 4px;
 }
-.video-icon {
-  font-size: 1.15rem;
-  width: 33px;
-  height: 33px;
+.mode-count {
   display: grid;
   place-items: center;
-  background: #e4efe6;
-  border-radius: 10px;
-}
-.video-status {
-  margin-left: auto;
-  font-size: 0.75rem;
-  background: #e8efe7;
-  color: #64816f;
-  padding: 4px 9px;
+  min-width: 23px;
+  height: 23px;
+  padding: 0 5px;
   border-radius: 6px;
-  white-space: nowrap;
+  background: #e4eee8;
+  color: var(--muted);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
 }
-.video-section[open] summary > .icon {
-  transform: rotate(45deg);
+.video-heading {
+  display: flex;
+  align-items: baseline;
+  gap: 18px;
+  justify-content: space-between;
+  margin-bottom: 9px;
 }
-.video-content {
-  padding: 0 0 20px;
+.video-heading h2 {
+  font-size: 1.05rem;
+  font-weight: 550;
+  line-height: 1.5;
 }
-.video-placeholder {
-  aspect-ratio: 16/8;
-  min-height: 190px;
-  border-radius: 15px;
-  background: linear-gradient(125deg, #e0eee4, #e4f1ee);
+.video-duration {
+  flex-shrink: 0;
+  color: var(--muted);
+  font-size: 0.8rem;
+  font-variant-numeric: tabular-nums;
+}
+.video-focus {
+  color: var(--muted);
+  font-size: 0.93rem;
+  line-height: 1.65;
+  margin-bottom: 20px;
+  max-width: 750px;
+}
+course-video {
+  display: block;
+}
+.video-poster {
+  position: relative;
+  aspect-ratio: 16/9;
+  background: #dcebe1;
+  overflow: hidden;
+}
+.video-poster-image {
+  display: block;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.video-play {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  color: white;
+  background: linear-gradient(180deg, #193d380d, #193d3859);
+}
+.video-play:hover {
+  background: linear-gradient(180deg, #193d3814, #193d3873);
+}
+.video-play-symbol {
+  display: grid;
+  place-items: center;
+  width: 65px;
+  height: 65px;
+  padding-left: 4px;
+  border-radius: 50%;
+  background: var(--green);
+  border: 1px solid #ffffff66;
+  box-shadow: 0 6px 32px #193d3826;
+  font-size: 1.4rem;
+}
+.video-play-label {
+  padding: 7px 13px;
+  background: #193d38e6;
+  border-radius: 7px;
+  font-size: 0.86rem;
+}
+.video-beginning {
+  position: absolute;
+  right: 15px;
+  bottom: 12px;
+  min-height: 40px;
+  padding: 7px 13px;
+  border-radius: 8px;
+  background: #fffffff2;
+  color: var(--ink);
+  font-size: 0.79rem;
+}
+.video-beginning:hover {
+  background: #fff;
+  color: var(--green);
+}
+.video-play:focus-visible {
+  outline-offset: -6px;
+}
+.video-fallback,
+.video-loading {
+  min-height: 250px;
+  aspect-ratio: 16/9;
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  gap: 15px;
+  gap: 14px;
+  background: linear-gradient(130deg, #e1eee5, #e3f0ef);
   text-align: center;
-  padding: 35px;
-  position: relative;
-  color: #315c4b;
+  padding: 30px;
 }
-.video-proof-mark {
-  display: grid;
-  place-items: center;
-  height: 52px;
-  width: 52px;
-  border-radius: 16px;
-  background: #ffffff80;
-  font-size: 2.5rem;
-  color: #75a28d;
+.video-fallback p {
+  max-width: 440px;
+  color: var(--muted);
+  font-size: 0.9rem;
 }
-.video-placeholder strong {
-  font-size: 1.1rem;
-  font-weight: 500;
+.video-fallback h3 {
+  font-size: 1.15rem;
+  font-weight: 550;
 }
-.video-placeholder p {
-  font-size: 0.85rem;
-  max-width: 380px;
-  color: #648170;
+.video-fallback .quiet {
+  font-size: 0.82rem;
+}
+.video-content {
+  overflow: hidden;
+  border-radius: 17px;
+  background: #193d38;
 }
 .video-content iframe {
   display: block;
   width: 100%;
   aspect-ratio: 16/9;
   border: 0;
-  border-radius: 14px;
+}
+.video-placeholder {
+  aspect-ratio: 16/9;
+  min-height: 250px;
+  background:
+    radial-gradient(ellipse at 15% 10%, #d1e9dc, transparent 62%),
+    linear-gradient(135deg, #e3efe6, #dceef0);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+  padding: 32px;
+  position: relative;
+  color: #315c4b;
+}
+.video-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  color: #4b7566;
+}
+.video-proof-mark {
+  display: grid;
+  place-items: center;
+  height: 66px;
+  width: 66px;
+  border-radius: 20px;
+  background: #ffffff70;
+  font-size: 3rem;
+  color: #5d9683;
+}
+.video-placeholder strong {
+  font-size: clamp(1.1rem, 2vw, 1.5rem);
+  font-weight: 500;
+  line-height: 1.35;
+  text-wrap: balance;
+}
+.video-placeholder p {
+  font-size: 0.9rem;
+  max-width: 390px;
+  color: #4d7668;
+}
+.video-caption {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 12px 1px 0;
+  color: var(--muted);
+  font-size: 0.79rem;
+}
+.video-external {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  min-height: 32px;
+}
+.video-external:hover {
+  color: var(--green);
+  text-decoration: underline;
+}
+.video-next {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 26px;
+  padding: 23px 0 6px;
+  margin-top: 22px;
+  border-top: 1px solid var(--line);
+}
+.video-next h2 {
+  font-size: 1.05rem;
+  font-weight: 550;
+  margin-top: 6px;
+}
+.video-next p:not(.eyebrow) {
+  color: var(--muted);
+  font-size: 0.85rem;
+  margin-top: 4px;
+}
+.video-next .primary {
+  flex-shrink: 0;
 }
 .witness-scene {
   display: flex;
@@ -1239,6 +1402,10 @@ progress::-moz-progress-bar {
   }
 }
 @media (max-width: 850px) {
+  .video-next {
+    flex-wrap: wrap;
+  }
+
   .app {
     padding: 0 24px;
   }
@@ -1484,22 +1651,81 @@ progress::-moz-progress-bar {
     gap: 7px;
     padding-left: 0;
   }
-  .video-section {
-    margin-top: 20px;
+  .lesson-modes {
+    gap: 17px;
+    margin: 20px 0 22px;
   }
-  .video-section summary {
-    font-size: 0.86rem;
-    gap: 10px;
-    min-height: 65px;
+  .lesson-mode {
+    gap: 6px;
+    font-size: 0.79rem;
+    padding-bottom: 11px;
+  }
+  .lesson-mode > .icon {
+    font-size: 1.05rem;
+  }
+  .mode-count {
+    display: none;
+  }
+  .video-heading h2 {
+    font-size: 0.97rem;
+  }
+  .video-focus {
+    font-size: 0.87rem;
+    margin-bottom: 16px;
+  }
+  .video-play-symbol {
+    width: 48px;
+    height: 48px;
+    font-size: 1.05rem;
+  }
+  .video-play-label {
+    font-size: 0.76rem;
+  }
+  .video-play {
+    padding-bottom: 25px;
+    gap: 8px;
+  }
+  .video-beginning {
+    right: 9px;
+    bottom: 6px;
+    min-height: 36px;
+    font-size: 0.73rem;
+  }
+  .video-fallback {
+    padding: 25px 17px;
+    aspect-ratio: auto;
+    gap: 12px;
+  }
+  .video-content {
+    border-radius: 13px;
   }
   .video-placeholder {
-    padding: 26px 18px;
+    padding: 22px 18px;
+    gap: 12px;
   }
-  .video-placeholder strong {
-    font-size: 1rem;
+  .video-proof-mark {
+    width: 50px;
+    height: 50px;
+    font-size: 2.3rem;
+    border-radius: 15px;
   }
   .video-placeholder p {
-    font-size: 0.8rem;
+    font-size: 0.84rem;
+  }
+  .video-caption {
+    flex-wrap: wrap;
+    gap: 4px;
+    font-size: 0.75rem;
+  }
+  .video-next {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 18px;
+    margin-top: 16px;
+    padding-top: 20px;
+  }
+  .video-next .primary {
+    justify-content: space-between;
   }
   .witness-scene {
     gap: 10px;

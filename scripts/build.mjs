@@ -22,6 +22,12 @@ for (const name of ["katex.min.js", "katex.min.css", "fonts"])
     recursive: true,
   });
 cpSync("node_modules/katex/LICENSE", "dist/katex/LICENSE");
+mkdirSync("dist/vimeo", { recursive: true });
+cpSync(
+  "node_modules/@vimeo/player/dist/player.min.js",
+  "dist/vimeo/player.min.js",
+);
+cpSync("node_modules/@vimeo/player/LICENSE.md", "dist/vimeo/LICENSE.md");
 const course = JSON.parse(readFileSync("data/course.json", "utf8"));
 writeFileSync(
   "dist/course.js",

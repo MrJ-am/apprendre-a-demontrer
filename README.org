@@ -13,7 +13,7 @@ Un site interactif pour apprendre à formaliser et à construire des démonstrat
 
 Les 12 leçons sont accessibles indépendamment. Chaque étape propose une question, une réponse à choisir ou à compléter, un indice et un retour. Les bilans reprennent les points construits au cours de la leçon. La progression est conservée pendant l’utilisation de la page ; elle repart de zéro après un rechargement.
 
-Le premier parcours s’ouvre directement sur un exercice. Le bouton « Les parcours » donne accès à l’ensemble des leçons. Les petits repères numérotés permettent de revenir à une étape.
+Chaque leçon s’ouvre sur sa vidéo, puis propose de commencer ou de reprendre les exercices. Les deux entrées « Comprendre en vidéo » et « À vous de jouer » restent accessibles pendant la leçon. Revenir à la vidéo conserve la question courante, les réponses et les indices ; le lecteur Vimeo retrouve sa position pendant l’utilisation de la page. Le bouton « Les parcours » donne accès à l’ensemble des leçons. Les liens directs vers une question restent valides.
 
 * Développer
 
@@ -52,7 +52,9 @@ Les formules en ligne sont délimitées par ~$~. La propriété ~FORMULA~ contie
 
 * Ajouter une vidéo
 
-Chaque leçon possède une vidéo provisoire. Remplacer ses propriétés, en conservant son ~CUSTOM_ID~ :
+Les vidéos sont placées au début des leçons. Les lecteurs Vimeo et leur SDK ne sont chargés qu’à la demande de l’élève. Les miniatures ont la place du futur lecteur, ce qui évite un saut de mise en page. Si Vimeo refuse la lecture intégrée, un lien de secours permet de retrouver la vidéo sur Vimeo.
+
+Modifier les propriétés de la leçon, en conservant son ~CUSTOM_ID~ :
 
 #+begin_example
 :VIDEO_PROVIDER: youtube
@@ -70,7 +72,32 @@ Pour Vimeo :
 
 Pour une vidéo Vimeo non répertoriée, utiliser ~123456789/cle~ avec sa clé de partage. Les restrictions d’intégration du propriétaire de la vidéo restent applicables.
 
-Le bloc ~video~ porte le titre accessible du lecteur. Aucun lien vidéo réel n’a encore été fourni. Revenir à ~placeholder~ et supprimer ~VIDEO_ID~ pour rétablir l’emplacement provisoire.
+Le bloc ~video~ porte le titre accessible du lecteur. Le bloc facultatif ~video_focus~ prépare une observation ou une question à garder en tête pendant la vidéo. Les métadonnées facultatives sont :
+
+| Propriété | Usage |
+|-----------+-------|
+| ~VIDEO_DURATION~ | Durée complète en secondes |
+| ~VIDEO_START~ | Début conseillé en secondes, strictement avant la fin |
+| ~VIDEO_POSTER~ | Miniature HTTPS de Vimeo |
+| ~VIDEO_WATCH_URL~ | Lien HTTPS de secours Vimeo ou YouTube |
+
+Un repère ne découpe pas la vidéo : l’élève peut toujours choisir « Depuis le début ». Les repères initiaux ont été relevés dans les sous-titres disponibles des vidéos sur les notations et les quantificateurs. Ils ne prétendent pas constituer un nouveau montage.
+
+Cinq vidéos du dossier « Théorie de la démonstration » sont utilisées dans onze leçons :
+
+| Vidéo | Leçons |
+|-------+--------|
+| Les notations de la logique | Tous / au moins un ; négations ; implication ; négation des quantificateurs |
+| Les quantificateurs | Nommer ; portées ; objet arbitraire ; règles des quantificateurs |
+| Qu’est-ce qu’un théorème, transitivité de l’implication | Construire un « si… alors » |
+| Conjonction, disjonction, implication | Assembler, séparer, traiter les cas |
+| Irrationalité de racine de 2 | La poussière sous le tapis |
+
+La leçon « Qui choisit après qui ? » garde sa vidéo à venir. Les autres vidéos du dossier restent des ressources pour les prochaines séquences, sans association forcée à une leçon.
+
+Les vidéos actuelles utilisent une liste de domaines autorisés dans Vimeo. Pour activer la lecture intégrée sur ce site, ajouter ~apprendre-a-demontrer.valid-rhino-3109.chatgpt.site~ aux domaines autorisés dans Partager → Intégrer. Le lecteur essaie l’intégration normalement et offre un lien de secours en cas de refus ; il ne contourne pas ces restrictions. Aucun jeton API ni sous-titre téléchargé n’est inclus dans le site.
+
+Pour rétablir un emplacement provisoire, choisir ~VIDEO_PROVIDER: placeholder~ et supprimer les autres propriétés ~VIDEO_*~.
 
 * Organisation
 
@@ -84,6 +111,7 @@ Le bloc ~video~ porte le titre accessible du lecteur. Aucun lien vidéo réel n�
 | ~scripts/build_data.py~ | Compilation Org vers JSON |
 | ~public/style.css~ | Apparence, disposition et adaptation aux écrans |
 | ~public/bridge.js~ | Rendu KaTeX, gestion du focus et outils WebMCP facultatifs |
+| ~public/video.js~ | Chargement à la demande, reprise et repli du lecteur Vimeo |
 | ~tests/~ | Vérifications du correcteur et du compilateur éditorial |
 
 * Cadre logique

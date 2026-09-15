@@ -15,7 +15,12 @@ Nommer les objets, suivre les hypothèses et comprendre de quoi dépendent les c
 ** Un nom n’est pas un détail.
 :PROPERTIES:
 :CUSTOM_ID: nommer
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003697436/afb23e1b66
+:VIDEO_DURATION: 2902
+:VIDEO_START: 2400
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920149539-2ec1493e98b713e81ac232ad3eac896e07f138b7042721b385f63612dc403540-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003697436/0fa21b50c1
 :END:
 
 #+begin_intro
@@ -23,8 +28,12 @@ Deux nombres pairs ont-ils forcément la même moitié ? Essayons de les nommer 
 #+end_intro
 
 #+begin_video
-Un nom n’est pas un détail.
+8. Les quantificateurs
 #+end_video
+
+#+begin_video_focus
+Repérez la différence entre « soit x » et « soit x tel que… ». Dans les questions, nous essaierons de nommer deux témoins sans les confondre.
+#+end_video_focus
 
 *** Deux nombres, deux témoins
 :PROPERTIES:
@@ -190,7 +199,12 @@ Définir à partir d’un objet disponible peut fournir un témoin.
 ** Jusqu’où peut-on s’en servir ?
 :PROPERTIES:
 :CUSTOM_ID: portees
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003697436/afb23e1b66
+:VIDEO_DURATION: 2902
+:VIDEO_START: 312
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920149539-2ec1493e98b713e81ac232ad3eac896e07f138b7042721b385f63612dc403540-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003697436/0fa21b50c1
 :END:
 
 #+begin_intro
@@ -198,8 +212,12 @@ Une hypothèse ouvre un espace de travail. Les conclusions qu’on y obtient peu
 #+end_intro
 
 #+begin_video
-Jusqu’où peut-on s’en servir ?
+8. Les quantificateurs
 #+end_video
+
+#+begin_video_focus
+Suivez les hypothèses locales : quelles informations peut-on encore utiliser lorsqu’un bloc de raisonnement est refermé ?
+#+end_video_focus
 
 *** Dans le cadre de l’hypothèse
 :PROPERTIES:
@@ -471,7 +489,12 @@ Un choix uniforme satisfait aussi les demandes cas par cas.
 ** Un exemple n’est pas « un quelconque ».
 :PROPERTIES:
 :CUSTOM_ID: arbitraire
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003697436/afb23e1b66
+:VIDEO_DURATION: 2902
+:VIDEO_START: 274
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920149539-2ec1493e98b713e81ac232ad3eac896e07f138b7042721b385f63612dc403540-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003697436/0fa21b50c1
 :END:
 
 #+begin_intro
@@ -479,8 +502,12 @@ Pour prouver une affirmation universelle, on travaille avec un objet arbitraire.
 #+end_intro
 
 #+begin_video
-Un exemple n’est pas « un quelconque ».
+8. Les quantificateurs
 #+end_video
+
+#+begin_video_focus
+Pourquoi le nom choisi pour démontrer un « pour tout » ne doit-il pas hériter d’hypothèses particulières ?
+#+end_video_focus
 
 *** Trois essais ne font pas tous les cas
 :PROPERTIES:
@@ -625,7 +652,12 @@ Comprendre ce que disent les quantificateurs et transformer les propositions san
 ** Tous. Au moins un.
 :PROPERTIES:
 :CUSTOM_ID: tous-un
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003737827/7150ea876b
+:VIDEO_DURATION: 1019
+:VIDEO_START: 808
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920192639-b361e69df5b87410583fb0635421bfc45bb511c26c65444414fc75685ab3b319-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003737827/184bda8bf9
 :END:
 
 #+begin_intro
@@ -633,8 +665,12 @@ Sur un petit ensemble, on peut déplier une phrase quantifiée et regarder ce qu
 #+end_intro
 
 #+begin_video
-Tous. Au moins un.
+4. Les notations de la logique
 #+end_video
+
+#+begin_video_focus
+Repérez la lecture de « pour tout » et « il existe ». Les questions feront ensuite apparaître leur lien avec « et » et « ou ».
+#+end_video_focus
 
 *** Déplier « pour tout »
 :PROPERTIES:
@@ -795,7 +831,12 @@ Les « et » infinis décrivent le sens ; ils ne prescrivent pas une vérificati
 ** Faire entrer la négation.
 :PROPERTIES:
 :CUSTOM_ID: negations
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003737827/7150ea876b
+:VIDEO_DURATION: 1019
+:VIDEO_START: 554
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920192639-b361e69df5b87410583fb0635421bfc45bb511c26c65444414fc75685ab3b319-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003737827/184bda8bf9
 :END:
 
 #+begin_intro
@@ -803,8 +844,12 @@ Nier une phrase, ce n’est pas nier chaque morceau en gardant les mêmes connec
 #+end_intro
 
 #+begin_video
-Faire entrer la négation.
+4. Les notations de la logique
 #+end_video
+
+#+begin_video_focus
+Observez comment la négation transforme les connecteurs. À vous, ensuite, de la faire entrer dans plusieurs formules.
+#+end_video_focus
 
 *** Nier « les deux »
 :PROPERTIES:
@@ -961,7 +1006,12 @@ La négation se propage suivant la structure de la formule.
 ** Ce que promet un « si… alors ».
 :PROPERTIES:
 :CUSTOM_ID: implication
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003737827/7150ea876b
+:VIDEO_DURATION: 1019
+:VIDEO_START: 664
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920192639-b361e69df5b87410583fb0635421bfc45bb511c26c65444414fc75685ab3b319-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003737827/184bda8bf9
 :END:
 
 #+begin_intro
@@ -969,8 +1019,12 @@ Une implication interdit une situation précise : que l’hypothèse soit vraie 
 #+end_intro
 
 #+begin_video
-Ce que promet un « si… alors ».
+4. Les notations de la logique
 #+end_video
+
+#+begin_video_focus
+Une implication peut s’écrire avec « non » et « ou ». Voyons ce que cette réécriture permet de comprendre et de transformer.
+#+end_video_focus
 
 *** La promesse non tenue
 :PROPERTIES:
@@ -1134,7 +1188,12 @@ La vérité d’une implication ne donne pas la vérité de sa conclusion seule.
 ** De « tous » à « un contre-exemple ».
 :PROPERTIES:
 :CUSTOM_ID: nier-quantificateurs
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003737827/7150ea876b
+:VIDEO_DURATION: 1019
+:VIDEO_START: 808
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920192639-b361e69df5b87410583fb0635421bfc45bb511c26c65444414fc75685ab3b319-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003737827/184bda8bf9
 :END:
 
 #+begin_intro
@@ -1142,8 +1201,12 @@ Les lois de De Morgan se prolongent aux quantificateurs. Le passage du « et » 
 #+end_intro
 
 #+begin_video
-De « tous » à « un contre-exemple ».
+4. Les notations de la logique
 #+end_video
+
+#+begin_video_focus
+Que devient « pour tout » lorsque l’on nie une proposition ? Faites le lien avec les règles de négation de « et » et « ou ».
+#+end_video_focus
 
 *** Nier une affirmation universelle
 :PROPERTIES:
@@ -1313,7 +1376,12 @@ Utiliser les règles de déduction naturelle et rendre visibles les raisons qui 
 ** Construire un « si… alors ».
 :PROPERTIES:
 :CUSTOM_ID: si-alors
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003702315
+:VIDEO_DURATION: 934
+:VIDEO_START: 0
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920153139-b483f6e596d31906e2512570a5d6de14f7bbf7fbc41d14fc5b9fd51e612696b5-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003702315/496735d818
 :END:
 
 #+begin_intro
@@ -1321,8 +1389,12 @@ Une démonstration peut être vue comme une suite de transformations de ce qu’
 #+end_intro
 
 #+begin_video
-Construire un « si… alors ».
+7. Qu’est-ce qu’un théorème, exemple de la transitivité de l’implication
 #+end_video
+
+#+begin_video_focus
+La transitivité de l’implication donne un premier exemple de démonstration. Les questions vous feront reconstruire les hypothèses et les étapes nécessaires.
+#+end_video_focus
 
 *** Partir de la bonne hypothèse
 :PROPERTIES:
@@ -1479,7 +1551,12 @@ Les prémisses d’une règle peuvent être les conclusions d’étapes précéd
 ** Assembler. Séparer. Traiter les cas.
 :PROPERTIES:
 :CUSTOM_ID: et-cas
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003741264
+:VIDEO_DURATION: 1314
+:VIDEO_START: 0
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920196972-842c31036128a4b0cebacc69490f5ecf440ecee93044998114d7bc91df6bf951-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003741264/a966f62ec7
 :END:
 
 #+begin_intro
@@ -1487,8 +1564,12 @@ Les prémisses d’une règle peuvent être les conclusions d’étapes précéd
 #+end_intro
 
 #+begin_video
-Assembler. Séparer. Traiter les cas.
+6. Conjonction, disjonction, implication, les premiers connecteurs logiques
 #+end_video
+
+#+begin_video_focus
+Repérez comment on construit et comment on utilise une conjonction, une disjonction ou une implication. Nous mettrons ces gestes en pratique un par un.
+#+end_video_focus
 
 *** Construire une conjonction
 :PROPERTIES:
@@ -1652,7 +1733,12 @@ Traiter plusieurs cas ne suffit pas si un cas reste à l’écart.
 ** Du quelconque au témoin.
 :PROPERTIES:
 :CUSTOM_ID: regles-quantificateurs
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003697436/afb23e1b66
+:VIDEO_DURATION: 2902
+:VIDEO_START: 0
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920149539-2ec1493e98b713e81ac232ad3eac896e07f138b7042721b385f63612dc403540-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003697436/0fa21b50c1
 :END:
 
 #+begin_intro
@@ -1660,8 +1746,12 @@ Les quantificateurs ont eux aussi des règles d’introduction et d’éliminati
 #+end_intro
 
 #+begin_video
-Du quelconque au témoin.
+8. Les quantificateurs
 #+end_video
+
+#+begin_video_focus
+Démontrer un « pour tout », choisir un témoin, utiliser une existence : observez ce qui autorise chacun de ces gestes.
+#+end_video_focus
 
 *** Utiliser « pour tout »
 :PROPERTIES:
@@ -1823,7 +1913,12 @@ Le témoin local sert la preuve ; son nom ne doit pas s’échapper.
 ** La poussière sous le tapis.
 :PROPERTIES:
 :CUSTOM_ID: rigueur
-:VIDEO_PROVIDER: placeholder
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 1003701428
+:VIDEO_DURATION: 1395
+:VIDEO_START: 0
+:VIDEO_POSTER: https://i.vimeocdn.com/video/1920152506-1c37b60ed71c44a765040a72bf7dd0013780b0e6237ee3f60ce9460f4fccabeb-d_960x540?&region=us
+:VIDEO_WATCH_URL: https://vimeo.com/user117768124/review/1003701428/ff67c61f6f
 :END:
 
 #+begin_intro
@@ -1831,8 +1926,12 @@ Un raisonnement familier peut utiliser un résultat sans le dire. Revenons sur l
 #+end_intro
 
 #+begin_video
-La poussière sous le tapis.
+12. Irrationalité de racine de 2, une vraie démonstration !
 #+end_video
+
+#+begin_video_focus
+La vidéo propose une démonstration de l’irrationalité de racine de 2. Les questions isolent un de ses ingrédients : pourquoi un entier dont le carré est pair est-il lui-même pair ?
+#+end_video_focus
 
 *** Un passage qui réclame une raison
 :PROPERTIES:

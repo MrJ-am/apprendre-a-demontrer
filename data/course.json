@@ -145,9 +145,14 @@
           "id": "nommer",
           "intro": "Deux nombres pairs ont-ils forcément la même moitié ? Essayons de les nommer : une petite décision d’écriture peut changer ce que nous affirmons.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Un nom n’est pas un détail."
+            "provider": "vimeo",
+            "id": "1003697436/afb23e1b66",
+            "title": "8. Les quantificateurs",
+            "duration": 2902,
+            "start": 2400,
+            "poster": "https://i.vimeocdn.com/video/1920149539-2ec1493e98b713e81ac232ad3eac896e07f138b7042721b385f63612dc403540-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003697436/0fa21b50c1",
+            "focus": "Repérez la différence entre « soit x » et « soit x tel que… ». Dans les questions, nous essaierons de nommer deux témoins sans les confondre."
           }
         },
         {
@@ -273,9 +278,14 @@
           "id": "portees",
           "intro": "Une hypothèse ouvre un espace de travail. Les conclusions qu’on y obtient peuvent encore dépendre d’elle : suivons cette dépendance.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Jusqu’où peut-on s’en servir ?"
+            "provider": "vimeo",
+            "id": "1003697436/afb23e1b66",
+            "title": "8. Les quantificateurs",
+            "duration": 2902,
+            "start": 312,
+            "poster": "https://i.vimeocdn.com/video/1920149539-2ec1493e98b713e81ac232ad3eac896e07f138b7042721b385f63612dc403540-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003697436/0fa21b50c1",
+            "focus": "Suivez les hypothèses locales : quelles informations peut-on encore utiliser lorsqu’un bloc de raisonnement est refermé ?"
           }
         },
         {
@@ -385,7 +395,12 @@
           "video": {
             "provider": "placeholder",
             "id": "",
-            "title": "Qui choisit après qui ?"
+            "title": "Qui choisit après qui ?",
+            "duration": 0,
+            "start": 0,
+            "poster": "",
+            "watchUrl": "",
+            "focus": ""
           }
         },
         {
@@ -516,9 +531,14 @@
           "id": "arbitraire",
           "intro": "Pour prouver une affirmation universelle, on travaille avec un objet arbitraire. Cela impose de surveiller ce qu’on suppose à son sujet.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Un exemple n’est pas « un quelconque »."
+            "provider": "vimeo",
+            "id": "1003697436/afb23e1b66",
+            "title": "8. Les quantificateurs",
+            "duration": 2902,
+            "start": 274,
+            "poster": "https://i.vimeocdn.com/video/1920149539-2ec1493e98b713e81ac232ad3eac896e07f138b7042721b385f63612dc403540-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003697436/0fa21b50c1",
+            "focus": "Pourquoi le nom choisi pour démontrer un « pour tout » ne doit-il pas hériter d’hypothèses particulières ?"
           }
         }
       ],
@@ -661,9 +681,14 @@
           "id": "tous-un",
           "intro": "Sur un petit ensemble, on peut déplier une phrase quantifiée et regarder ce qui la rend vraie. C’est le point de départ pour comprendre les domaines infinis.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Tous. Au moins un."
+            "provider": "vimeo",
+            "id": "1003737827/7150ea876b",
+            "title": "4. Les notations de la logique",
+            "duration": 1019,
+            "start": 808,
+            "poster": "https://i.vimeocdn.com/video/1920192639-b361e69df5b87410583fb0635421bfc45bb511c26c65444414fc75685ab3b319-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003737827/184bda8bf9",
+            "focus": "Repérez la lecture de « pour tout » et « il existe ». Les questions feront ensuite apparaître leur lien avec « et » et « ou »."
           }
         },
         {
@@ -774,9 +799,14 @@
           "id": "negations",
           "intro": "Nier une phrase, ce n’est pas nier chaque morceau en gardant les mêmes connecteurs. Faisons apparaître les cas qui la rendent fausse.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Faire entrer la négation."
+            "provider": "vimeo",
+            "id": "1003737827/7150ea876b",
+            "title": "4. Les notations de la logique",
+            "duration": 1019,
+            "start": 554,
+            "poster": "https://i.vimeocdn.com/video/1920192639-b361e69df5b87410583fb0635421bfc45bb511c26c65444414fc75685ab3b319-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003737827/184bda8bf9",
+            "focus": "Observez comment la négation transforme les connecteurs. À vous, ensuite, de la faire entrer dans plusieurs formules."
           }
         },
         {
@@ -914,9 +944,14 @@
           "id": "implication",
           "intro": "Une implication interdit une situation précise : que l’hypothèse soit vraie et la conclusion fausse. Cette lecture rend ses transformations compréhensibles.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Ce que promet un « si… alors »."
+            "provider": "vimeo",
+            "id": "1003737827/7150ea876b",
+            "title": "4. Les notations de la logique",
+            "duration": 1019,
+            "start": 664,
+            "poster": "https://i.vimeocdn.com/video/1920192639-b361e69df5b87410583fb0635421bfc45bb511c26c65444414fc75685ab3b319-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003737827/184bda8bf9",
+            "focus": "Une implication peut s’écrire avec « non » et « ou ». Voyons ce que cette réécriture permet de comprendre et de transformer."
           }
         },
         {
@@ -1038,9 +1073,14 @@
           "id": "nier-quantificateurs",
           "intro": "Les lois de De Morgan se prolongent aux quantificateurs. Le passage du « et » au « ou » devient un passage de « pour tout » à « il existe ».",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "De « tous » à « un contre-exemple »."
+            "provider": "vimeo",
+            "id": "1003737827/7150ea876b",
+            "title": "4. Les notations de la logique",
+            "duration": 1019,
+            "start": 808,
+            "poster": "https://i.vimeocdn.com/video/1920192639-b361e69df5b87410583fb0635421bfc45bb511c26c65444414fc75685ab3b319-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003737827/184bda8bf9",
+            "focus": "Que devient « pour tout » lorsque l’on nie une proposition ? Faites le lien avec les règles de négation de « et » et « ou »."
           }
         }
       ],
@@ -1171,9 +1211,14 @@
           "id": "si-alors",
           "intro": "Une démonstration peut être vue comme une suite de transformations de ce qu’on est autorisé à affirmer. Commençons par les deux usages de l’implication.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Construire un « si… alors »."
+            "provider": "vimeo",
+            "id": "1003702315",
+            "title": "7. Qu’est-ce qu’un théorème, exemple de la transitivité de l’implication",
+            "duration": 934,
+            "start": 0,
+            "poster": "https://i.vimeocdn.com/video/1920153139-b483f6e596d31906e2512570a5d6de14f7bbf7fbc41d14fc5b9fd51e612696b5-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003702315/496735d818",
+            "focus": "La transitivité de l’implication donne un premier exemple de démonstration. Les questions vous feront reconstruire les hypothèses et les étapes nécessaires."
           }
         },
         {
@@ -1317,9 +1362,14 @@
           "id": "et-cas",
           "intro": "« Et » et « ou » donnent des façons différentes de construire une preuve. Pour utiliser un « ou », il faut se garder de choisir la branche qui nous arrange.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Assembler. Séparer. Traiter les cas."
+            "provider": "vimeo",
+            "id": "1003741264",
+            "title": "6. Conjonction, disjonction, implication, les premiers connecteurs logiques",
+            "duration": 1314,
+            "start": 0,
+            "poster": "https://i.vimeocdn.com/video/1920196972-842c31036128a4b0cebacc69490f5ecf440ecee93044998114d7bc91df6bf951-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003741264/a966f62ec7",
+            "focus": "Repérez comment on construit et comment on utilise une conjonction, une disjonction ou une implication. Nous mettrons ces gestes en pratique un par un."
           }
         },
         {
@@ -1464,9 +1514,14 @@
           "id": "regles-quantificateurs",
           "intro": "Les quantificateurs ont eux aussi des règles d’introduction et d’élimination. Les conditions sur les noms et les hypothèses protègent ces règles contre les faux raisonnements.",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "Du quelconque au témoin."
+            "provider": "vimeo",
+            "id": "1003697436/afb23e1b66",
+            "title": "8. Les quantificateurs",
+            "duration": 2902,
+            "start": 0,
+            "poster": "https://i.vimeocdn.com/video/1920149539-2ec1493e98b713e81ac232ad3eac896e07f138b7042721b385f63612dc403540-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003697436/0fa21b50c1",
+            "focus": "Démontrer un « pour tout », choisir un témoin, utiliser une existence : observez ce qui autorise chacun de ces gestes."
           }
         },
         {
@@ -1639,9 +1694,14 @@
           "id": "rigueur",
           "intro": "Un raisonnement familier peut utiliser un résultat sans le dire. Revenons sur la parité : quels faits permettent réellement de passer d’une ligne à la suivante ?",
           "video": {
-            "provider": "placeholder",
-            "id": "",
-            "title": "La poussière sous le tapis."
+            "provider": "vimeo",
+            "id": "1003701428",
+            "title": "12. Irrationalité de racine de 2, une vraie démonstration !",
+            "duration": 1395,
+            "start": 0,
+            "poster": "https://i.vimeocdn.com/video/1920152506-1c37b60ed71c44a765040a72bf7dd0013780b0e6237ee3f60ce9460f4fccabeb-d_960x540?&region=us",
+            "watchUrl": "https://vimeo.com/user117768124/review/1003701428/ff67c61f6f",
+            "focus": "La vidéo propose une démonstration de l’irrationalité de racine de 2. Les questions isolent un de ses ingrédients : pourquoi un entier dont le carré est pair est-il lui-même pair ?"
           }
         }
       ],

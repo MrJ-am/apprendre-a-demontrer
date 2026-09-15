@@ -152,4 +152,7 @@ execFileSync(
 execFileSync(process.execPath, ["--check", "public/bridge.js"], {
   stdio: "inherit",
 });
+execFileSync(process.execPath, ["--check", "public/video.js"], {
+  stdio: "inherit",
+});
 console.log("Données, formules, correcteur et syntaxe JavaScript vérifiés.");

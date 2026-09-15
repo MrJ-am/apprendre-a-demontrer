@@ -86,6 +86,11 @@ route model =
     model.url.fragment |> Maybe.withDefault "" |> String.split "/" |> List.filter (not << String.isEmpty)
 
 
+isVideoPage : Model -> Bool
+isVideoPage model =
+    List.isEmpty (route model) || (route model |> List.drop 2 |> List.head) == Just "video"
+
+
 position : Model -> Maybe Position
 position model =
     Result.toMaybe model.course
@@ -107,14 +112,23 @@ position model =
                                 Nothing
 
                     requested =
-                        route model |> List.drop 2 |> List.head |> Maybe.andThen String.toInt |> Maybe.withDefault 1
+                        route model
+                            |> List.drop
+                                (if isVideoPage model then
+                                    3
+
+                                 else
+                                    2
+                                )
+                            |> List.head
+                            |> Maybe.andThen String.toInt
                 in
                 located
                     |> Maybe.andThen
                         (\( t, l ) ->
                             let
                                 index =
-                                    clamp 0 (List.length l.steps - 1) (requested - 1)
+                                    clamp 0 (List.length l.steps - 1) (Maybe.map (\n -> n - 1) requested |> Maybe.withDefault (resumeIndex model l))
                             in
                             l.steps |> List.drop index |> List.head |> Maybe.map (\s -> { track = t, lesson = l, index = index, step = s })
                         )
@@ -134,6 +148,21 @@ isCorrect r =
 completed : Model -> List Step -> Int
 completed model =
     List.filter (response model >> isCorrect) >> List.length
+
+
+resumeIndex : Model -> Lesson -> Int
+resumeIndex model lesson =
+    lesson.steps |> List.indexedMap Tuple.pair |> List.filter (\( _, s ) -> not (isCorrect (response model s))) |> List.head |> Maybe.map Tuple.first |> Maybe.withDefault 0
+
+
+lessonEntryUrl : Track -> Lesson -> String
+lessonEntryUrl track lesson =
+    "#/" ++ track.id ++ "/" ++ lesson.id ++ "/video"
+
+
+lessonVideoUrl : Position -> String
+lessonVideoUrl pos =
+    lessonEntryUrl pos.track pos.lesson ++ "/" ++ String.fromInt (pos.index + 1)
 
 
 lessonUrl : Track -> Lesson -> Int -> String
@@ -252,7 +281,7 @@ update msg model =
                 (\pos ->
                     let
                         missing =
-                            pos.lesson.steps |> List.indexedMap Tuple.pair |> List.filter (\( _, s ) -> not (isCorrect (response model s))) |> List.head |> Maybe.map Tuple.first |> Maybe.withDefault 0
+                            resumeIndex model pos.lesson
                     in
                     navigate { model | recap = False } (lessonUrl pos.track pos.lesson missing)
                 )
@@ -263,7 +292,7 @@ update msg model =
                     pos.track.lessons
                         |> List.filter (\l -> l.id == lessonId)
                         |> List.head
-                        |> Maybe.map (\l -> navigate model (lessonUrl pos.track l 0))
+                        |> Maybe.map (\l -> navigate model (lessonEntryUrl pos.track l))
                         |> Maybe.withDefault ( model, Cmd.none )
                 )
 
@@ -282,14 +311,18 @@ update msg model =
 
                 Ok { request, action, answer, target } ->
                     if action == "answer" then
-                        withPosition
-                            (\pos ->
-                                let
-                                    updated =
-                                        submit { model | pending = Just request } pos (String.left 500 answer)
-                                in
-                                ( { updated | pending = Nothing }, Cmd.batch [ emit updated, focusElement "feedback" ] )
-                            )
+                        if isVideoPage model || model.recap then
+                            ( model, reportState (E.object [ ( "requestId", E.string request ), ( "error", E.string "Ouvrez d’abord un exercice." ) ]) )
+
+                        else
+                            withPosition
+                                (\pos ->
+                                    let
+                                        updated =
+                                            submit { model | pending = Just request } pos (String.left 500 answer)
+                                    in
+                                    ( { updated | pending = Nothing }, Cmd.batch [ emit updated, focusElement "feedback" ] )
+                                )
 
                     else if action == "navigate" then
                         let
@@ -298,9 +331,20 @@ update msg model =
                         in
                         case ( Result.toMaybe model.course, parts ) of
                             ( Just course, t :: l :: index :: [] ) ->
-                                case ( Course.findLesson course t l, String.toInt index ) of
+                                case
+                                    ( Course.findLesson course t l
+                                    , if index == "video" then
+                                        Just 0
+
+                                      else
+                                        String.toInt index
+                                    )
+                                of
                                     ( Just ( tr, le ), Just n ) ->
-                                        if n >= 1 && n <= List.length le.steps then
+                                        if index == "video" then
+                                            navigate { model | pending = Just request } (lessonEntryUrl tr le)
+
+                                        else if n >= 1 && n <= List.length le.steps then
                                             navigate { model | pending = Just request } (lessonUrl tr le (n - 1))
 
                                         else
@@ -332,54 +376,63 @@ emit model =
                         r =
                             response model pos.step
                     in
-                    [ ( "page"
-                      , E.string
-                            (if model.recap then
-                                "bilan"
-
-                             else
-                                "exercice"
-                            )
-                      )
-                    , ( "trackId", E.string pos.track.id )
+                    [ ( "trackId", E.string pos.track.id )
                     , ( "lessonId", E.string pos.lesson.id )
                     , ( "step", E.int (pos.index + 1) )
                     , ( "stepCount", E.int (List.length pos.lesson.steps) )
-                    , ( "stepId", E.string pos.step.id )
-                    , ( "title", E.string pos.step.title )
-                    , ( "context", E.string pos.step.context )
-                    , ( "question", E.string pos.step.question )
-                    , ( "formula", E.string pos.step.formula )
-                    , ( "value", E.string r.value )
-                    , ( "correct", E.bool (isCorrect r) )
-                    , ( "feedback"
-                      , E.string
-                            (case r.verdict of
-                                Just (Ok _) ->
-                                    pos.step.success
-
-                                Just (Err e) ->
-                                    e
-
-                                Nothing ->
-                                    ""
-                            )
-                      )
-                    , ( "kind"
-                      , E.string
-                            (case pos.step.kind of
-                                ChoiceQuestion ->
-                                    "choice"
-
-                                Fill ->
-                                    "fill"
-
-                                Rewrite ->
-                                    "rewrite"
-                            )
-                      )
-                    , ( "choices", E.list (\c -> E.object [ ( "id", E.string c.id ), ( "label", E.string c.label ) ]) pos.step.choices )
                     ]
+                        ++ (if isVideoPage model && not model.recap then
+                                [ ( "page", E.string "video" )
+                                , ( "title", E.string pos.lesson.video.title )
+                                , ( "videoAvailable", E.bool (pos.lesson.video.provider /= "placeholder") )
+                                ]
+
+                            else
+                                [ ( "page"
+                                  , E.string
+                                        (if model.recap then
+                                            "bilan"
+
+                                         else
+                                            "exercice"
+                                        )
+                                  )
+                                , ( "stepId", E.string pos.step.id )
+                                , ( "title", E.string pos.step.title )
+                                , ( "context", E.string pos.step.context )
+                                , ( "question", E.string pos.step.question )
+                                , ( "formula", E.string pos.step.formula )
+                                , ( "value", E.string r.value )
+                                , ( "correct", E.bool (isCorrect r) )
+                                , ( "feedback"
+                                  , E.string
+                                        (case r.verdict of
+                                            Just (Ok _) ->
+                                                pos.step.success
+
+                                            Just (Err e) ->
+                                                e
+
+                                            Nothing ->
+                                                ""
+                                        )
+                                  )
+                                , ( "kind"
+                                  , E.string
+                                        (case pos.step.kind of
+                                            ChoiceQuestion ->
+                                                "choice"
+
+                                            Fill ->
+                                                "fill"
+
+                                            Rewrite ->
+                                                "rewrite"
+                                        )
+                                  )
+                                , ( "choices", E.list (\c -> E.object [ ( "id", E.string c.id ), ( "label", E.string c.label ) ]) pos.step.choices )
+                                ]
+                           )
     in
     reportState (E.object (request :: information))
 
@@ -451,7 +504,6 @@ view model =
 
                                           else
                                             lessonView model pos
-                                        , videoView pos.lesson
                                         ]
                                     ]
             , footer [ class "site-footer" ] [ text "Apprendre à démontrer", span [] [ text "Un cours de Jean-Christophe Jameux" ] ]
@@ -469,7 +521,7 @@ sidebar model course pos =
                 (\t ->
                     let
                         url =
-                            List.head t.lessons |> Maybe.map (\l -> lessonUrl t l 0) |> Maybe.withDefault "#/parcours"
+                            List.head t.lessons |> Maybe.map (lessonEntryUrl t) |> Maybe.withDefault "#/parcours"
                     in
                     a
                         [ href url
@@ -502,7 +554,7 @@ sidebar model course pos =
                             completed model l.steps == List.length l.steps
                     in
                     a
-                        [ href (lessonUrl pos.track l 0)
+                        [ href (lessonEntryUrl pos.track l)
                         , classList [ ( "lesson-link", True ), ( "current", l.id == pos.lesson.id ) ]
                         , attribute "aria-current"
                             (if l.id == pos.lesson.id then
@@ -537,15 +589,56 @@ sidebar model course pos =
 
 lessonView : Model -> Position -> Html Msg
 lessonView model pos =
+    div [ class "lesson-content" ]
+        [ div [ class "lesson-kicker" ]
+            [ span [ class "eyebrow" ] [ text pos.track.title ]
+            , span [ class "step-fraction" ]
+                [ text (String.fromInt (completed model pos.lesson.steps) ++ " / " ++ String.fromInt (List.length pos.lesson.steps) ++ " étapes") ]
+            ]
+        , h1 [ id "lesson-heading", tabindex -1 ] [ text pos.lesson.title ]
+        , p [ class "intro" ] [ text pos.lesson.intro ]
+        , nav [ class "lesson-modes", attribute "aria-label" "Dans cette leçon" ]
+            [ a
+                [ href (lessonVideoUrl pos)
+                , classList [ ( "lesson-mode", True ), ( "active", isVideoPage model ) ]
+                , attribute "aria-current"
+                    (if isVideoPage model then
+                        "page"
+
+                     else
+                        "false"
+                    )
+                ]
+                [ icon "▷", span [] [ text "Comprendre en vidéo" ] ]
+            , a
+                [ href (lessonUrl pos.track pos.lesson pos.index)
+                , classList [ ( "lesson-mode", True ), ( "active", not (isVideoPage model) ) ]
+                , attribute "aria-current"
+                    (if isVideoPage model then
+                        "false"
+
+                     else
+                        "page"
+                    )
+                ]
+                [ icon "↳", span [] [ text "À vous de jouer" ], span [ class "mode-count" ] [ text (String.fromInt (List.length pos.lesson.steps)) ] ]
+            ]
+        , if isVideoPage model then
+            videoView model pos
+
+          else
+            exerciseView model pos
+        ]
+
+
+exerciseView : Model -> Position -> Html Msg
+exerciseView model pos =
     let
         r =
             response model pos.step
     in
-    div [ class "lesson-content" ]
-        [ div [ class "lesson-kicker" ] [ span [ class "eyebrow" ] [ text pos.track.title ], span [ class "step-fraction" ] [ text (String.fromInt (pos.index + 1) ++ " / " ++ String.fromInt (List.length pos.lesson.steps)) ] ]
-        , h1 [ id "lesson-heading", tabindex -1 ] [ text pos.lesson.title ]
-        , p [ class "intro" ] [ text pos.lesson.intro ]
-        , nav [ class "stepper", attribute "aria-label" "Étapes de la leçon" ]
+    div [ class "exercise-content" ]
+        [ nav [ class "stepper", attribute "aria-label" "Étapes de la leçon" ]
             (List.indexedMap
                 (\i s ->
                     a
@@ -853,7 +946,8 @@ finiteScene universal =
                                     "(-1)^2=1"
 
                                  else
-                                    n ++ "^2="
+                                    n
+                                        ++ "^2="
                                         ++ (if valid then
                                                 "1"
 
@@ -904,41 +998,120 @@ scopeScene closed =
         ]
 
 
-videoView : Lesson -> Html Msg
-videoView lesson =
-    details [ class "video-section" ]
-        [ summary []
-            [ span [ class "video-icon", attribute "aria-hidden" "true" ] [ text "▷" ]
-            , span [] [ text "La leçon en vidéo" ]
-            , span [ class "video-status" ]
-                [ text
-                    (if lesson.video.provider == "placeholder" then
-                        "À venir"
+videoView : Model -> Position -> Html Msg
+videoView model pos =
+    let
+        video =
+            pos.lesson.video
 
-                     else
-                        "Regarder"
-                    )
+        started =
+            pos.index > 0 || List.any (\s -> not (String.isEmpty (response model s).value)) pos.lesson.steps
+    in
+    section [ class "video-section", attribute "aria-label" "La leçon en vidéo" ]
+        [ if video.provider /= "placeholder" then
+            div [ class "video-heading" ]
+                [ h2 [] [ text video.title ]
+                , if video.duration > 0 then
+                    span [ class "video-duration" ] [ text (clock video.duration) ]
+
+                  else
+                    text ""
                 ]
-            , icon "+"
-            ]
+
+          else
+            text ""
+        , if String.isEmpty video.focus then
+            text ""
+
+          else
+            p [ class "video-focus" ] [ rich video.focus ]
         , div [ class "video-content" ]
-            [ if lesson.video.provider == "placeholder" then
+            [ if video.provider == "placeholder" then
                 div [ class "video-placeholder" ]
-                    [ span [ class "video-proof-mark", attribute "aria-hidden" "true" ] [ text "⊢" ]
-                    , strong [] [ text lesson.video.title ]
-                    , p [] [ text "La vidéo sera ajoutée ici. Tous les exercices sont déjà disponibles." ]
+                    [ span [ class "video-status" ] [ text "VIDÉO À VENIR" ]
+                    , span [ class "video-proof-mark", attribute "aria-hidden" "true" ] [ text "⊢" ]
+                    , strong [] [ text video.title ]
+                    , p [] [ text "La vidéo de cette leçon arrive bientôt. Vous pouvez déjà explorer les questions." ]
                     ]
 
+              else if video.provider == "vimeo" then
+                node "course-video"
+                    [ attribute "video-title" video.title
+                    , attribute "src" (videoUrl video)
+                    , attribute "poster" video.poster
+                    , attribute "start" (String.fromInt video.start)
+                    , attribute "watch-url" (videoWatchUrl video)
+                    ]
+                    []
+
               else
-                iframe [ title lesson.video.title, src (videoUrl lesson.video), attribute "loading" "lazy", attribute "allow" "accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen", attribute "allowfullscreen" "", attribute "referrerpolicy" "strict-origin-when-cross-origin" ] []
+                iframe [ title video.title, src (videoUrl video), attribute "loading" "lazy", attribute "allow" "autoplay; encrypted-media; picture-in-picture; fullscreen", attribute "allowfullscreen" "", attribute "referrerpolicy" "strict-origin-when-cross-origin" ] []
+            ]
+        , div [ class "video-caption" ]
+            [ span []
+                [ text
+                    (if video.start > 0 then
+                        "Passage conseillé à " ++ clock video.start ++ " · La vidéo reste accessible en entier."
+
+                     else
+                        "Une idée à regarder, puis à mettre à l’épreuve."
+                    )
+                ]
+            , if video.provider /= "placeholder" then
+                a [ href (videoWatchUrl video), target "_blank", rel "noopener noreferrer", class "video-external" ] [ text "Ouvrir la vidéo", icon "↗" ]
+
+              else
+                text ""
+            ]
+        , div [ class "video-next" ]
+            [ div []
+                [ p [ class "eyebrow" ]
+                    [ text
+                        (if started then
+                            "ON REPREND LE FIL"
+
+                         else
+                            "ENSUITE, À VOUS"
+                        )
+                    ]
+                , h2 [] [ text pos.step.title ]
+                , p [] [ text "Une question à la fois. Des indices pour avancer." ]
+                ]
+            , a [ href (lessonUrl pos.track pos.lesson pos.index), class "primary" ]
+                [ text
+                    (if started then
+                        "Reprendre l’exercice"
+
+                     else
+                        "Commencer les exercices"
+                    )
+                , icon "→"
+                ]
             ]
         ]
+
+
+clock : Int -> String
+clock seconds =
+    String.fromInt (seconds // 60) ++ ":" ++ String.padLeft 2 '0' (String.fromInt (modBy 60 seconds))
+
+
+videoWatchUrl : Course.Video -> String
+videoWatchUrl video =
+    if not (String.isEmpty video.watchUrl) then
+        video.watchUrl
+
+    else if video.provider == "youtube" then
+        "https://www.youtube.com/watch?v=" ++ video.id
+
+    else
+        "https://vimeo.com/" ++ video.id
 
 
 videoUrl : Course.Video -> String
 videoUrl video =
     if video.provider == "youtube" then
-        "https://www.youtube-nocookie.com/embed/" ++ video.id
+        "https://www.youtube-nocookie.com/embed/" ++ video.id ++ "?start=" ++ String.fromInt video.start
 
     else
         case String.split "/" video.id of
@@ -993,7 +1166,7 @@ recapView model pos =
                 ]
             , case nextLesson of
                 Just l ->
-                    a [ href (lessonUrl pos.track l 0), class "primary" ] [ text "Leçon suivante", icon "→" ]
+                    a [ href (lessonEntryUrl pos.track l), class "primary" ] [ text "Leçon suivante", icon "→" ]
 
                 Nothing ->
                     a [ href "#/parcours", class "primary" ] [ text "Explorer les parcours", icon "→" ]
@@ -1018,7 +1191,7 @@ catalog model course =
                             (List.map
                                 (\l ->
                                     li []
-                                        [ a [ href (lessonUrl t l 0) ]
+                                        [ a [ href (lessonEntryUrl t l) ]
                                             [ span [] [ text l.title ]
                                             , icon
                                                 (if completed model l.steps == List.length l.steps then

@@ -4,6 +4,7 @@ import argparse
 import json
 import re
 from pathlib import Path
+from urllib.parse import urlsplit
 
 ROOT = Path(__file__).resolve().parent.parent
 SOURCE = ROOT / 'cours' / 'parcours.org'
@@ -48,7 +49,7 @@ def compile_course(text):
                 if not prop:
                     raise ValueError(f'Propriété invalide, ligne {i + 1}')
                 key, value = prop.groups()
-                mapping = {'CUSTOM_ID':'id','TYPE':'kind','ANSWERS':'answers','SCENE':'scene','FORMULA':'formula','SOURCE':'source','RULE':'rule','SHORT':'shortTitle','SYMBOL':'symbol','VIDEO_PROVIDER':'videoProvider','VIDEO_ID':'videoId'}
+                mapping = {'CUSTOM_ID':'id','TYPE':'kind','ANSWERS':'answers','SCENE':'scene','FORMULA':'formula','SOURCE':'source','RULE':'rule','SHORT':'shortTitle','SYMBOL':'symbol','VIDEO_PROVIDER':'videoProvider','VIDEO_ID':'videoId','VIDEO_DURATION':'videoDuration','VIDEO_START':'videoStart','VIDEO_POSTER':'videoPoster','VIDEO_WATCH_URL':'videoWatchUrl'}
                 if key not in mapping:
                     raise ValueError(f'Propriété inconnue : {key}')
                 current[mapping[key]] = [v.strip() for v in value.split(';;')] if key == 'ANSWERS' else value
@@ -57,7 +58,7 @@ def compile_course(text):
                 raise ValueError('Tiroir de propriétés non fermé')
         elif line.startswith('#+begin_'):
             key = line.removeprefix('#+begin_').strip()
-            if key not in {'description','intro','context','question','hint','success','takeaway','video'}:
+            if key not in {'description','intro','context','question','hint','success','takeaway','video','video_focus'}:
                 raise ValueError(f'Bloc Org non pris en charge : {key}')
             if current is None:
                 raise ValueError('Bloc sans titre')
@@ -104,7 +105,21 @@ def compile_course(text):
             if provider == 'youtube' and not re.fullmatch(r'[A-Za-z0-9_-]{11}', video_id): raise ValueError('Identifiant YouTube invalide')
             if provider == 'vimeo' and not re.fullmatch(r'[0-9]+(?:/[A-Za-z0-9]+)?', video_id): raise ValueError('Identifiant Vimeo invalide')
             if provider == 'placeholder' and video_id: raise ValueError('Vidéo provisoire avec identifiant')
-            l['video'] = {'provider':provider,'id':video_id,'title':l.get('video', l['title'])}
+            def seconds(property_name):
+                value = l.pop(property_name, '0')
+                if not re.fullmatch(r'[0-9]+', value): raise ValueError('Durée ou repère vidéo invalide')
+                return int(value)
+            duration, start = seconds('videoDuration'), seconds('videoStart')
+            if start and (not duration or start >= duration): raise ValueError('Repère vidéo hors durée')
+            poster = l.pop('videoPoster', '')
+            watch_url = l.pop('videoWatchUrl', '')
+            for url, hosts in [(poster, ['i.vimeocdn.com']), (watch_url, ['vimeo.com', 'www.vimeo.com', 'www.youtube.com', 'youtu.be'])]:
+                if url:
+                    parsed = urlsplit(url)
+                    if parsed.scheme != 'https' or parsed.hostname not in hosts or parsed.username or parsed.password or parsed.port:
+                        raise ValueError('Lien vidéo non autorisé')
+            if provider == 'placeholder' and (duration or start or poster or watch_url): raise ValueError('Vidéo provisoire avec métadonnées de lecture')
+            l['video'] = {'provider':provider,'id':video_id,'title':l.get('video', l['title']), 'duration':duration,'start':start,'poster':poster,'watchUrl':watch_url,'focus':l.pop('video_focus','')}
             for s in l['steps']:
                 identify(s)
                 for field in ['context','question','hint','success','takeaway']:

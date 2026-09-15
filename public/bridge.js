@@ -128,7 +128,7 @@
     name: "open_learning_lesson",
     title: "Ouvrir une leçon",
     description:
-      "Navigue vers une leçon et une étape. Cette action ne valide aucun exercice.",
+      "Ouvre la présentation vidéo d’une leçon, ou un exercice précis si une étape est indiquée. Cette action ne valide aucun exercice.",
     inputSchema: {
       type: "object",
       properties: {
@@ -161,7 +161,7 @@
         throw new Error("Leçon ou étape introuvable.");
       return send({
         action: "navigate",
-        route: `#/${track.id}/${lesson.id}/${step}`,
+        route: `#/${track.id}/${lesson.id}/${input.step === undefined ? "video" : step}`,
       });
     },
   });
