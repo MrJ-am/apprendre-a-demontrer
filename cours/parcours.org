@@ -1,0 +1,2024 @@
+#+title: Apprendre à démontrer — parcours interactifs
+#+language: fr
+
+* Les contrats de la démonstration
+:PROPERTIES:
+:CUSTOM_ID: contrats
+:SHORT: Les contrats
+:SYMBOL: 01
+:END:
+
+#+begin_description
+Nommer les objets, suivre les hypothèses et comprendre de quoi dépendent les choix.
+#+end_description
+
+** Un nom n’est pas un détail.
+:PROPERTIES:
+:CUSTOM_ID: nommer
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Deux nombres pairs ont-ils forcément la même moitié ? Essayons de les nommer : une petite décision d’écriture peut changer ce que nous affirmons.
+#+end_intro
+
+#+begin_video
+Un nom n’est pas un détail.
+#+end_video
+
+*** Deux nombres, deux témoins
+:PROPERTIES:
+:CUSTOM_ID: nommer-temoins
+:TYPE: choice
+:ANSWERS: non
+:FORMULA: a=2k \qquad b=2k
+:SCENE: witness
+:END:
+
+#+begin_context
+On sait que $a$ et $b$ sont des entiers pairs. On souhaite utiliser leur définition.
+#+end_context
+
+#+begin_question
+Peut-on toujours choisir un même entier $k$ pour écrire les deux égalités ci-dessous ?
+#+end_question
+
+#+begin_hint
+Essaie avec $a=2$ et $b=4$.
+#+end_hint
+
+#+begin_success
+Ces deux égalités imposeraient $a=b$. La parité de chacun donne un témoin, mais les deux témoins ne sont pas nécessairement égaux.
+#+end_success
+
+#+begin_takeaway
+Réutiliser un nom, c’est réutiliser le même objet.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui, puisque les deux nombres sont pairs. | Pour $a=2$, il faudrait $k=1$. Pour $b=4$, il faudrait $k=2$. Un même nom peut-il désigner ces deux valeurs simultanément ? |
+| non | Non : cela imposerait que les deux nombres soient égaux. |  |
+
+*** Ouvrir une place pour un autre objet
+:PROPERTIES:
+:CUSTOM_ID: nommer-frais
+:TYPE: fill
+:ANSWERS: l
+:RULE: fresh
+:FORMULA: a=2k \qquad b=2\boxed{\phantom{\ell}}
+:END:
+
+#+begin_context
+On a déjà écrit $a=2k$. Pour traduire la parité de $b$, introduisons un autre nom. Les noms $a$, $b$ et $k$ sont déjà utilisés.
+#+end_context
+
+#+begin_question
+Complète avec une lettre disponible.
+#+end_question
+
+#+begin_hint
+Une lettre suffit, par exemple la lettre qui suit k dans l’alphabet.
+#+end_hint
+
+#+begin_success
+On peut écrire $b=2\ell$ pour un certain entier $\ell$. Ce nouveau nom autorise deux valeurs différentes ; il n’interdit pas qu’elles soient égales.
+#+end_success
+
+#+begin_takeaway
+Des noms différents n’imposent pas des objets différents.
+#+end_takeaway
+
+*** Différents noms, valeurs égales ?
+:PROPERTIES:
+:CUSTOM_ID: nommer-egaux
+:TYPE: choice
+:ANSWERS: non
+:END:
+
+#+begin_context
+Nous avons choisi des entiers $k$ et $\ell$ tels que $a=2k$ et $b=2\ell$.
+#+end_context
+
+#+begin_question
+Avons-nous affirmé que $k$ et $\ell$ sont différents ?
+#+end_question
+
+#+begin_hint
+Prends deux nombres pairs égaux.
+#+end_hint
+
+#+begin_success
+Non. Si $a=b=6$, on peut avoir $k=\ell=3$. Deux noms différents laissent cette possibilité ouverte.
+#+end_success
+
+#+begin_takeaway
+Une distinction de noms n’est pas une preuve d’inégalité.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui, les lettres sont différentes. | Les lettres $k$ et $\ell$ peuvent toutes deux désigner 3. Le nom et la valeur jouent des rôles différents. |
+| non | Non, ils peuvent désigner le même entier. |  |
+
+*** Nommer n’est pas fabriquer
+:PROPERTIES:
+:CUSTOM_ID: nommer-existence
+:TYPE: choice
+:ANSWERS: non
+:FORMULA: u\in\mathbb R\qquad u^2=-1
+:END:
+
+#+begin_context
+On voudrait introduire un réel $u$ tel que $u^2=-1$.
+#+end_context
+
+#+begin_question
+La phrase « soit $u$ un réel tel que $u^2=-1$ » suffit-elle à rendre ce choix possible ?
+#+end_question
+
+#+begin_hint
+Quel est le signe du carré d’un réel ?
+#+end_hint
+
+#+begin_success
+Il n’existe pas de tel réel. Nommer un objet satisfaisant une propriété exige que son existence soit établie, ou supposée dans une hypothèse explicite.
+#+end_success
+
+#+begin_takeaway
+Un choix d’objet doit être autorisé par une existence.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui : on vient de définir cet objet. | Une phrase ne peut pas créer un objet incompatible avec les propriétés des réels. |
+| non | Non : il faut que cet objet existe. |  |
+
+*** Donner un nom à une expression
+:PROPERTIES:
+:CUSTOM_ID: nommer-definition
+:TYPE: choice
+:ANSWERS: def
+:FORMULA: y:=-x
+:END:
+
+#+begin_context
+Cette fois, $x$ est un réel déjà fixé. On écrit $y:=-x$.
+#+end_context
+
+#+begin_question
+Que fait cette écriture ?
+#+end_question
+
+#+begin_hint
+Lis le symbole := comme « est défini par ».
+#+end_hint
+
+#+begin_success
+Elle définit $y$ à partir de $x$. Aucun choix supplémentaire n’est requis : $-x$ est bien un réel.
+#+end_success
+
+#+begin_takeaway
+Définir à partir d’un objet disponible peut fournir un témoin.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| def | Elle donne le nom $y$ au réel $-x$. |  |
+| assume | Elle suppose sans justification que tous les réels vérifient $y=-x$. | Il n’est pas question de tous les réels : on vient de définir un objet particulier. |
+
+** Jusqu’où peut-on s’en servir ?
+:PROPERTIES:
+:CUSTOM_ID: portees
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Une hypothèse ouvre un espace de travail. Les conclusions qu’on y obtient peuvent encore dépendre d’elle : suivons cette dépendance.
+#+end_intro
+
+#+begin_video
+Jusqu’où peut-on s’en servir ?
+#+end_video
+
+*** Dans le cadre de l’hypothèse
+:PROPERTIES:
+:CUSTOM_ID: portees-interieur
+:TYPE: choice
+:ANSWERS: local
+:SCENE: scope
+:END:
+
+#+begin_context
+On veut établir : si $x>2$, alors $x^2>4$. On fixe un réel $x$, puis on suppose $x>2$.
+#+end_context
+
+#+begin_question
+Pendant cette partie du raisonnement, que peut-on utiliser ?
+#+end_question
+
+#+begin_hint
+Regarde ce qui est écrit sous « supposons ».
+#+end_hint
+
+#+begin_success
+On peut utiliser $x>2$ à l’intérieur du raisonnement ouvert sous cette hypothèse. Cela ne veut pas dire que tous les réels sont supérieurs à 2.
+#+end_success
+
+#+begin_takeaway
+Une hypothèse est disponible à l’intérieur de sa portée.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| local | L’hypothèse $x>2$. |  |
+| global | Le fait que tous les réels sont supérieurs à 2. | Nous avons supposé $x>2$ pour le raisonnement en cours, pas pour tous les réels. |
+
+*** Refermer le cadre
+:PROPERTIES:
+:CUSTOM_ID: portees-sortie
+:TYPE: choice
+:ANSWERS: imp
+:SCENE: scope-closed
+:END:
+
+#+begin_context
+Sous l’hypothèse $x>2$, on a obtenu $x^2>4$. On referme maintenant ce raisonnement conditionnel.
+#+end_context
+
+#+begin_question
+Quelle affirmation avons-nous établie sans conserver cette hypothèse ?
+#+end_question
+
+#+begin_hint
+Essaie de vérifier les propositions pour x = 0.
+#+end_hint
+
+#+begin_success
+Nous avons montré que l’hypothèse entraîne la conclusion. Nous pouvons conserver l’implication, mais pas affirmer sa conclusion sans condition.
+#+end_success
+
+#+begin_takeaway
+Décharger une hypothèse permet de conclure une implication.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| plain | $x^2>4$. | Pour $x=0$, c’est faux. La conclusion obtenue dépendait de $x>2$. |
+| imp | $x>2\;\Rightarrow\;x^2>4$. |  |
+
+*** Le témoin reste dans son cadre
+:PROPERTIES:
+:CUSTOM_ID: portees-temoin
+:TYPE: choice
+:ANSWERS: non
+:END:
+
+#+begin_context
+On sait qu’il existe un entier pair. Dans un raisonnement local, on appelle $k$ un témoin de cette existence. Aucune autre information ne le caractérise.
+#+end_context
+
+#+begin_question
+Peut-on conclure que ce témoin vaut 2 ?
+#+end_question
+
+#+begin_hint
+Ce que tu sais de k est seulement : k est pair.
+#+end_hint
+
+#+begin_success
+Le témoin pourrait être 0, 2, 4 ou un autre entier pair. La propriété donnée n’autorise pas à lui attribuer une valeur supplémentaire.
+#+end_success
+
+#+begin_takeaway
+Un témoin connu par une propriété n’est pas un objet choisi librement.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui : 2 est un entier pair. | Le fait que 2 convienne ne prouve pas que le témoin déjà nommé $k$ vaut 2. |
+| non | Non : on sait seulement que $k$ est pair. |  |
+
+*** Exporter une conclusion
+:PROPERTIES:
+:CUSTOM_ID: portees-local
+:TYPE: choice
+:ANSWERS: exists
+:FORMULA: \exists k\in\mathbb Z,\ k\text{ pair}
+:END:
+
+#+begin_context
+Dans le cadre précédent, on a déduit que $k+1$ est impair. On veut fermer le cadre où $k$ a été introduit.
+#+end_context
+
+#+begin_question
+Quelle conclusion ne dépend plus du nom local k ?
+#+end_question
+
+#+begin_hint
+Cherche une phrase qui ne contient pas k.
+#+end_hint
+
+#+begin_success
+« Il existe un entier impair » ne contient plus le nom local. Le témoin nous a permis d’établir une existence, sans exporter son nom.
+#+end_success
+
+#+begin_takeaway
+Une conclusion exportée ne doit pas dépendre d’un nom qui disparaît.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| name | $k+1$ est impair. | Cette phrase contient encore le nom local $k$. Elle ne constitue pas une conclusion indépendante de ce témoin. |
+| exists | Il existe un entier impair. |  |
+
+** Qui choisit après qui ?
+:PROPERTIES:
+:CUSTOM_ID: dependances
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+L’ordre des choix compte. Un objet choisi après un autre peut dépendre de lui ; inverser cet ordre peut rendre l’objectif impossible.
+#+end_intro
+
+#+begin_video
+Qui choisit après qui ?
+#+end_video
+
+*** Une réponse qui dépend du premier choix
+:PROPERTIES:
+:CUSTOM_ID: dependances-temoin
+:TYPE: fill
+:ANSWERS: -x ;; −x ;; 0-x ;; -(x) ;; -1*x
+:FORMULA: y:=\boxed{\phantom{-x}}
+:SCENE: dependence
+:END:
+
+#+begin_context
+On fixe un réel $x$. On cherche ensuite un réel $y$ tel que $x+y=0$.
+#+end_context
+
+#+begin_question
+Complète la définition de y.
+#+end_question
+
+#+begin_hint
+Quel réel faut-il ajouter à $x$ pour obtenir zéro ?
+#+end_hint
+
+#+begin_success
+Le choix $y=-x$ fonctionne pour chaque réel $x$. La valeur choisie pour $y$ dépend de celle de $x$.
+#+end_success
+
+#+begin_takeaway
+« Pour tout x, il existe y » autorise y à dépendre de x.
+#+end_takeaway
+
+*** Un seul choix pour tout le monde
+:PROPERTIES:
+:CUSTOM_ID: dependances-ordre
+:TYPE: choice
+:ANSWERS: non
+:FORMULA: \exists y\in\mathbb R,\ \forall x\in\mathbb R,\ x+y=0
+:END:
+
+#+begin_context
+On te demande maintenant de choisir $y$ avant de connaître $x$, et de conserver ce même $y$ pour tous les réels $x$.
+#+end_context
+
+#+begin_question
+Peut-on garantir que x + y = 0 pour tous les x ?
+#+end_question
+
+#+begin_hint
+Teste successivement x = 0 et x = 1.
+#+end_hint
+
+#+begin_success
+Le cas $x=0$ imposerait $y=0$, puis le cas $x=1$ imposerait $y=-1$. Un même réel ne convient pas aux deux.
+#+end_success
+
+#+begin_takeaway
+Inverser les quantificateurs peut changer la vérité d’une proposition.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui : il suffit encore de prendre $y=-x$. | Cette fois, $y$ doit être choisi avant $x$. La formule $-x$ ne fournit pas un choix indépendant de $x$. |
+| non | Non : aucun même réel ne convient pour tous les x. |  |
+
+*** Répondre à un choix fixé
+:PROPERTIES:
+:CUSTOM_ID: dependances-contre
+:TYPE: fill
+:ANSWERS: 1
+:FORMULA: x=-y+1\qquad x+y=\boxed{\phantom1}
+:END:
+
+#+begin_context
+Quelqu’un a fixé un réel $y$. Pour montrer que ce choix ne marche pas pour tous les $x$, on peut choisir $x=-y+1$.
+#+end_context
+
+#+begin_question
+Quelle est alors la valeur de x + y ?
+#+end_question
+
+#+begin_hint
+Remplace x par son expression, puis simplifie.
+#+end_hint
+
+#+begin_success
+On obtient $(-y+1)+y=1$, donc pas 0. Ce contre-exemple peut dépendre du choix de $y$ qu’il réfute.
+#+end_success
+
+#+begin_takeaway
+Un contre-exemple peut être construit à partir d’un choix déjà effectué.
+#+end_takeaway
+
+*** Lequel donne le plus ?
+:PROPERTIES:
+:CUSTOM_ID: dependances-fort
+:TYPE: choice
+:ANSWERS: unique
+:END:
+
+#+begin_context
+Comparons deux affirmations : un même objet convient à tous les cas ; pour chaque cas, un objet convient.
+#+end_context
+
+#+begin_question
+Laquelle entraîne toujours l’autre ?
+#+end_question
+
+#+begin_hint
+Imagine que tu disposes déjà d’un témoin qui marche pour tous.
+#+end_hint
+
+#+begin_success
+Si un même $y$ convient pour tous les $x$, il convient en particulier pour chacun. L’inverse est faux, comme l’a montré $x+y=0$ sur les réels.
+#+end_success
+
+#+begin_takeaway
+Un choix uniforme satisfait aussi les demandes cas par cas.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| unique | $\exists y\,\forall x\,P(x,y)$ entraîne $\forall x\,\exists y\,P(x,y)$. |  |
+| each | $\forall x\,\exists y\,P(x,y)$ entraîne $\exists y\,\forall x\,P(x,y)$. | L’exemple $P(x,y):x+y=0$ donne un témoin pour chaque $x$, mais aucun témoin commun. |
+
+** Un exemple n’est pas « un quelconque ».
+:PROPERTIES:
+:CUSTOM_ID: arbitraire
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Pour prouver une affirmation universelle, on travaille avec un objet arbitraire. Cela impose de surveiller ce qu’on suppose à son sujet.
+#+end_intro
+
+#+begin_video
+Un exemple n’est pas « un quelconque ».
+#+end_video
+
+*** Trois essais ne font pas tous les cas
+:PROPERTIES:
+:CUSTOM_ID: arbitraire-exemple
+:TYPE: choice
+:ANSWERS: non
+:END:
+
+#+begin_context
+On constate que $0^2\geq0$, $1^2\geq0$ et $(-1)^2\geq0$.
+#+end_context
+
+#+begin_question
+Ces trois calculs prouvent-ils que tous les réels ont un carré positif ou nul ?
+#+end_question
+
+#+begin_hint
+Que nous disent ces calculs sur x = 1/2 ?
+#+end_hint
+
+#+begin_success
+Ils vérifient trois cas. L’affirmation est vraie, mais sa preuve doit couvrir un réel arbitraire, pas seulement ceux qu’on a testés.
+#+end_success
+
+#+begin_takeaway
+Une proposition vraie peut être accompagnée d’un argument insuffisant.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui : on a testé un positif, un négatif et zéro. | Le carré ne dépend pas seulement du signe : ces calculs ne traitent pas chaque nombre de ces catégories. |
+| non | Non : ils ne couvrent que trois réels. |  |
+
+*** Commencer une preuve universelle
+:PROPERTIES:
+:CUSTOM_ID: arbitraire-fixer
+:TYPE: choice
+:ANSWERS: any
+:END:
+
+#+begin_context
+On veut prouver $\forall x\in\mathbb R,\ x^2\geq0$.
+#+end_context
+
+#+begin_question
+Quelle ouverture permet de travailler sur un réel arbitraire ?
+#+end_question
+
+#+begin_hint
+Aucune valeur précise n’est nécessaire.
+#+end_hint
+
+#+begin_success
+« Soit $x\in\mathbb R$ » fixe un réel sans lui attribuer de propriété supplémentaire. On devra raisonner en utilisant seulement ce qui est vrai de tout réel.
+#+end_success
+
+#+begin_takeaway
+Fixer un objet arbitraire ne revient pas à choisir un exemple particulier.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| one | Prenons $x=1$. | Cette ouverture ne traite que le réel 1. |
+| any | Soit $x\in\mathbb R$. |  |
+| positive | Soit $x>0$. | On a exclu les réels négatifs et zéro. |
+
+*** Raisonner par cas
+:PROPERTIES:
+:CUSTOM_ID: arbitraire-cas
+:TYPE: choice
+:ANSWERS: cover
+:END:
+
+#+begin_context
+Après avoir fixé $x\in\mathbb R$, on distingue les cas $x\geq0$ et $x<0$.
+#+end_context
+
+#+begin_question
+Pourquoi cela permet-il de traiter tous les réels ?
+#+end_question
+
+#+begin_hint
+Ce découpage laisse-t-il un réel de côté ?
+#+end_hint
+
+#+begin_success
+Tout réel vérifie l’un de ces deux cas. Les hypothèses temporaires sont légitimes si chaque cas est traité et si leur ensemble couvre toutes les possibilités.
+#+end_success
+
+#+begin_takeaway
+Une disjonction de cas doit être exhaustive.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| cover | Les deux cas couvrent tous les réels. |  |
+| easy | Il suffit de traiter le cas le plus facile. | Une conclusion obtenue dans un seul cas peut dépendre de l’hypothèse propre à ce cas. |
+
+*** Retrouver la conclusion autorisée
+:PROPERTIES:
+:CUSTOM_ID: arbitraire-conclure
+:TYPE: choice
+:ANSWERS: conditional
+:END:
+
+#+begin_context
+On a fixé $x\in\mathbb R$, supposé $x>0$, puis démontré $x^2>0$ sous cette hypothèse.
+#+end_context
+
+#+begin_question
+Quelle conclusion universelle ce travail justifie-t-il ?
+#+end_question
+
+#+begin_hint
+Vérifie ce qui se passerait pour x = 0.
+#+end_hint
+
+#+begin_success
+La dépendance à $x>0$ doit rester visible dans l’implication. On peut ensuite généraliser en $x$, car aucun réel particulier n’a été choisi.
+#+end_success
+
+#+begin_takeaway
+La généralisation ne fait pas disparaître les conditions de la preuve.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| all | $\forall x\in\mathbb R,\ x^2>0$. | Cette proposition est fausse pour $x=0$. L’hypothèse $x>0$ a disparu indûment. |
+| conditional | $\forall x\in\mathbb R,\ x>0\Rightarrow x^2>0$. |  |
+
+* Apprendre à formaliser
+:PROPERTIES:
+:CUSTOM_ID: formaliser
+:SHORT: Formaliser
+:SYMBOL: 02
+:END:
+
+#+begin_description
+Comprendre ce que disent les quantificateurs et transformer les propositions sans changer leur sens.
+#+end_description
+
+** Tous. Au moins un.
+:PROPERTIES:
+:CUSTOM_ID: tous-un
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Sur un petit ensemble, on peut déplier une phrase quantifiée et regarder ce qui la rend vraie. C’est le point de départ pour comprendre les domaines infinis.
+#+end_intro
+
+#+begin_video
+Tous. Au moins un.
+#+end_video
+
+*** Déplier « pour tout »
+:PROPERTIES:
+:CUSTOM_ID: tous-connecteur
+:TYPE: choice
+:ANSWERS: et
+:FORMULA: (-1)^2=1\quad\boxed{\ ?\ }\quad0^2=1\quad\boxed{\ ?\ }\quad1^2=1
+:SCENE: forall
+:END:
+
+#+begin_context
+On prend $D=\{-1,0,1\}$. Dire que tout $x\in D$ vérifie $x^2=1$, c’est demander les trois égalités à la fois.
+#+end_context
+
+#+begin_question
+Quel connecteur relie les trois affirmations ?
+#+end_question
+
+#+begin_hint
+Un seul cas réussi suffirait-il ?
+#+end_hint
+
+#+begin_success
+Les trois égalités doivent être vraies simultanément. Le quantificateur universel fonctionne ici comme un « et » répété.
+#+end_success
+
+#+begin_takeaway
+Pour tout : tous les cas doivent convenir.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| et | Et |  |
+| ou | Ou | Un « ou » demanderait seulement qu’au moins une égalité soit vraie. |
+
+*** Un seul contre-exemple suffit
+:PROPERTIES:
+:CUSTOM_ID: tous-contre
+:TYPE: fill
+:ANSWERS: 0
+:SCENE: forall
+:END:
+
+#+begin_context
+Parmi les éléments de $D=\{-1,0,1\}$, certains ne vérifient pas $x^2=1$.
+#+end_context
+
+#+begin_question
+Donne un contre-exemple à l’affirmation universelle.
+#+end_question
+
+#+begin_hint
+Calcule le carré de chacun des trois éléments.
+#+end_hint
+
+#+begin_success
+Pour $x=0$, on a $x^2=0\ne1$. Une seule égalité fausse suffit à rendre la conjonction fausse.
+#+end_success
+
+#+begin_takeaway
+Réfuter « tous », c’est trouver au moins un cas qui échoue.
+#+end_takeaway
+
+*** Déplier « il existe »
+:PROPERTIES:
+:CUSTOM_ID: un-connecteur
+:TYPE: choice
+:ANSWERS: ou
+:FORMULA: (-1)^2=1\quad\boxed{\ ?\ }\quad0^2=1\quad\boxed{\ ?\ }\quad1^2=1
+:SCENE: exists
+:END:
+
+#+begin_context
+On garde le même ensemble et la même propriété. On demande maintenant si au moins un élément vérifie $x^2=1$.
+#+end_context
+
+#+begin_question
+Quel connecteur convient cette fois ?
+#+end_question
+
+#+begin_hint
+Les valeurs -1 et 1 fonctionnent toutes les deux.
+#+end_hint
+
+#+begin_success
+Le « ou » est inclusif : il suffit qu’au moins une égalité soit vraie, et plusieurs peuvent l’être.
+#+end_success
+
+#+begin_takeaway
+Il existe signifie « au moins un », pas « exactement un ».
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| et | Et | Un « et » exigerait que tous les éléments conviennent. |
+| ou | Ou |  |
+
+*** Fournir un témoin
+:PROPERTIES:
+:CUSTOM_ID: un-temoin
+:TYPE: fill
+:ANSWERS: -1 ;; 1
+:SCENE: exists
+:END:
+
+#+begin_context
+Pour établir $\exists x\in D,\ x^2=1$, on peut présenter un élément de $D$ qui convient.
+#+end_context
+
+#+begin_question
+Donne un témoin.
+#+end_question
+
+#+begin_hint
+Tu peux choisir l’un des deux éléments dont le carré vaut 1.
+#+end_hint
+
+#+begin_success
+Les valeurs $-1$ et $1$ sont toutes deux des témoins possibles. Un seul suffit à établir l’existence.
+#+end_success
+
+#+begin_takeaway
+Un témoin transforme une demande d’existence en une vérification.
+#+end_takeaway
+
+*** Passer à un domaine infini
+:PROPERTIES:
+:CUSTOM_ID: tous-infini
+:TYPE: choice
+:ANSWERS: non
+:END:
+
+#+begin_context
+Sur $\mathbb N$, on peut lire $\forall n,P(n)$ comme « $P(0)$ et $P(1)$ et $P(2)$ et… ». Cette lecture donne le sens de la quantification.
+#+end_context
+
+#+begin_question
+Avoir vérifié un million de cas suffit-il en général à prouver cette affirmation ?
+#+end_question
+
+#+begin_hint
+Quel serait le premier entier non testé ?
+#+end_hint
+
+#+begin_success
+Non : il resterait des cas non traités. Il faut un argument couvrant chaque entier, par exemple un raisonnement sur un entier arbitraire ou une récurrence.
+#+end_success
+
+#+begin_takeaway
+Les « et » infinis décrivent le sens ; ils ne prescrivent pas une vérification sans fin.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui, si aucun essai n’a échoué. | Une propriété peut être vraie pour les premiers cas puis devenir fausse. |
+| non | Non : il faut un argument qui couvre tous les cas. |  |
+
+** Faire entrer la négation.
+:PROPERTIES:
+:CUSTOM_ID: negations
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Nier une phrase, ce n’est pas nier chaque morceau en gardant les mêmes connecteurs. Faisons apparaître les cas qui la rendent fausse.
+#+end_intro
+
+#+begin_video
+Faire entrer la négation.
+#+end_video
+
+*** Nier « les deux »
+:PROPERTIES:
+:CUSTOM_ID: negation-sens
+:TYPE: choice
+:ANSWERS: one
+:END:
+
+#+begin_context
+On affirme : « Alice a rendu son devoir et Bilal a rendu le sien ».
+#+end_context
+
+#+begin_question
+Quelle situation suffit à rendre cette phrase fausse ?
+#+end_question
+
+#+begin_hint
+Et si Alice a rendu son devoir, mais pas Bilal ?
+#+end_hint
+
+#+begin_success
+Il suffit que l’un des deux n’ait pas rendu son devoir. Il est possible qu’aucun ne l’ait rendu, mais ce n’est pas nécessaire.
+#+end_success
+
+#+begin_takeaway
+Nier une conjonction demande au moins un échec.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| both | Il faut qu’aucun des deux n’ait rendu son devoir. | La phrase est déjà fausse si Bilal seul n’a rien rendu. |
+| one | Au moins l’un des deux n’a pas rendu son devoir. |  |
+
+*** La négation d’un « et »
+:PROPERTIES:
+:CUSTOM_ID: negation-et
+:TYPE: rewrite
+:ANSWERS: ¬A ∨ ¬B
+:RULE: nnf
+:SOURCE: ¬(A ∧ B)
+:FORMULA: \neg(A\land B)
+:END:
+
+#+begin_context
+$A$ et $B$ désignent deux propositions. Réécrivons la formule en ne laissant des négations que devant $A$ ou $B$.
+#+end_context
+
+#+begin_question
+Fais entrer la négation.
+#+end_question
+
+#+begin_hint
+Le connecteur doit devenir un « ou ».
+#+end_hint
+
+#+begin_success
+La conjonction échoue dès qu’au moins l’une de ses propositions échoue : $\neg(A\land B)\equiv\neg A\lor\neg B$.
+#+end_success
+
+#+begin_takeaway
+En traversant une négation, « et » devient « ou ».
+#+end_takeaway
+
+*** La négation d’un « ou »
+:PROPERTIES:
+:CUSTOM_ID: negation-ou
+:TYPE: rewrite
+:ANSWERS: ¬A ∧ ¬B
+:RULE: nnf
+:SOURCE: ¬(A ∨ B)
+:FORMULA: \neg(A\lor B)
+:END:
+
+#+begin_context
+Pour qu’un « ou » inclusif soit faux, aucune de ses deux possibilités ne doit convenir.
+#+end_context
+
+#+begin_question
+Fais entrer la négation.
+#+end_question
+
+#+begin_hint
+Les deux possibilités doivent échouer.
+#+end_hint
+
+#+begin_success
+Il faut que $A$ soit faux et que $B$ soit faux : $\neg(A\lor B)\equiv\neg A\land\neg B$.
+#+end_success
+
+#+begin_takeaway
+En traversant une négation, « ou » devient « et ».
+#+end_takeaway
+
+*** Deux négations
+:PROPERTIES:
+:CUSTOM_ID: negation-double
+:TYPE: rewrite
+:ANSWERS: A
+:RULE: nnf
+:SOURCE: ¬¬A
+:FORMULA: \neg\neg A
+:END:
+
+#+begin_context
+Dans ce parcours, nous interprétons les propositions en logique classique : chacune est vraie ou fausse.
+#+end_context
+
+#+begin_question
+Simplifie la formule pour enlever les négations doubles.
+#+end_question
+
+#+begin_hint
+Si A est vraie, quelle est la valeur de non A, puis de non non A ?
+#+end_hint
+
+#+begin_success
+Dans ce cadre classique, $\neg\neg A$ et $A$ ont la même valeur de vérité. Les principes de preuve correspondants seront distingués dans le parcours de déduction.
+#+end_success
+
+#+begin_takeaway
+La suppression de la double négation est ici une transformation classique.
+#+end_takeaway
+
+*** Suivre la négation jusqu’au bout
+:PROPERTIES:
+:CUSTOM_ID: negation-composee
+:TYPE: rewrite
+:ANSWERS: (¬A ∧ ¬B) ∨ C
+:RULE: nnf
+:SOURCE: ¬((A ∨ B) ∧ ¬C)
+:FORMULA: \neg\big((A\lor B)\land\neg C\big)
+:END:
+
+#+begin_context
+Appliquons les deux lois de De Morgan à une formule emboîtée. Les parenthèses déterminent ce que chaque négation porte.
+#+end_context
+
+#+begin_question
+Ne garde de négations que devant les lettres.
+#+end_question
+
+#+begin_hint
+Commence par le connecteur principal, qui est un « et ».
+#+end_hint
+
+#+begin_success
+On obtient $(\neg A\land\neg B)\lor C$. La négation extérieure transforme le « et » en « ou », puis celle de $A\lor B$ se propage ; les deux négations devant $C$ s’annulent.
+#+end_success
+
+#+begin_takeaway
+La négation se propage suivant la structure de la formule.
+#+end_takeaway
+
+** Ce que promet un « si… alors ».
+:PROPERTIES:
+:CUSTOM_ID: implication
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Une implication interdit une situation précise : que l’hypothèse soit vraie et la conclusion fausse. Cette lecture rend ses transformations compréhensibles.
+#+end_intro
+
+#+begin_video
+Ce que promet un « si… alors ».
+#+end_video
+
+*** La promesse non tenue
+:PROPERTIES:
+:CUSTOM_ID: implication-fausse
+:TYPE: choice
+:ANSWERS: tf
+:SCENE: implication
+:END:
+
+#+begin_context
+La règle annoncée est : « si un nombre est divisible par 4, alors il est pair ».
+#+end_context
+
+#+begin_question
+Quel cas contredirait cette règle ?
+#+end_question
+
+#+begin_hint
+Cherche un cas qui satisfait le « si » mais échoue au « alors ».
+#+end_hint
+
+#+begin_success
+Un multiple de 4 qui ne serait pas pair aurait l’hypothèse vraie et la conclusion fausse. Les nombres qui ne sont pas multiples de 4 ne contredisent pas la règle.
+#+end_success
+
+#+begin_takeaway
+Une implication est fausse seulement si son hypothèse est vraie et sa conclusion fausse.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| tf | Un nombre divisible par 4, mais pas pair. |  |
+| ft | Un nombre pair qui n’est pas divisible par 4. | Le nombre 2 en est un exemple ; il ne contredit pas ce qui a été promis pour les multiples de 4. |
+
+*** Exprimer l’implication avec « ou »
+:PROPERTIES:
+:CUSTOM_ID: implication-ou
+:TYPE: rewrite
+:ANSWERS: ¬A ∨ B
+:RULE: no-implies
+:SOURCE: A → B
+:FORMULA: A\Rightarrow B
+:END:
+
+#+begin_context
+En logique classique, pour éviter le cas « $A$ vraie et $B$ fausse », il faut que $A$ soit fausse ou que $B$ soit vraie.
+#+end_context
+
+#+begin_question
+Réécris sans utiliser →.
+#+end_question
+
+#+begin_hint
+Il faut nier A, pas B.
+#+end_hint
+
+#+begin_success
+On obtient $\neg A\lor B$. C’est exactement la condition qui exclut la promesse non tenue.
+#+end_success
+
+#+begin_takeaway
+En logique classique : A implique B équivaut à non A ou B.
+#+end_takeaway
+
+*** Nier une implication
+:PROPERTIES:
+:CUSTOM_ID: implication-nier
+:TYPE: rewrite
+:ANSWERS: A ∧ ¬B
+:RULE: nnf
+:SOURCE: ¬(A → B)
+:FORMULA: \neg(A\Rightarrow B)
+:END:
+
+#+begin_context
+Nier une implication, c’est affirmer précisément le cas qui la rend fausse.
+#+end_context
+
+#+begin_question
+Réécris avec et, ou, et des négations devant les lettres seulement.
+#+end_question
+
+#+begin_hint
+Tu peux d’abord remplacer l’implication par un « ou ».
+#+end_hint
+
+#+begin_success
+On obtient $A\land\neg B$ : l’hypothèse est vraie, la conclusion est fausse.
+#+end_success
+
+#+begin_takeaway
+Un contre-exemple à une implication satisfait l’hypothèse et contredit la conclusion.
+#+end_takeaway
+
+*** Retourner sans changer le sens
+:PROPERTIES:
+:CUSTOM_ID: implication-contraposee
+:TYPE: choice
+:ANSWERS: contra
+:END:
+
+#+begin_context
+On sait que $A\Rightarrow B$. En logique classique, une autre implication lui est équivalente.
+#+end_context
+
+#+begin_question
+Laquelle ?
+#+end_question
+
+#+begin_hint
+Être pair ne suffit pas à être divisible par 4.
+#+end_hint
+
+#+begin_success
+$\neg B\Rightarrow\neg A$ lui est équivalente : si la conclusion est fausse, l’hypothèse ne peut pas être vraie. La réciproque $B\Rightarrow A$ n’en découle pas en général.
+#+end_success
+
+#+begin_takeaway
+La contraposée inverse l’ordre et nie les deux propositions.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| reverse | $B\Rightarrow A$. | C’est la réciproque. Dans notre exemple, elle affirmerait à tort que tout nombre pair est divisible par 4. |
+| contra | $\neg B\Rightarrow\neg A$. |  |
+| inverse | $\neg A\Rightarrow\neg B$. | Le nombre 2 n’est pas divisible par 4, mais il est pair. |
+
+*** Quand l’hypothèse est fausse
+:PROPERTIES:
+:CUSTOM_ID: implication-vide
+:TYPE: choice
+:ANSWERS: true
+:SCENE: implication
+:END:
+
+#+begin_context
+Considérons l’implication : « si 3 est divisible par 4, alors 3 est pair ». Les deux propositions élémentaires sont fausses.
+#+end_context
+
+#+begin_question
+Quelle valeur a l’implication en logique classique ?
+#+end_question
+
+#+begin_hint
+Le cas interdit demande que l’hypothèse soit vraie.
+#+end_hint
+
+#+begin_success
+Elle est vraie : son unique cas de fausseté serait une hypothèse vraie accompagnée d’une conclusion fausse. Cela ne rend pas sa conclusion vraie.
+#+end_success
+
+#+begin_takeaway
+La vérité d’une implication ne donne pas la vérité de sa conclusion seule.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| true | Vraie. |  |
+| false | Fausse, puisque 3 n’est pas pair. | La conclusion est fausse, mais l’hypothèse aussi. Ce n’est pas le cas qui contredit une implication. |
+
+** De « tous » à « un contre-exemple ».
+:PROPERTIES:
+:CUSTOM_ID: nier-quantificateurs
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Les lois de De Morgan se prolongent aux quantificateurs. Le passage du « et » au « ou » devient un passage de « pour tout » à « il existe ».
+#+end_intro
+
+#+begin_video
+De « tous » à « un contre-exemple ».
+#+end_video
+
+*** Nier une affirmation universelle
+:PROPERTIES:
+:CUSTOM_ID: quant-non-tous
+:TYPE: rewrite
+:ANSWERS: ∃x ¬P(x)
+:RULE: nnf
+:SOURCE: ¬(∀x P(x))
+:FORMULA: \neg\big(\forall x,\ P(x)\big)
+:END:
+
+#+begin_context
+Dire « ce n’est pas vrai que tous vérifient $P$ », c’est dire qu’au moins un élément ne vérifie pas $P$.
+#+end_context
+
+#+begin_question
+Fais entrer la négation jusqu’à P(x).
+#+end_question
+
+#+begin_hint
+Change le quantificateur en déplaçant la négation.
+#+end_hint
+
+#+begin_success
+On obtient $\exists x,\neg P(x)$. Le témoin de cette existence est un contre-exemple à l’affirmation universelle.
+#+end_success
+
+#+begin_takeaway
+Non « pour tout » devient « il existe non ».
+#+end_takeaway
+
+*** Nier une existence
+:PROPERTIES:
+:CUSTOM_ID: quant-aucun
+:TYPE: rewrite
+:ANSWERS: ∀x ¬P(x)
+:RULE: nnf
+:SOURCE: ¬(∃x P(x))
+:FORMULA: \neg\big(\exists x,\ P(x)\big)
+:END:
+
+#+begin_context
+Dire qu’il n’existe aucun élément vérifiant $P$, c’est demander à chaque élément de ne pas vérifier $P$.
+#+end_context
+
+#+begin_question
+Fais entrer la négation jusqu’à P(x).
+#+end_question
+
+#+begin_hint
+Un seul échec ne suffit pas à nier une existence.
+#+end_hint
+
+#+begin_success
+On obtient $\forall x,\neg P(x)$. Il faut exclure tous les témoins possibles.
+#+end_success
+
+#+begin_takeaway
+Non « il existe » devient « pour tout non ».
+#+end_takeaway
+
+*** Traverser deux quantificateurs
+:PROPERTIES:
+:CUSTOM_ID: quant-deux
+:TYPE: rewrite
+:ANSWERS: ∃x ∀y ¬P(x,y)
+:RULE: nnf
+:SOURCE: ¬(∀x ∃y P(x,y))
+:FORMULA: \neg\big(\forall x,\exists y,\ P(x,y)\big)
+:END:
+
+#+begin_context
+La négation doit traverser chaque quantificateur dans son ordre d’apparition.
+#+end_context
+
+#+begin_question
+Ne laisse la négation que devant P(x,y).
+#+end_question
+
+#+begin_hint
+Traverse d’abord ∀x, puis ∃y.
+#+end_hint
+
+#+begin_success
+On obtient $\exists x,\forall y,\neg P(x,y)$. Il existe un premier choix pour lequel aucune réponse ne convient.
+#+end_success
+
+#+begin_takeaway
+Chaque quantificateur change ; leur ordre est conservé.
+#+end_takeaway
+
+*** Préciser le domaine
+:PROPERTIES:
+:CUSTOM_ID: quant-restriction
+:TYPE: choice
+:ANSWERS: impl
+:END:
+
+#+begin_context
+On veut écrire « tous les objets qui appartiennent à $E$ vérifient $P$ », en quantifiant d’abord sur tous les objets.
+#+end_context
+
+#+begin_question
+Quelle écriture convient ?
+#+end_question
+
+#+begin_hint
+Que demande la proposition à un objet qui n’appartient pas à E ?
+#+end_hint
+
+#+begin_success
+On écrit $\forall x,\ x\in E\Rightarrow P(x)$. L’implication n’exige pas que les objets extérieurs à $E$ appartiennent à $E$.
+#+end_success
+
+#+begin_takeaway
+La restriction d’un quantificateur universel utilise une implication.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| and | $\forall x,\ x\in E\land P(x)$. | Cette formule exigerait que tous les objets appartiennent à E. |
+| impl | $\forall x,\ x\in E\Rightarrow P(x)$. |  |
+
+*** Un témoin dans le bon domaine
+:PROPERTIES:
+:CUSTOM_ID: quant-restriction-existe
+:TYPE: choice
+:ANSWERS: and
+:END:
+
+#+begin_context
+On veut cette fois affirmer qu’il existe un élément de $E$ qui vérifie $P$.
+#+end_context
+
+#+begin_question
+Quelle écriture exige les deux propriétés du témoin ?
+#+end_question
+
+#+begin_hint
+Le témoin doit vraiment appartenir à E.
+#+end_hint
+
+#+begin_success
+On écrit $\exists x,\ x\in E\land P(x)$. Le même témoin doit appartenir à $E$ et vérifier $P$.
+#+end_success
+
+#+begin_takeaway
+La restriction d’un quantificateur existentiel utilise une conjonction.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| and | $\exists x,\ x\in E\land P(x)$. |  |
+| impl | $\exists x,\ x\in E\Rightarrow P(x)$. | Un objet extérieur à E satisferait cette implication. Cela ne fournirait aucun témoin dans E. |
+
+* Construire une démonstration
+:PROPERTIES:
+:CUSTOM_ID: deduire
+:SHORT: Déduire
+:SYMBOL: 03
+:END:
+
+#+begin_description
+Utiliser les règles de déduction naturelle et rendre visibles les raisons qui autorisent chaque étape.
+#+end_description
+
+** Construire un « si… alors ».
+:PROPERTIES:
+:CUSTOM_ID: si-alors
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Une démonstration peut être vue comme une suite de transformations de ce qu’on est autorisé à affirmer. Commençons par les deux usages de l’implication.
+#+end_intro
+
+#+begin_video
+Construire un « si… alors ».
+#+end_video
+
+*** Partir de la bonne hypothèse
+:PROPERTIES:
+:CUSTOM_ID: deduction-depart
+:TYPE: choice
+:ANSWERS: a
+:SCENE: proof-open
+:END:
+
+#+begin_context
+On veut démontrer $A\Rightarrow B$. Une méthode consiste à ouvrir un raisonnement temporaire.
+#+end_context
+
+#+begin_question
+Que doit-on supposer dans ce raisonnement ?
+#+end_question
+
+#+begin_hint
+Quel est le côté gauche de l’implication ?
+#+end_hint
+
+#+begin_success
+On suppose $A$, puis on cherche à établir $B$. Si on y parvient, on pourra décharger cette hypothèse pour conclure $A\Rightarrow B$.
+#+end_success
+
+#+begin_takeaway
+Introduire une implication : supposer son hypothèse et établir sa conclusion.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| a | $A$. |  |
+| b | $B$. | Supposer B donne déjà la conclusion, mais ne montre pas qu’elle découle de A. |
+
+*** Faire fonctionner une implication
+:PROPERTIES:
+:CUSTOM_ID: deduction-utiliser
+:TYPE: fill
+:ANSWERS: B
+:FORMULA: \frac{A\Rightarrow B\qquad A}{\boxed{\phantom B}}
+:SCENE: modus
+:END:
+
+#+begin_context
+On dispose de deux prémisses : $A\Rightarrow B$ et $A$.
+#+end_context
+
+#+begin_question
+Quelle proposition peut-on en déduire immédiatement ?
+#+end_question
+
+#+begin_hint
+L’hypothèse de l’implication est satisfaite.
+#+end_hint
+
+#+begin_success
+On obtient $B$. Cette règle s’appelle l’élimination de l’implication, ou modus ponens.
+#+end_success
+
+#+begin_takeaway
+Éliminer une implication demande aussi sa prémisse gauche.
+#+end_takeaway
+
+*** Une prémisse manquante
+:PROPERTIES:
+:CUSTOM_ID: deduction-manque
+:TYPE: choice
+:ANSWERS: non
+:END:
+
+#+begin_context
+On dispose seulement de $A\Rightarrow B$.
+#+end_context
+
+#+begin_question
+Peut-on en déduire B sans autre information ?
+#+end_question
+
+#+begin_hint
+La règle précédente avait deux prémisses.
+#+end_hint
+
+#+begin_success
+Il manque une justification de $A$. Une implication peut être vraie avec une conclusion fausse lorsque son hypothèse est fausse.
+#+end_success
+
+#+begin_takeaway
+Une règle ne s’applique que lorsque toutes ses prémisses sont disponibles.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui, puisque B est à droite de la flèche. | La position à droite de la flèche ne rend pas B disponible sans établir A. |
+| non | Non, il faut aussi disposer de A. |  |
+
+*** Une implication très simple
+:PROPERTIES:
+:CUSTOM_ID: deduction-identite
+:TYPE: rewrite
+:ANSWERS: A → A
+:RULE: structure
+:SOURCE: A → A
+:FORMULA: \begin{array}{c}[A]\\\vdots\\A\end{array}\quad\Longrightarrow\quad\boxed{\phantom{A\Rightarrow A}}
+:END:
+
+#+begin_context
+Sous l’hypothèse temporaire $A$, on dispose immédiatement de $A$. On décharge cette hypothèse.
+#+end_context
+
+#+begin_question
+Quelle implication vient-on de démontrer ?
+#+end_question
+
+#+begin_hint
+L’hypothèse et la conclusion du raisonnement local sont ici identiques.
+#+end_hint
+
+#+begin_success
+On a démontré $A\Rightarrow A$ sans hypothèse restante. L’hypothèse temporaire ne rend pas le raisonnement circulaire : elle est précisément ce qu’exige la conclusion conditionnelle.
+#+end_success
+
+#+begin_takeaway
+Une hypothèse déchargée reste visible à gauche de l’implication.
+#+end_takeaway
+
+*** Enchaîner deux règles
+:PROPERTIES:
+:CUSTOM_ID: deduction-transitive
+:TYPE: fill
+:ANSWERS: B
+:FORMULA: A\Rightarrow B\qquad B\Rightarrow C\qquad [A]
+:END:
+
+#+begin_context
+On dispose de $A\Rightarrow B$ et $B\Rightarrow C$. Pour prouver $A\Rightarrow C$, on suppose temporairement $A$.
+#+end_context
+
+#+begin_question
+Quelle proposition obtient-on en premier avec A ⇒ B ?
+#+end_question
+
+#+begin_hint
+Applique une première fois l’élimination de l’implication.
+#+end_hint
+
+#+begin_success
+On obtient $B$, puis $C$ à l’aide de $B\Rightarrow C$. On décharge enfin $A$ pour conclure $A\Rightarrow C$.
+#+end_success
+
+#+begin_takeaway
+Les prémisses d’une règle peuvent être les conclusions d’étapes précédentes.
+#+end_takeaway
+
+** Assembler. Séparer. Traiter les cas.
+:PROPERTIES:
+:CUSTOM_ID: et-cas
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+« Et » et « ou » donnent des façons différentes de construire une preuve. Pour utiliser un « ou », il faut se garder de choisir la branche qui nous arrange.
+#+end_intro
+
+#+begin_video
+Assembler. Séparer. Traiter les cas.
+#+end_video
+
+*** Construire une conjonction
+:PROPERTIES:
+:CUSTOM_ID: deduction-et
+:TYPE: choice
+:ANSWERS: both
+:FORMULA: \frac{A\qquad B}{A\land B}
+:END:
+
+#+begin_context
+On souhaite établir $A\land B$.
+#+end_context
+
+#+begin_question
+De quoi a-t-on besoin ?
+#+end_question
+
+#+begin_hint
+Le sens de $A\land B$ demande les deux affirmations.
+#+end_hint
+
+#+begin_success
+Il faut une justification de $A$ et une justification de $B$. C’est l’introduction de la conjonction.
+#+end_success
+
+#+begin_takeaway
+Pour prouver « et », prouver les deux.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| one | D’une preuve de A seulement. | Une preuve de A ne donne aucune raison d’affirmer B. |
+| both | D’une preuve de A et d’une preuve de B. |  |
+
+*** Utiliser une conjonction
+:PROPERTIES:
+:CUSTOM_ID: deduction-extraire
+:TYPE: choice
+:ANSWERS: yes
+:FORMULA: \frac{A\land B}{A}
+:END:
+
+#+begin_context
+On dispose de $A\land B$.
+#+end_context
+
+#+begin_question
+Peut-on en extraire A ?
+#+end_question
+
+#+begin_hint
+Si les deux sont vrais, A est-il vrai ?
+#+end_hint
+
+#+begin_success
+Oui. Chacun des deux membres est disponible. C’est une règle d’élimination de la conjonction.
+#+end_success
+
+#+begin_takeaway
+Une conjonction permet de récupérer chacun de ses membres.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| yes | Oui. |  |
+| no | Non, il faudrait une preuve indépendante de A. | La preuve de la conjonction fournit déjà ce qu’il faut pour en obtenir A. |
+
+*** Construire une disjonction
+:PROPERTIES:
+:CUSTOM_ID: deduction-ou
+:TYPE: choice
+:ANSWERS: yes
+:FORMULA: \frac{A}{A\lor B}
+:END:
+
+#+begin_context
+On dispose de $A$, mais on ne sait rien de $B$.
+#+end_context
+
+#+begin_question
+Peut-on prouver A ou B ?
+#+end_question
+
+#+begin_hint
+On demande au moins un membre, pas exactement un.
+#+end_hint
+
+#+begin_success
+Oui : un seul des deux membres suffit. Le « ou » est inclusif et n’exige pas de décider l’autre membre.
+#+end_success
+
+#+begin_takeaway
+Pour prouver « ou », un membre suffit.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| yes | Oui, à partir de A. |  |
+| no | Non, il faut d’abord vérifier B. | La vérité de A suffit déjà à celle du « ou ». |
+
+*** Utiliser une disjonction
+:PROPERTIES:
+:CUSTOM_ID: deduction-cas
+:TYPE: choice
+:ANSWERS: cases
+:SCENE: cases
+:END:
+
+#+begin_context
+On sait $A\lor B$, sans savoir lequel est établi. On veut prouver $C$.
+#+end_context
+
+#+begin_question
+Quelle stratégie est valable ?
+#+end_question
+
+#+begin_hint
+La disjonction ne permet pas de choisir librement le membre vrai.
+#+end_hint
+
+#+begin_success
+Il faut établir $C$ sous l’hypothèse $A$ et sous l’hypothèse $B$. Avec $A\lor B$, cela permet de conclure $C$.
+#+end_success
+
+#+begin_takeaway
+Éliminer un « ou » demande de traiter toutes ses branches.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| choose | Choisir A et établir C à partir de A. | Il se pourrait que seul B soit vrai. Le raisonnement n’aurait pas couvert ce cas. |
+| cases | Établir C dans le cas A et dans le cas B. |  |
+
+*** Vérifier l’exhaustivité
+:PROPERTIES:
+:CUSTOM_ID: deduction-couverture
+:TYPE: fill
+:ANSWERS: 0
+:END:
+
+#+begin_context
+Pour traiter un réel $x$, on a prouvé une même conclusion dans les cas $x>0$ et $x<0$.
+#+end_context
+
+#+begin_question
+Quel réel n’a pas encore été traité ?
+#+end_question
+
+#+begin_hint
+Ce réel n’est ni strictement positif ni strictement négatif.
+#+end_hint
+
+#+begin_success
+Le cas $x=0$ manque. Il faut le traiter, ou utiliser dès le départ une disjonction exhaustive telle que $x\geq0$ ou $x<0$.
+#+end_success
+
+#+begin_takeaway
+Traiter plusieurs cas ne suffit pas si un cas reste à l’écart.
+#+end_takeaway
+
+** Du quelconque au témoin.
+:PROPERTIES:
+:CUSTOM_ID: regles-quantificateurs
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Les quantificateurs ont eux aussi des règles d’introduction et d’élimination. Les conditions sur les noms et les hypothèses protègent ces règles contre les faux raisonnements.
+#+end_intro
+
+#+begin_video
+Du quelconque au témoin.
+#+end_video
+
+*** Utiliser « pour tout »
+:PROPERTIES:
+:CUSTOM_ID: deduction-pour-tout
+:TYPE: choice
+:ANSWERS: p
+:FORMULA: \frac{\forall x,\ P(x)}{P(a)}
+:END:
+
+#+begin_context
+On dispose de $\forall x,P(x)$. Le nom $a$ désigne un objet du domaine.
+#+end_context
+
+#+begin_question
+Quelle proposition peut-on en déduire ?
+#+end_question
+
+#+begin_hint
+Remplace x par a.
+#+end_hint
+
+#+begin_success
+On peut obtenir $P(a)$ : un énoncé universel s’applique à chaque objet du domaine.
+#+end_success
+
+#+begin_takeaway
+Éliminer ∀ : appliquer l’énoncé à un objet du domaine.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| p | $P(a)$. |  |
+| not | $\neg P(a)$. | L’énoncé universel fournit P(a), pas sa négation. |
+
+*** La condition du quelconque
+:PROPERTIES:
+:CUSTOM_ID: deduction-generaliser
+:TYPE: choice
+:ANSWERS: non
+:END:
+
+#+begin_context
+On a prouvé $P(a)$, mais la seule raison utilisée est une hypothèse encore ouverte qui affirme précisément $P(a)$.
+#+end_context
+
+#+begin_question
+Peut-on généraliser et conclure ∀x P(x) ?
+#+end_question
+
+#+begin_hint
+Savoir que 2 est pair permet-il de conclure que tous les entiers le sont ?
+#+end_hint
+
+#+begin_success
+Non. Le nom $a$ apparaît dans une hypothèse non déchargée dont dépend la preuve. Il ne joue pas le rôle d’un objet arbitraire soumis seulement aux conditions du domaine.
+#+end_success
+
+#+begin_takeaway
+Introduire ∀ exige de contrôler les hypothèses dont dépend la preuve.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| oui | Oui, il suffit de remplacer la lettre a par x. | Changer une lettre ne supprime pas la dépendance à une hypothèse particulière. |
+| non | Non : la preuve dépend d’une hypothèse particulière sur a. |  |
+
+*** Construire une existence
+:PROPERTIES:
+:CUSTOM_ID: deduction-existe
+:TYPE: fill
+:ANSWERS: 2 ;; -2
+:FORMULA: \exists n\in\mathbb Z,\ n^2=4
+:END:
+
+#+begin_context
+On veut établir qu’il existe un entier $n$ tel que $n^2=4$.
+#+end_context
+
+#+begin_question
+Donne un témoin entier.
+#+end_question
+
+#+begin_hint
+Il y a deux carrés à tester très simplement.
+#+end_hint
+
+#+begin_success
+Les entiers 2 et -2 conviennent. Vérifier la propriété pour un témoin du bon domaine permet d’introduire le quantificateur existentiel.
+#+end_success
+
+#+begin_takeaway
+Introduire ∃ : fournir un objet du domaine et vérifier sa propriété.
+#+end_takeaway
+
+*** Utiliser une existence sans choisir plus
+:PROPERTIES:
+:CUSTOM_ID: deduction-elim-existe
+:TYPE: choice
+:ANSWERS: square
+:END:
+
+#+begin_context
+On sait $\exists n\in\mathbb Z,\ n^2=4$. Dans un raisonnement local, on appelle $k$ un tel entier.
+#+end_context
+
+#+begin_question
+Que peut-on affirmer immédiatement sur k ?
+#+end_question
+
+#+begin_hint
+N’oublie pas le témoin négatif.
+#+end_hint
+
+#+begin_success
+On sait $k^2=4$, mais on ne peut pas décider que $k=2$ : il pourrait valoir -2. Le témoin ne possède que les propriétés données.
+#+end_success
+
+#+begin_takeaway
+Éliminer ∃ ne permet pas de choisir les propriétés qui nous arrangent.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| positive | $k=2$. | Le témoin pourrait être $-2$. Tu as ajouté une propriété qui n’était pas donnée. |
+| square | $k^2=4$. |  |
+
+*** Fermer le raisonnement local
+:PROPERTIES:
+:CUSTOM_ID: deduction-temoin-sortie
+:TYPE: choice
+:ANSWERS: exist
+:END:
+
+#+begin_context
+Du fait que $k^2=4$, on déduit $k\ne0$, puis qu’il existe un entier non nul.
+#+end_context
+
+#+begin_question
+Quelle conclusion peut-on conserver lorsque le nom local k disparaît ?
+#+end_question
+
+#+begin_hint
+Choisis la phrase qui ne contient plus k.
+#+end_hint
+
+#+begin_success
+« Il existe un entier non nul » ne dépend plus du nom local. La conclusion exportée et les autres hypothèses ouvertes doivent respecter la condition de fraîcheur de la règle existentielle.
+#+end_success
+
+#+begin_takeaway
+Le témoin local sert la preuve ; son nom ne doit pas s’échapper.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| local | $k\ne0$. | Cette conclusion conserve le nom qui vient de sortir de portée. |
+| exist | Il existe un entier non nul. |  |
+
+** La poussière sous le tapis.
+:PROPERTIES:
+:CUSTOM_ID: rigueur
+:VIDEO_PROVIDER: placeholder
+:END:
+
+#+begin_intro
+Un raisonnement familier peut utiliser un résultat sans le dire. Revenons sur la parité : quels faits permettent réellement de passer d’une ligne à la suivante ?
+#+end_intro
+
+#+begin_video
+La poussière sous le tapis.
+#+end_video
+
+*** Un passage qui réclame une raison
+:PROPERTIES:
+:CUSTOM_ID: rigueur-lemme
+:TYPE: choice
+:ANSWERS: lemma
+:END:
+
+#+begin_context
+Dans une preuve de l’irrationalité de $\sqrt2$, on rencontre : « $p^2$ est pair, donc $p$ est pair ».
+#+end_context
+
+#+begin_question
+De quel résultat ce passage dépend-il ?
+#+end_question
+
+#+begin_hint
+La définition d’un entier pair parle d’une écriture sous la forme 2k.
+#+end_hint
+
+#+begin_success
+Il dépend du lemme : si le carré d’un entier naturel est pair, alors cet entier est pair. Ce passage n’est pas la définition d’un entier pair.
+#+end_success
+
+#+begin_takeaway
+Identifier le résultat utilisé est le début du contrôle de la preuve.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| definition | Seulement de la définition du mot pair. | La définition traduit p pair par p = 2k ; elle ne relie pas directement p² à p. |
+| lemma | D’un lemme reliant la parité d’un entier à celle de son carré. |  |
+
+*** Le carré d’un nombre de la forme 2k + 1
+:PROPERTIES:
+:CUSTOM_ID: rigueur-impair
+:TYPE: fill
+:ANSWERS: 1
+:FORMULA: (2k+1)^2=2(2k^2+2k)+\boxed{\phantom1}
+:END:
+
+#+begin_context
+Pour un entier naturel $k$, on développe $(2k+1)^2=4k^2+4k+1$.
+#+end_context
+
+#+begin_question
+Complète l’égalité.
+#+end_question
+
+#+begin_hint
+Regroupe les deux premiers termes sous un facteur 2.
+#+end_hint
+
+#+begin_success
+On obtient $2(2k^2+2k)+1$. Puisque $2k^2+2k$ est un entier naturel, ce carré possède lui aussi la forme d’un entier impair.
+#+end_success
+
+#+begin_takeaway
+Une définition s’utilise en exhibant l’objet qu’elle demande.
+#+end_takeaway
+
+*** Une hypothèse encore cachée
+:PROPERTIES:
+:CUSTOM_ID: rigueur-dichotomie
+:TYPE: choice
+:ANSWERS: cover
+:END:
+
+#+begin_context
+On a montré qu’un entier de la forme $2k+1$ a un carré de cette même forme. On voudrait maintenant dire : « si $n$ n’est pas pair, il est de la forme $2k+1$ ».
+#+end_context
+
+#+begin_question
+Quel résultat faut-il avoir établi ?
+#+end_question
+
+#+begin_hint
+Les deux formes couvrent-elles tous les entiers par définition ?
+#+end_hint
+
+#+begin_success
+Il faut savoir que tout entier naturel est de la forme $2k$ ou $2k+1$. Définir « impair » par la seconde forme ne démontre pas que tout entier non pair possède cette forme.
+#+end_success
+
+#+begin_takeaway
+Une définition ne remplace pas un théorème d’exhaustivité.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| definition | Aucun : c’est automatiquement vrai par la définition « impair = 2k + 1 ». | Cette définition ne dit pas encore que tout entier possède l’une des deux formes. |
+| cover | Que tout entier naturel est de la forme 2k ou 2k + 1. |  |
+
+*** Établir l’exhaustivité
+:PROPERTIES:
+:CUSTOM_ID: rigueur-recurrence
+:TYPE: choice
+:ANSWERS: all
+:END:
+
+#+begin_context
+Admettons le principe de récurrence sur $\mathbb N$. Le cas 0 est pair. Si $n=2k$, alors $n+1=2k+1$. Si $n=2k+1$, alors $n+1=2(k+1)$.
+#+end_context
+
+#+begin_question
+Que permet de conclure cette récurrence ?
+#+end_question
+
+#+begin_hint
+Le successeur d’un pair a la forme impaire ; celui d’un impair a la forme paire.
+#+end_hint
+
+#+begin_success
+Le cas initial et les deux passages au successeur montrent que tout entier naturel possède l’une des deux formes. Le principe de récurrence utilisé est ici explicitement annoncé.
+#+end_success
+
+#+begin_takeaway
+La preuve doit couvrir chaque cas possible au passage au successeur.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| all | Tous les entiers naturels sont de la forme 2k ou 2k + 1. |  |
+| even | Tous les entiers naturels sont pairs. | Le premier passage donne une forme impaire, et le second une forme paire : on démontre leur alternative. |
+
+*** Les deux formes peuvent-elles coïncider ?
+:PROPERTIES:
+:CUSTOM_ID: rigueur-incompatibles
+:TYPE: choice
+:ANSWERS: both
+:FORMULA: 2r=1\qquad\big(r\leq0\ \text{ou}\ r\geq1\big)
+:END:
+
+#+begin_context
+Supposons $2a=2b+1$. Alors $2(a-b)=1$. Posons $r=a-b\in\mathbb Z$. On utilise le fait que tout entier $r$ vérifie $r\leq0$ ou $r\geq1$.
+#+end_context
+
+#+begin_question
+Pourquoi l’égalité 2r = 1 est-elle impossible ?
+#+end_question
+
+#+begin_hint
+Examine les deux possibilités pour l’entier r.
+#+end_hint
+
+#+begin_success
+Si $r\leq0$, alors $2r\leq0$ ; si $r\geq1$, alors $2r\geq2$. Aucun cas n’autorise $2r=1$. Les deux formes sont donc incompatibles.
+#+end_success
+
+#+begin_takeaway
+Une contradiction doit découler de faits explicitement disponibles.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| both | Dans les deux cas possibles pour r, 2r ne vaut pas 1. |  |
+| positive | Parce que r est forcément positif. | La différence a - b n’est pas nécessairement positive. Il faut traiter aussi r ≤ 0. |
+
+*** Revenir au lemme
+:PROPERTIES:
+:CUSTOM_ID: rigueur-fin
+:TYPE: choice
+:ANSWERS: contradiction
+:END:
+
+#+begin_context
+Tout entier est pair ou impair, jamais les deux ; le carré d’un impair est impair. Supposons maintenant que $n^2$ soit pair.
+#+end_context
+
+#+begin_question
+Que se passerait-il si n était impair ?
+#+end_question
+
+#+begin_hint
+Combine le résultat sur le carré d’un impair et l’incompatibilité des deux parités.
+#+end_hint
+
+#+begin_success
+Son carré serait impair et pair, ce qui est impossible. Le cas impair est exclu ; par l’exhaustivité établie, $n$ est donc pair. Nous avons rendu visibles les résultats utilisés.
+#+end_success
+
+#+begin_takeaway
+Être rigoureux, c’est contrôler ce que chaque passage utilise et ce qu’il permet de conclure.
+#+end_takeaway
+
+| ID | Réponse | Relance |
+|----+---------+---------|
+| contradiction | n² serait à la fois pair et impair. |  |
+| nothing | Rien : un carré ne conserve aucune information de parité. | Nous avons précisément établi que le carré d’un impair est impair. |

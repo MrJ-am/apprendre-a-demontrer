@@ -1,0 +1,1654 @@
+{
+  "version": 1,
+  "tracks": [
+    {
+      "title": "Les contrats de la démonstration",
+      "lessons": [
+        {
+          "title": "Un nom n’est pas un détail.",
+          "steps": [
+            {
+              "title": "Deux nombres, deux témoins",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui, puisque les deux nombres sont pairs.",
+                  "feedback": "Pour $a=2$, il faudrait $k=1$. Pour $b=4$, il faudrait $k=2$. Un même nom peut-il désigner ces deux valeurs simultanément ?"
+                },
+                {
+                  "id": "non",
+                  "label": "Non : cela imposerait que les deux nombres soient égaux.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "witness",
+              "formula": "a=2k \\qquad b=2k",
+              "source": "",
+              "rule": "",
+              "id": "nommer-temoins",
+              "context": "On sait que $a$ et $b$ sont des entiers pairs. On souhaite utiliser leur définition.",
+              "question": "Peut-on toujours choisir un même entier $k$ pour écrire les deux égalités ci-dessous ?",
+              "hint": "Essaie avec $a=2$ et $b=4$.",
+              "success": "Ces deux égalités imposeraient $a=b$. La parité de chacun donne un témoin, mais les deux témoins ne sont pas nécessairement égaux.",
+              "takeaway": "Réutiliser un nom, c’est réutiliser le même objet."
+            },
+            {
+              "title": "Ouvrir une place pour un autre objet",
+              "kind": "fill",
+              "answers": [
+                "l"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "a=2k \\qquad b=2\\boxed{\\phantom{\\ell}}",
+              "source": "",
+              "rule": "fresh",
+              "id": "nommer-frais",
+              "context": "On a déjà écrit $a=2k$. Pour traduire la parité de $b$, introduisons un autre nom. Les noms $a$, $b$ et $k$ sont déjà utilisés.",
+              "question": "Complète avec une lettre disponible.",
+              "hint": "Une lettre suffit, par exemple la lettre qui suit k dans l’alphabet.",
+              "success": "On peut écrire $b=2\\ell$ pour un certain entier $\\ell$. Ce nouveau nom autorise deux valeurs différentes ; il n’interdit pas qu’elles soient égales.",
+              "takeaway": "Des noms différents n’imposent pas des objets différents."
+            },
+            {
+              "title": "Différents noms, valeurs égales ?",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui, les lettres sont différentes.",
+                  "feedback": "Les lettres $k$ et $\\ell$ peuvent toutes deux désigner 3. Le nom et la valeur jouent des rôles différents."
+                },
+                {
+                  "id": "non",
+                  "label": "Non, ils peuvent désigner le même entier.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "nommer-egaux",
+              "context": "Nous avons choisi des entiers $k$ et $\\ell$ tels que $a=2k$ et $b=2\\ell$.",
+              "question": "Avons-nous affirmé que $k$ et $\\ell$ sont différents ?",
+              "hint": "Prends deux nombres pairs égaux.",
+              "success": "Non. Si $a=b=6$, on peut avoir $k=\\ell=3$. Deux noms différents laissent cette possibilité ouverte.",
+              "takeaway": "Une distinction de noms n’est pas une preuve d’inégalité."
+            },
+            {
+              "title": "Nommer n’est pas fabriquer",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui : on vient de définir cet objet.",
+                  "feedback": "Une phrase ne peut pas créer un objet incompatible avec les propriétés des réels."
+                },
+                {
+                  "id": "non",
+                  "label": "Non : il faut que cet objet existe.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "u\\in\\mathbb R\\qquad u^2=-1",
+              "source": "",
+              "rule": "",
+              "id": "nommer-existence",
+              "context": "On voudrait introduire un réel $u$ tel que $u^2=-1$.",
+              "question": "La phrase « soit $u$ un réel tel que $u^2=-1$ » suffit-elle à rendre ce choix possible ?",
+              "hint": "Quel est le signe du carré d’un réel ?",
+              "success": "Il n’existe pas de tel réel. Nommer un objet satisfaisant une propriété exige que son existence soit établie, ou supposée dans une hypothèse explicite.",
+              "takeaway": "Un choix d’objet doit être autorisé par une existence."
+            },
+            {
+              "title": "Donner un nom à une expression",
+              "kind": "choice",
+              "answers": [
+                "def"
+              ],
+              "choices": [
+                {
+                  "id": "def",
+                  "label": "Elle donne le nom $y$ au réel $-x$.",
+                  "feedback": ""
+                },
+                {
+                  "id": "assume",
+                  "label": "Elle suppose sans justification que tous les réels vérifient $y=-x$.",
+                  "feedback": "Il n’est pas question de tous les réels : on vient de définir un objet particulier."
+                }
+              ],
+              "scene": "",
+              "formula": "y:=-x",
+              "source": "",
+              "rule": "",
+              "id": "nommer-definition",
+              "context": "Cette fois, $x$ est un réel déjà fixé. On écrit $y:=-x$.",
+              "question": "Que fait cette écriture ?",
+              "hint": "Lis le symbole := comme « est défini par ».",
+              "success": "Elle définit $y$ à partir de $x$. Aucun choix supplémentaire n’est requis : $-x$ est bien un réel.",
+              "takeaway": "Définir à partir d’un objet disponible peut fournir un témoin."
+            }
+          ],
+          "id": "nommer",
+          "intro": "Deux nombres pairs ont-ils forcément la même moitié ? Essayons de les nommer : une petite décision d’écriture peut changer ce que nous affirmons.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Un nom n’est pas un détail."
+          }
+        },
+        {
+          "title": "Jusqu’où peut-on s’en servir ?",
+          "steps": [
+            {
+              "title": "Dans le cadre de l’hypothèse",
+              "kind": "choice",
+              "answers": [
+                "local"
+              ],
+              "choices": [
+                {
+                  "id": "local",
+                  "label": "L’hypothèse $x>2$.",
+                  "feedback": ""
+                },
+                {
+                  "id": "global",
+                  "label": "Le fait que tous les réels sont supérieurs à 2.",
+                  "feedback": "Nous avons supposé $x>2$ pour le raisonnement en cours, pas pour tous les réels."
+                }
+              ],
+              "scene": "scope",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "portees-interieur",
+              "context": "On veut établir : si $x>2$, alors $x^2>4$. On fixe un réel $x$, puis on suppose $x>2$.",
+              "question": "Pendant cette partie du raisonnement, que peut-on utiliser ?",
+              "hint": "Regarde ce qui est écrit sous « supposons ».",
+              "success": "On peut utiliser $x>2$ à l’intérieur du raisonnement ouvert sous cette hypothèse. Cela ne veut pas dire que tous les réels sont supérieurs à 2.",
+              "takeaway": "Une hypothèse est disponible à l’intérieur de sa portée."
+            },
+            {
+              "title": "Refermer le cadre",
+              "kind": "choice",
+              "answers": [
+                "imp"
+              ],
+              "choices": [
+                {
+                  "id": "plain",
+                  "label": "$x^2>4$.",
+                  "feedback": "Pour $x=0$, c’est faux. La conclusion obtenue dépendait de $x>2$."
+                },
+                {
+                  "id": "imp",
+                  "label": "$x>2\\;\\Rightarrow\\;x^2>4$.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "scope-closed",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "portees-sortie",
+              "context": "Sous l’hypothèse $x>2$, on a obtenu $x^2>4$. On referme maintenant ce raisonnement conditionnel.",
+              "question": "Quelle affirmation avons-nous établie sans conserver cette hypothèse ?",
+              "hint": "Essaie de vérifier les propositions pour x = 0.",
+              "success": "Nous avons montré que l’hypothèse entraîne la conclusion. Nous pouvons conserver l’implication, mais pas affirmer sa conclusion sans condition.",
+              "takeaway": "Décharger une hypothèse permet de conclure une implication."
+            },
+            {
+              "title": "Le témoin reste dans son cadre",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui : 2 est un entier pair.",
+                  "feedback": "Le fait que 2 convienne ne prouve pas que le témoin déjà nommé $k$ vaut 2."
+                },
+                {
+                  "id": "non",
+                  "label": "Non : on sait seulement que $k$ est pair.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "portees-temoin",
+              "context": "On sait qu’il existe un entier pair. Dans un raisonnement local, on appelle $k$ un témoin de cette existence. Aucune autre information ne le caractérise.",
+              "question": "Peut-on conclure que ce témoin vaut 2 ?",
+              "hint": "Ce que tu sais de k est seulement : k est pair.",
+              "success": "Le témoin pourrait être 0, 2, 4 ou un autre entier pair. La propriété donnée n’autorise pas à lui attribuer une valeur supplémentaire.",
+              "takeaway": "Un témoin connu par une propriété n’est pas un objet choisi librement."
+            },
+            {
+              "title": "Exporter une conclusion",
+              "kind": "choice",
+              "answers": [
+                "exists"
+              ],
+              "choices": [
+                {
+                  "id": "name",
+                  "label": "$k+1$ est impair.",
+                  "feedback": "Cette phrase contient encore le nom local $k$. Elle ne constitue pas une conclusion indépendante de ce témoin."
+                },
+                {
+                  "id": "exists",
+                  "label": "Il existe un entier impair.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "\\exists k\\in\\mathbb Z,\\ k\\text{ pair}",
+              "source": "",
+              "rule": "",
+              "id": "portees-local",
+              "context": "Dans le cadre précédent, on a déduit que $k+1$ est impair. On veut fermer le cadre où $k$ a été introduit.",
+              "question": "Quelle conclusion ne dépend plus du nom local k ?",
+              "hint": "Cherche une phrase qui ne contient pas k.",
+              "success": "« Il existe un entier impair » ne contient plus le nom local. Le témoin nous a permis d’établir une existence, sans exporter son nom.",
+              "takeaway": "Une conclusion exportée ne doit pas dépendre d’un nom qui disparaît."
+            }
+          ],
+          "id": "portees",
+          "intro": "Une hypothèse ouvre un espace de travail. Les conclusions qu’on y obtient peuvent encore dépendre d’elle : suivons cette dépendance.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Jusqu’où peut-on s’en servir ?"
+          }
+        },
+        {
+          "title": "Qui choisit après qui ?",
+          "steps": [
+            {
+              "title": "Une réponse qui dépend du premier choix",
+              "kind": "fill",
+              "answers": [
+                "-x",
+                "−x",
+                "0-x",
+                "-(x)",
+                "-1*x"
+              ],
+              "choices": [],
+              "scene": "dependence",
+              "formula": "y:=\\boxed{\\phantom{-x}}",
+              "source": "",
+              "rule": "",
+              "id": "dependances-temoin",
+              "context": "On fixe un réel $x$. On cherche ensuite un réel $y$ tel que $x+y=0$.",
+              "question": "Complète la définition de y.",
+              "hint": "Quel réel faut-il ajouter à $x$ pour obtenir zéro ?",
+              "success": "Le choix $y=-x$ fonctionne pour chaque réel $x$. La valeur choisie pour $y$ dépend de celle de $x$.",
+              "takeaway": "« Pour tout x, il existe y » autorise y à dépendre de x."
+            },
+            {
+              "title": "Un seul choix pour tout le monde",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui : il suffit encore de prendre $y=-x$.",
+                  "feedback": "Cette fois, $y$ doit être choisi avant $x$. La formule $-x$ ne fournit pas un choix indépendant de $x$."
+                },
+                {
+                  "id": "non",
+                  "label": "Non : aucun même réel ne convient pour tous les x.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "\\exists y\\in\\mathbb R,\\ \\forall x\\in\\mathbb R,\\ x+y=0",
+              "source": "",
+              "rule": "",
+              "id": "dependances-ordre",
+              "context": "On te demande maintenant de choisir $y$ avant de connaître $x$, et de conserver ce même $y$ pour tous les réels $x$.",
+              "question": "Peut-on garantir que x + y = 0 pour tous les x ?",
+              "hint": "Teste successivement x = 0 et x = 1.",
+              "success": "Le cas $x=0$ imposerait $y=0$, puis le cas $x=1$ imposerait $y=-1$. Un même réel ne convient pas aux deux.",
+              "takeaway": "Inverser les quantificateurs peut changer la vérité d’une proposition."
+            },
+            {
+              "title": "Répondre à un choix fixé",
+              "kind": "fill",
+              "answers": [
+                "1"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "x=-y+1\\qquad x+y=\\boxed{\\phantom1}",
+              "source": "",
+              "rule": "",
+              "id": "dependances-contre",
+              "context": "Quelqu’un a fixé un réel $y$. Pour montrer que ce choix ne marche pas pour tous les $x$, on peut choisir $x=-y+1$.",
+              "question": "Quelle est alors la valeur de x + y ?",
+              "hint": "Remplace x par son expression, puis simplifie.",
+              "success": "On obtient $(-y+1)+y=1$, donc pas 0. Ce contre-exemple peut dépendre du choix de $y$ qu’il réfute.",
+              "takeaway": "Un contre-exemple peut être construit à partir d’un choix déjà effectué."
+            },
+            {
+              "title": "Lequel donne le plus ?",
+              "kind": "choice",
+              "answers": [
+                "unique"
+              ],
+              "choices": [
+                {
+                  "id": "unique",
+                  "label": "$\\exists y\\,\\forall x\\,P(x,y)$ entraîne $\\forall x\\,\\exists y\\,P(x,y)$.",
+                  "feedback": ""
+                },
+                {
+                  "id": "each",
+                  "label": "$\\forall x\\,\\exists y\\,P(x,y)$ entraîne $\\exists y\\,\\forall x\\,P(x,y)$.",
+                  "feedback": "L’exemple $P(x,y):x+y=0$ donne un témoin pour chaque $x$, mais aucun témoin commun."
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "dependances-fort",
+              "context": "Comparons deux affirmations : un même objet convient à tous les cas ; pour chaque cas, un objet convient.",
+              "question": "Laquelle entraîne toujours l’autre ?",
+              "hint": "Imagine que tu disposes déjà d’un témoin qui marche pour tous.",
+              "success": "Si un même $y$ convient pour tous les $x$, il convient en particulier pour chacun. L’inverse est faux, comme l’a montré $x+y=0$ sur les réels.",
+              "takeaway": "Un choix uniforme satisfait aussi les demandes cas par cas."
+            }
+          ],
+          "id": "dependances",
+          "intro": "L’ordre des choix compte. Un objet choisi après un autre peut dépendre de lui ; inverser cet ordre peut rendre l’objectif impossible.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Qui choisit après qui ?"
+          }
+        },
+        {
+          "title": "Un exemple n’est pas « un quelconque ».",
+          "steps": [
+            {
+              "title": "Trois essais ne font pas tous les cas",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui : on a testé un positif, un négatif et zéro.",
+                  "feedback": "Le carré ne dépend pas seulement du signe : ces calculs ne traitent pas chaque nombre de ces catégories."
+                },
+                {
+                  "id": "non",
+                  "label": "Non : ils ne couvrent que trois réels.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "arbitraire-exemple",
+              "context": "On constate que $0^2\\geq0$, $1^2\\geq0$ et $(-1)^2\\geq0$.",
+              "question": "Ces trois calculs prouvent-ils que tous les réels ont un carré positif ou nul ?",
+              "hint": "Que nous disent ces calculs sur x = 1/2 ?",
+              "success": "Ils vérifient trois cas. L’affirmation est vraie, mais sa preuve doit couvrir un réel arbitraire, pas seulement ceux qu’on a testés.",
+              "takeaway": "Une proposition vraie peut être accompagnée d’un argument insuffisant."
+            },
+            {
+              "title": "Commencer une preuve universelle",
+              "kind": "choice",
+              "answers": [
+                "any"
+              ],
+              "choices": [
+                {
+                  "id": "one",
+                  "label": "Prenons $x=1$.",
+                  "feedback": "Cette ouverture ne traite que le réel 1."
+                },
+                {
+                  "id": "any",
+                  "label": "Soit $x\\in\\mathbb R$.",
+                  "feedback": ""
+                },
+                {
+                  "id": "positive",
+                  "label": "Soit $x>0$.",
+                  "feedback": "On a exclu les réels négatifs et zéro."
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "arbitraire-fixer",
+              "context": "On veut prouver $\\forall x\\in\\mathbb R,\\ x^2\\geq0$.",
+              "question": "Quelle ouverture permet de travailler sur un réel arbitraire ?",
+              "hint": "Aucune valeur précise n’est nécessaire.",
+              "success": "« Soit $x\\in\\mathbb R$ » fixe un réel sans lui attribuer de propriété supplémentaire. On devra raisonner en utilisant seulement ce qui est vrai de tout réel.",
+              "takeaway": "Fixer un objet arbitraire ne revient pas à choisir un exemple particulier."
+            },
+            {
+              "title": "Raisonner par cas",
+              "kind": "choice",
+              "answers": [
+                "cover"
+              ],
+              "choices": [
+                {
+                  "id": "cover",
+                  "label": "Les deux cas couvrent tous les réels.",
+                  "feedback": ""
+                },
+                {
+                  "id": "easy",
+                  "label": "Il suffit de traiter le cas le plus facile.",
+                  "feedback": "Une conclusion obtenue dans un seul cas peut dépendre de l’hypothèse propre à ce cas."
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "arbitraire-cas",
+              "context": "Après avoir fixé $x\\in\\mathbb R$, on distingue les cas $x\\geq0$ et $x<0$.",
+              "question": "Pourquoi cela permet-il de traiter tous les réels ?",
+              "hint": "Ce découpage laisse-t-il un réel de côté ?",
+              "success": "Tout réel vérifie l’un de ces deux cas. Les hypothèses temporaires sont légitimes si chaque cas est traité et si leur ensemble couvre toutes les possibilités.",
+              "takeaway": "Une disjonction de cas doit être exhaustive."
+            },
+            {
+              "title": "Retrouver la conclusion autorisée",
+              "kind": "choice",
+              "answers": [
+                "conditional"
+              ],
+              "choices": [
+                {
+                  "id": "all",
+                  "label": "$\\forall x\\in\\mathbb R,\\ x^2>0$.",
+                  "feedback": "Cette proposition est fausse pour $x=0$. L’hypothèse $x>0$ a disparu indûment."
+                },
+                {
+                  "id": "conditional",
+                  "label": "$\\forall x\\in\\mathbb R,\\ x>0\\Rightarrow x^2>0$.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "arbitraire-conclure",
+              "context": "On a fixé $x\\in\\mathbb R$, supposé $x>0$, puis démontré $x^2>0$ sous cette hypothèse.",
+              "question": "Quelle conclusion universelle ce travail justifie-t-il ?",
+              "hint": "Vérifie ce qui se passerait pour x = 0.",
+              "success": "La dépendance à $x>0$ doit rester visible dans l’implication. On peut ensuite généraliser en $x$, car aucun réel particulier n’a été choisi.",
+              "takeaway": "La généralisation ne fait pas disparaître les conditions de la preuve."
+            }
+          ],
+          "id": "arbitraire",
+          "intro": "Pour prouver une affirmation universelle, on travaille avec un objet arbitraire. Cela impose de surveiller ce qu’on suppose à son sujet.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Un exemple n’est pas « un quelconque »."
+          }
+        }
+      ],
+      "id": "contrats",
+      "shortTitle": "Les contrats",
+      "symbol": "01",
+      "description": "Nommer les objets, suivre les hypothèses et comprendre de quoi dépendent les choix."
+    },
+    {
+      "title": "Apprendre à formaliser",
+      "lessons": [
+        {
+          "title": "Tous. Au moins un.",
+          "steps": [
+            {
+              "title": "Déplier « pour tout »",
+              "kind": "choice",
+              "answers": [
+                "et"
+              ],
+              "choices": [
+                {
+                  "id": "et",
+                  "label": "Et",
+                  "feedback": ""
+                },
+                {
+                  "id": "ou",
+                  "label": "Ou",
+                  "feedback": "Un « ou » demanderait seulement qu’au moins une égalité soit vraie."
+                }
+              ],
+              "scene": "forall",
+              "formula": "(-1)^2=1\\quad\\boxed{\\ ?\\ }\\quad0^2=1\\quad\\boxed{\\ ?\\ }\\quad1^2=1",
+              "source": "",
+              "rule": "",
+              "id": "tous-connecteur",
+              "context": "On prend $D=\\{-1,0,1\\}$. Dire que tout $x\\in D$ vérifie $x^2=1$, c’est demander les trois égalités à la fois.",
+              "question": "Quel connecteur relie les trois affirmations ?",
+              "hint": "Un seul cas réussi suffirait-il ?",
+              "success": "Les trois égalités doivent être vraies simultanément. Le quantificateur universel fonctionne ici comme un « et » répété.",
+              "takeaway": "Pour tout : tous les cas doivent convenir."
+            },
+            {
+              "title": "Un seul contre-exemple suffit",
+              "kind": "fill",
+              "answers": [
+                "0"
+              ],
+              "choices": [],
+              "scene": "forall",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "tous-contre",
+              "context": "Parmi les éléments de $D=\\{-1,0,1\\}$, certains ne vérifient pas $x^2=1$.",
+              "question": "Donne un contre-exemple à l’affirmation universelle.",
+              "hint": "Calcule le carré de chacun des trois éléments.",
+              "success": "Pour $x=0$, on a $x^2=0\\ne1$. Une seule égalité fausse suffit à rendre la conjonction fausse.",
+              "takeaway": "Réfuter « tous », c’est trouver au moins un cas qui échoue."
+            },
+            {
+              "title": "Déplier « il existe »",
+              "kind": "choice",
+              "answers": [
+                "ou"
+              ],
+              "choices": [
+                {
+                  "id": "et",
+                  "label": "Et",
+                  "feedback": "Un « et » exigerait que tous les éléments conviennent."
+                },
+                {
+                  "id": "ou",
+                  "label": "Ou",
+                  "feedback": ""
+                }
+              ],
+              "scene": "exists",
+              "formula": "(-1)^2=1\\quad\\boxed{\\ ?\\ }\\quad0^2=1\\quad\\boxed{\\ ?\\ }\\quad1^2=1",
+              "source": "",
+              "rule": "",
+              "id": "un-connecteur",
+              "context": "On garde le même ensemble et la même propriété. On demande maintenant si au moins un élément vérifie $x^2=1$.",
+              "question": "Quel connecteur convient cette fois ?",
+              "hint": "Les valeurs -1 et 1 fonctionnent toutes les deux.",
+              "success": "Le « ou » est inclusif : il suffit qu’au moins une égalité soit vraie, et plusieurs peuvent l’être.",
+              "takeaway": "Il existe signifie « au moins un », pas « exactement un »."
+            },
+            {
+              "title": "Fournir un témoin",
+              "kind": "fill",
+              "answers": [
+                "-1",
+                "1"
+              ],
+              "choices": [],
+              "scene": "exists",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "un-temoin",
+              "context": "Pour établir $\\exists x\\in D,\\ x^2=1$, on peut présenter un élément de $D$ qui convient.",
+              "question": "Donne un témoin.",
+              "hint": "Tu peux choisir l’un des deux éléments dont le carré vaut 1.",
+              "success": "Les valeurs $-1$ et $1$ sont toutes deux des témoins possibles. Un seul suffit à établir l’existence.",
+              "takeaway": "Un témoin transforme une demande d’existence en une vérification."
+            },
+            {
+              "title": "Passer à un domaine infini",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui, si aucun essai n’a échoué.",
+                  "feedback": "Une propriété peut être vraie pour les premiers cas puis devenir fausse."
+                },
+                {
+                  "id": "non",
+                  "label": "Non : il faut un argument qui couvre tous les cas.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "tous-infini",
+              "context": "Sur $\\mathbb N$, on peut lire $\\forall n,P(n)$ comme « $P(0)$ et $P(1)$ et $P(2)$ et… ». Cette lecture donne le sens de la quantification.",
+              "question": "Avoir vérifié un million de cas suffit-il en général à prouver cette affirmation ?",
+              "hint": "Quel serait le premier entier non testé ?",
+              "success": "Non : il resterait des cas non traités. Il faut un argument couvrant chaque entier, par exemple un raisonnement sur un entier arbitraire ou une récurrence.",
+              "takeaway": "Les « et » infinis décrivent le sens ; ils ne prescrivent pas une vérification sans fin."
+            }
+          ],
+          "id": "tous-un",
+          "intro": "Sur un petit ensemble, on peut déplier une phrase quantifiée et regarder ce qui la rend vraie. C’est le point de départ pour comprendre les domaines infinis.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Tous. Au moins un."
+          }
+        },
+        {
+          "title": "Faire entrer la négation.",
+          "steps": [
+            {
+              "title": "Nier « les deux »",
+              "kind": "choice",
+              "answers": [
+                "one"
+              ],
+              "choices": [
+                {
+                  "id": "both",
+                  "label": "Il faut qu’aucun des deux n’ait rendu son devoir.",
+                  "feedback": "La phrase est déjà fausse si Bilal seul n’a rien rendu."
+                },
+                {
+                  "id": "one",
+                  "label": "Au moins l’un des deux n’a pas rendu son devoir.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "negation-sens",
+              "context": "On affirme : « Alice a rendu son devoir et Bilal a rendu le sien ».",
+              "question": "Quelle situation suffit à rendre cette phrase fausse ?",
+              "hint": "Et si Alice a rendu son devoir, mais pas Bilal ?",
+              "success": "Il suffit que l’un des deux n’ait pas rendu son devoir. Il est possible qu’aucun ne l’ait rendu, mais ce n’est pas nécessaire.",
+              "takeaway": "Nier une conjonction demande au moins un échec."
+            },
+            {
+              "title": "La négation d’un « et »",
+              "kind": "rewrite",
+              "answers": [
+                "¬A ∨ ¬B"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\neg(A\\land B)",
+              "source": "¬(A ∧ B)",
+              "rule": "nnf",
+              "id": "negation-et",
+              "context": "$A$ et $B$ désignent deux propositions. Réécrivons la formule en ne laissant des négations que devant $A$ ou $B$.",
+              "question": "Fais entrer la négation.",
+              "hint": "Le connecteur doit devenir un « ou ».",
+              "success": "La conjonction échoue dès qu’au moins l’une de ses propositions échoue : $\\neg(A\\land B)\\equiv\\neg A\\lor\\neg B$.",
+              "takeaway": "En traversant une négation, « et » devient « ou »."
+            },
+            {
+              "title": "La négation d’un « ou »",
+              "kind": "rewrite",
+              "answers": [
+                "¬A ∧ ¬B"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\neg(A\\lor B)",
+              "source": "¬(A ∨ B)",
+              "rule": "nnf",
+              "id": "negation-ou",
+              "context": "Pour qu’un « ou » inclusif soit faux, aucune de ses deux possibilités ne doit convenir.",
+              "question": "Fais entrer la négation.",
+              "hint": "Les deux possibilités doivent échouer.",
+              "success": "Il faut que $A$ soit faux et que $B$ soit faux : $\\neg(A\\lor B)\\equiv\\neg A\\land\\neg B$.",
+              "takeaway": "En traversant une négation, « ou » devient « et »."
+            },
+            {
+              "title": "Deux négations",
+              "kind": "rewrite",
+              "answers": [
+                "A"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\neg\\neg A",
+              "source": "¬¬A",
+              "rule": "nnf",
+              "id": "negation-double",
+              "context": "Dans ce parcours, nous interprétons les propositions en logique classique : chacune est vraie ou fausse.",
+              "question": "Simplifie la formule pour enlever les négations doubles.",
+              "hint": "Si A est vraie, quelle est la valeur de non A, puis de non non A ?",
+              "success": "Dans ce cadre classique, $\\neg\\neg A$ et $A$ ont la même valeur de vérité. Les principes de preuve correspondants seront distingués dans le parcours de déduction.",
+              "takeaway": "La suppression de la double négation est ici une transformation classique."
+            },
+            {
+              "title": "Suivre la négation jusqu’au bout",
+              "kind": "rewrite",
+              "answers": [
+                "(¬A ∧ ¬B) ∨ C"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\neg\\big((A\\lor B)\\land\\neg C\\big)",
+              "source": "¬((A ∨ B) ∧ ¬C)",
+              "rule": "nnf",
+              "id": "negation-composee",
+              "context": "Appliquons les deux lois de De Morgan à une formule emboîtée. Les parenthèses déterminent ce que chaque négation porte.",
+              "question": "Ne garde de négations que devant les lettres.",
+              "hint": "Commence par le connecteur principal, qui est un « et ».",
+              "success": "On obtient $(\\neg A\\land\\neg B)\\lor C$. La négation extérieure transforme le « et » en « ou », puis celle de $A\\lor B$ se propage ; les deux négations devant $C$ s’annulent.",
+              "takeaway": "La négation se propage suivant la structure de la formule."
+            }
+          ],
+          "id": "negations",
+          "intro": "Nier une phrase, ce n’est pas nier chaque morceau en gardant les mêmes connecteurs. Faisons apparaître les cas qui la rendent fausse.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Faire entrer la négation."
+          }
+        },
+        {
+          "title": "Ce que promet un « si… alors ».",
+          "steps": [
+            {
+              "title": "La promesse non tenue",
+              "kind": "choice",
+              "answers": [
+                "tf"
+              ],
+              "choices": [
+                {
+                  "id": "tf",
+                  "label": "Un nombre divisible par 4, mais pas pair.",
+                  "feedback": ""
+                },
+                {
+                  "id": "ft",
+                  "label": "Un nombre pair qui n’est pas divisible par 4.",
+                  "feedback": "Le nombre 2 en est un exemple ; il ne contredit pas ce qui a été promis pour les multiples de 4."
+                }
+              ],
+              "scene": "implication",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "implication-fausse",
+              "context": "La règle annoncée est : « si un nombre est divisible par 4, alors il est pair ».",
+              "question": "Quel cas contredirait cette règle ?",
+              "hint": "Cherche un cas qui satisfait le « si » mais échoue au « alors ».",
+              "success": "Un multiple de 4 qui ne serait pas pair aurait l’hypothèse vraie et la conclusion fausse. Les nombres qui ne sont pas multiples de 4 ne contredisent pas la règle.",
+              "takeaway": "Une implication est fausse seulement si son hypothèse est vraie et sa conclusion fausse."
+            },
+            {
+              "title": "Exprimer l’implication avec « ou »",
+              "kind": "rewrite",
+              "answers": [
+                "¬A ∨ B"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "A\\Rightarrow B",
+              "source": "A → B",
+              "rule": "no-implies",
+              "id": "implication-ou",
+              "context": "En logique classique, pour éviter le cas « $A$ vraie et $B$ fausse », il faut que $A$ soit fausse ou que $B$ soit vraie.",
+              "question": "Réécris sans utiliser →.",
+              "hint": "Il faut nier A, pas B.",
+              "success": "On obtient $\\neg A\\lor B$. C’est exactement la condition qui exclut la promesse non tenue.",
+              "takeaway": "En logique classique : A implique B équivaut à non A ou B."
+            },
+            {
+              "title": "Nier une implication",
+              "kind": "rewrite",
+              "answers": [
+                "A ∧ ¬B"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\neg(A\\Rightarrow B)",
+              "source": "¬(A → B)",
+              "rule": "nnf",
+              "id": "implication-nier",
+              "context": "Nier une implication, c’est affirmer précisément le cas qui la rend fausse.",
+              "question": "Réécris avec et, ou, et des négations devant les lettres seulement.",
+              "hint": "Tu peux d’abord remplacer l’implication par un « ou ».",
+              "success": "On obtient $A\\land\\neg B$ : l’hypothèse est vraie, la conclusion est fausse.",
+              "takeaway": "Un contre-exemple à une implication satisfait l’hypothèse et contredit la conclusion."
+            },
+            {
+              "title": "Retourner sans changer le sens",
+              "kind": "choice",
+              "answers": [
+                "contra"
+              ],
+              "choices": [
+                {
+                  "id": "reverse",
+                  "label": "$B\\Rightarrow A$.",
+                  "feedback": "C’est la réciproque. Dans notre exemple, elle affirmerait à tort que tout nombre pair est divisible par 4."
+                },
+                {
+                  "id": "contra",
+                  "label": "$\\neg B\\Rightarrow\\neg A$.",
+                  "feedback": ""
+                },
+                {
+                  "id": "inverse",
+                  "label": "$\\neg A\\Rightarrow\\neg B$.",
+                  "feedback": "Le nombre 2 n’est pas divisible par 4, mais il est pair."
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "implication-contraposee",
+              "context": "On sait que $A\\Rightarrow B$. En logique classique, une autre implication lui est équivalente.",
+              "question": "Laquelle ?",
+              "hint": "Être pair ne suffit pas à être divisible par 4.",
+              "success": "$\\neg B\\Rightarrow\\neg A$ lui est équivalente : si la conclusion est fausse, l’hypothèse ne peut pas être vraie. La réciproque $B\\Rightarrow A$ n’en découle pas en général.",
+              "takeaway": "La contraposée inverse l’ordre et nie les deux propositions."
+            },
+            {
+              "title": "Quand l’hypothèse est fausse",
+              "kind": "choice",
+              "answers": [
+                "true"
+              ],
+              "choices": [
+                {
+                  "id": "true",
+                  "label": "Vraie.",
+                  "feedback": ""
+                },
+                {
+                  "id": "false",
+                  "label": "Fausse, puisque 3 n’est pas pair.",
+                  "feedback": "La conclusion est fausse, mais l’hypothèse aussi. Ce n’est pas le cas qui contredit une implication."
+                }
+              ],
+              "scene": "implication",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "implication-vide",
+              "context": "Considérons l’implication : « si 3 est divisible par 4, alors 3 est pair ». Les deux propositions élémentaires sont fausses.",
+              "question": "Quelle valeur a l’implication en logique classique ?",
+              "hint": "Le cas interdit demande que l’hypothèse soit vraie.",
+              "success": "Elle est vraie : son unique cas de fausseté serait une hypothèse vraie accompagnée d’une conclusion fausse. Cela ne rend pas sa conclusion vraie.",
+              "takeaway": "La vérité d’une implication ne donne pas la vérité de sa conclusion seule."
+            }
+          ],
+          "id": "implication",
+          "intro": "Une implication interdit une situation précise : que l’hypothèse soit vraie et la conclusion fausse. Cette lecture rend ses transformations compréhensibles.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Ce que promet un « si… alors »."
+          }
+        },
+        {
+          "title": "De « tous » à « un contre-exemple ».",
+          "steps": [
+            {
+              "title": "Nier une affirmation universelle",
+              "kind": "rewrite",
+              "answers": [
+                "∃x ¬P(x)"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\neg\\big(\\forall x,\\ P(x)\\big)",
+              "source": "¬(∀x P(x))",
+              "rule": "nnf",
+              "id": "quant-non-tous",
+              "context": "Dire « ce n’est pas vrai que tous vérifient $P$ », c’est dire qu’au moins un élément ne vérifie pas $P$.",
+              "question": "Fais entrer la négation jusqu’à P(x).",
+              "hint": "Change le quantificateur en déplaçant la négation.",
+              "success": "On obtient $\\exists x,\\neg P(x)$. Le témoin de cette existence est un contre-exemple à l’affirmation universelle.",
+              "takeaway": "Non « pour tout » devient « il existe non »."
+            },
+            {
+              "title": "Nier une existence",
+              "kind": "rewrite",
+              "answers": [
+                "∀x ¬P(x)"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\neg\\big(\\exists x,\\ P(x)\\big)",
+              "source": "¬(∃x P(x))",
+              "rule": "nnf",
+              "id": "quant-aucun",
+              "context": "Dire qu’il n’existe aucun élément vérifiant $P$, c’est demander à chaque élément de ne pas vérifier $P$.",
+              "question": "Fais entrer la négation jusqu’à P(x).",
+              "hint": "Un seul échec ne suffit pas à nier une existence.",
+              "success": "On obtient $\\forall x,\\neg P(x)$. Il faut exclure tous les témoins possibles.",
+              "takeaway": "Non « il existe » devient « pour tout non »."
+            },
+            {
+              "title": "Traverser deux quantificateurs",
+              "kind": "rewrite",
+              "answers": [
+                "∃x ∀y ¬P(x,y)"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\neg\\big(\\forall x,\\exists y,\\ P(x,y)\\big)",
+              "source": "¬(∀x ∃y P(x,y))",
+              "rule": "nnf",
+              "id": "quant-deux",
+              "context": "La négation doit traverser chaque quantificateur dans son ordre d’apparition.",
+              "question": "Ne laisse la négation que devant P(x,y).",
+              "hint": "Traverse d’abord ∀x, puis ∃y.",
+              "success": "On obtient $\\exists x,\\forall y,\\neg P(x,y)$. Il existe un premier choix pour lequel aucune réponse ne convient.",
+              "takeaway": "Chaque quantificateur change ; leur ordre est conservé."
+            },
+            {
+              "title": "Préciser le domaine",
+              "kind": "choice",
+              "answers": [
+                "impl"
+              ],
+              "choices": [
+                {
+                  "id": "and",
+                  "label": "$\\forall x,\\ x\\in E\\land P(x)$.",
+                  "feedback": "Cette formule exigerait que tous les objets appartiennent à E."
+                },
+                {
+                  "id": "impl",
+                  "label": "$\\forall x,\\ x\\in E\\Rightarrow P(x)$.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "quant-restriction",
+              "context": "On veut écrire « tous les objets qui appartiennent à $E$ vérifient $P$ », en quantifiant d’abord sur tous les objets.",
+              "question": "Quelle écriture convient ?",
+              "hint": "Que demande la proposition à un objet qui n’appartient pas à E ?",
+              "success": "On écrit $\\forall x,\\ x\\in E\\Rightarrow P(x)$. L’implication n’exige pas que les objets extérieurs à $E$ appartiennent à $E$.",
+              "takeaway": "La restriction d’un quantificateur universel utilise une implication."
+            },
+            {
+              "title": "Un témoin dans le bon domaine",
+              "kind": "choice",
+              "answers": [
+                "and"
+              ],
+              "choices": [
+                {
+                  "id": "and",
+                  "label": "$\\exists x,\\ x\\in E\\land P(x)$.",
+                  "feedback": ""
+                },
+                {
+                  "id": "impl",
+                  "label": "$\\exists x,\\ x\\in E\\Rightarrow P(x)$.",
+                  "feedback": "Un objet extérieur à E satisferait cette implication. Cela ne fournirait aucun témoin dans E."
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "quant-restriction-existe",
+              "context": "On veut cette fois affirmer qu’il existe un élément de $E$ qui vérifie $P$.",
+              "question": "Quelle écriture exige les deux propriétés du témoin ?",
+              "hint": "Le témoin doit vraiment appartenir à E.",
+              "success": "On écrit $\\exists x,\\ x\\in E\\land P(x)$. Le même témoin doit appartenir à $E$ et vérifier $P$.",
+              "takeaway": "La restriction d’un quantificateur existentiel utilise une conjonction."
+            }
+          ],
+          "id": "nier-quantificateurs",
+          "intro": "Les lois de De Morgan se prolongent aux quantificateurs. Le passage du « et » au « ou » devient un passage de « pour tout » à « il existe ».",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "De « tous » à « un contre-exemple »."
+          }
+        }
+      ],
+      "id": "formaliser",
+      "shortTitle": "Formaliser",
+      "symbol": "02",
+      "description": "Comprendre ce que disent les quantificateurs et transformer les propositions sans changer leur sens."
+    },
+    {
+      "title": "Construire une démonstration",
+      "lessons": [
+        {
+          "title": "Construire un « si… alors ».",
+          "steps": [
+            {
+              "title": "Partir de la bonne hypothèse",
+              "kind": "choice",
+              "answers": [
+                "a"
+              ],
+              "choices": [
+                {
+                  "id": "a",
+                  "label": "$A$.",
+                  "feedback": ""
+                },
+                {
+                  "id": "b",
+                  "label": "$B$.",
+                  "feedback": "Supposer B donne déjà la conclusion, mais ne montre pas qu’elle découle de A."
+                }
+              ],
+              "scene": "proof-open",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "deduction-depart",
+              "context": "On veut démontrer $A\\Rightarrow B$. Une méthode consiste à ouvrir un raisonnement temporaire.",
+              "question": "Que doit-on supposer dans ce raisonnement ?",
+              "hint": "Quel est le côté gauche de l’implication ?",
+              "success": "On suppose $A$, puis on cherche à établir $B$. Si on y parvient, on pourra décharger cette hypothèse pour conclure $A\\Rightarrow B$.",
+              "takeaway": "Introduire une implication : supposer son hypothèse et établir sa conclusion."
+            },
+            {
+              "title": "Faire fonctionner une implication",
+              "kind": "fill",
+              "answers": [
+                "B"
+              ],
+              "choices": [],
+              "scene": "modus",
+              "formula": "\\frac{A\\Rightarrow B\\qquad A}{\\boxed{\\phantom B}}",
+              "source": "",
+              "rule": "",
+              "id": "deduction-utiliser",
+              "context": "On dispose de deux prémisses : $A\\Rightarrow B$ et $A$.",
+              "question": "Quelle proposition peut-on en déduire immédiatement ?",
+              "hint": "L’hypothèse de l’implication est satisfaite.",
+              "success": "On obtient $B$. Cette règle s’appelle l’élimination de l’implication, ou modus ponens.",
+              "takeaway": "Éliminer une implication demande aussi sa prémisse gauche."
+            },
+            {
+              "title": "Une prémisse manquante",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui, puisque B est à droite de la flèche.",
+                  "feedback": "La position à droite de la flèche ne rend pas B disponible sans établir A."
+                },
+                {
+                  "id": "non",
+                  "label": "Non, il faut aussi disposer de A.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "deduction-manque",
+              "context": "On dispose seulement de $A\\Rightarrow B$.",
+              "question": "Peut-on en déduire B sans autre information ?",
+              "hint": "La règle précédente avait deux prémisses.",
+              "success": "Il manque une justification de $A$. Une implication peut être vraie avec une conclusion fausse lorsque son hypothèse est fausse.",
+              "takeaway": "Une règle ne s’applique que lorsque toutes ses prémisses sont disponibles."
+            },
+            {
+              "title": "Une implication très simple",
+              "kind": "rewrite",
+              "answers": [
+                "A → A"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\begin{array}{c}[A]\\\\\\vdots\\\\A\\end{array}\\quad\\Longrightarrow\\quad\\boxed{\\phantom{A\\Rightarrow A}}",
+              "source": "A → A",
+              "rule": "structure",
+              "id": "deduction-identite",
+              "context": "Sous l’hypothèse temporaire $A$, on dispose immédiatement de $A$. On décharge cette hypothèse.",
+              "question": "Quelle implication vient-on de démontrer ?",
+              "hint": "L’hypothèse et la conclusion du raisonnement local sont ici identiques.",
+              "success": "On a démontré $A\\Rightarrow A$ sans hypothèse restante. L’hypothèse temporaire ne rend pas le raisonnement circulaire : elle est précisément ce qu’exige la conclusion conditionnelle.",
+              "takeaway": "Une hypothèse déchargée reste visible à gauche de l’implication."
+            },
+            {
+              "title": "Enchaîner deux règles",
+              "kind": "fill",
+              "answers": [
+                "B"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "A\\Rightarrow B\\qquad B\\Rightarrow C\\qquad [A]",
+              "source": "",
+              "rule": "",
+              "id": "deduction-transitive",
+              "context": "On dispose de $A\\Rightarrow B$ et $B\\Rightarrow C$. Pour prouver $A\\Rightarrow C$, on suppose temporairement $A$.",
+              "question": "Quelle proposition obtient-on en premier avec A ⇒ B ?",
+              "hint": "Applique une première fois l’élimination de l’implication.",
+              "success": "On obtient $B$, puis $C$ à l’aide de $B\\Rightarrow C$. On décharge enfin $A$ pour conclure $A\\Rightarrow C$.",
+              "takeaway": "Les prémisses d’une règle peuvent être les conclusions d’étapes précédentes."
+            }
+          ],
+          "id": "si-alors",
+          "intro": "Une démonstration peut être vue comme une suite de transformations de ce qu’on est autorisé à affirmer. Commençons par les deux usages de l’implication.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Construire un « si… alors »."
+          }
+        },
+        {
+          "title": "Assembler. Séparer. Traiter les cas.",
+          "steps": [
+            {
+              "title": "Construire une conjonction",
+              "kind": "choice",
+              "answers": [
+                "both"
+              ],
+              "choices": [
+                {
+                  "id": "one",
+                  "label": "D’une preuve de A seulement.",
+                  "feedback": "Une preuve de A ne donne aucune raison d’affirmer B."
+                },
+                {
+                  "id": "both",
+                  "label": "D’une preuve de A et d’une preuve de B.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "\\frac{A\\qquad B}{A\\land B}",
+              "source": "",
+              "rule": "",
+              "id": "deduction-et",
+              "context": "On souhaite établir $A\\land B$.",
+              "question": "De quoi a-t-on besoin ?",
+              "hint": "Le sens de $A\\land B$ demande les deux affirmations.",
+              "success": "Il faut une justification de $A$ et une justification de $B$. C’est l’introduction de la conjonction.",
+              "takeaway": "Pour prouver « et », prouver les deux."
+            },
+            {
+              "title": "Utiliser une conjonction",
+              "kind": "choice",
+              "answers": [
+                "yes"
+              ],
+              "choices": [
+                {
+                  "id": "yes",
+                  "label": "Oui.",
+                  "feedback": ""
+                },
+                {
+                  "id": "no",
+                  "label": "Non, il faudrait une preuve indépendante de A.",
+                  "feedback": "La preuve de la conjonction fournit déjà ce qu’il faut pour en obtenir A."
+                }
+              ],
+              "scene": "",
+              "formula": "\\frac{A\\land B}{A}",
+              "source": "",
+              "rule": "",
+              "id": "deduction-extraire",
+              "context": "On dispose de $A\\land B$.",
+              "question": "Peut-on en extraire A ?",
+              "hint": "Si les deux sont vrais, A est-il vrai ?",
+              "success": "Oui. Chacun des deux membres est disponible. C’est une règle d’élimination de la conjonction.",
+              "takeaway": "Une conjonction permet de récupérer chacun de ses membres."
+            },
+            {
+              "title": "Construire une disjonction",
+              "kind": "choice",
+              "answers": [
+                "yes"
+              ],
+              "choices": [
+                {
+                  "id": "yes",
+                  "label": "Oui, à partir de A.",
+                  "feedback": ""
+                },
+                {
+                  "id": "no",
+                  "label": "Non, il faut d’abord vérifier B.",
+                  "feedback": "La vérité de A suffit déjà à celle du « ou »."
+                }
+              ],
+              "scene": "",
+              "formula": "\\frac{A}{A\\lor B}",
+              "source": "",
+              "rule": "",
+              "id": "deduction-ou",
+              "context": "On dispose de $A$, mais on ne sait rien de $B$.",
+              "question": "Peut-on prouver A ou B ?",
+              "hint": "On demande au moins un membre, pas exactement un.",
+              "success": "Oui : un seul des deux membres suffit. Le « ou » est inclusif et n’exige pas de décider l’autre membre.",
+              "takeaway": "Pour prouver « ou », un membre suffit."
+            },
+            {
+              "title": "Utiliser une disjonction",
+              "kind": "choice",
+              "answers": [
+                "cases"
+              ],
+              "choices": [
+                {
+                  "id": "choose",
+                  "label": "Choisir A et établir C à partir de A.",
+                  "feedback": "Il se pourrait que seul B soit vrai. Le raisonnement n’aurait pas couvert ce cas."
+                },
+                {
+                  "id": "cases",
+                  "label": "Établir C dans le cas A et dans le cas B.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "cases",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "deduction-cas",
+              "context": "On sait $A\\lor B$, sans savoir lequel est établi. On veut prouver $C$.",
+              "question": "Quelle stratégie est valable ?",
+              "hint": "La disjonction ne permet pas de choisir librement le membre vrai.",
+              "success": "Il faut établir $C$ sous l’hypothèse $A$ et sous l’hypothèse $B$. Avec $A\\lor B$, cela permet de conclure $C$.",
+              "takeaway": "Éliminer un « ou » demande de traiter toutes ses branches."
+            },
+            {
+              "title": "Vérifier l’exhaustivité",
+              "kind": "fill",
+              "answers": [
+                "0"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "deduction-couverture",
+              "context": "Pour traiter un réel $x$, on a prouvé une même conclusion dans les cas $x>0$ et $x<0$.",
+              "question": "Quel réel n’a pas encore été traité ?",
+              "hint": "Ce réel n’est ni strictement positif ni strictement négatif.",
+              "success": "Le cas $x=0$ manque. Il faut le traiter, ou utiliser dès le départ une disjonction exhaustive telle que $x\\geq0$ ou $x<0$.",
+              "takeaway": "Traiter plusieurs cas ne suffit pas si un cas reste à l’écart."
+            }
+          ],
+          "id": "et-cas",
+          "intro": "« Et » et « ou » donnent des façons différentes de construire une preuve. Pour utiliser un « ou », il faut se garder de choisir la branche qui nous arrange.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Assembler. Séparer. Traiter les cas."
+          }
+        },
+        {
+          "title": "Du quelconque au témoin.",
+          "steps": [
+            {
+              "title": "Utiliser « pour tout »",
+              "kind": "choice",
+              "answers": [
+                "p"
+              ],
+              "choices": [
+                {
+                  "id": "p",
+                  "label": "$P(a)$.",
+                  "feedback": ""
+                },
+                {
+                  "id": "not",
+                  "label": "$\\neg P(a)$.",
+                  "feedback": "L’énoncé universel fournit P(a), pas sa négation."
+                }
+              ],
+              "scene": "",
+              "formula": "\\frac{\\forall x,\\ P(x)}{P(a)}",
+              "source": "",
+              "rule": "",
+              "id": "deduction-pour-tout",
+              "context": "On dispose de $\\forall x,P(x)$. Le nom $a$ désigne un objet du domaine.",
+              "question": "Quelle proposition peut-on en déduire ?",
+              "hint": "Remplace x par a.",
+              "success": "On peut obtenir $P(a)$ : un énoncé universel s’applique à chaque objet du domaine.",
+              "takeaway": "Éliminer ∀ : appliquer l’énoncé à un objet du domaine."
+            },
+            {
+              "title": "La condition du quelconque",
+              "kind": "choice",
+              "answers": [
+                "non"
+              ],
+              "choices": [
+                {
+                  "id": "oui",
+                  "label": "Oui, il suffit de remplacer la lettre a par x.",
+                  "feedback": "Changer une lettre ne supprime pas la dépendance à une hypothèse particulière."
+                },
+                {
+                  "id": "non",
+                  "label": "Non : la preuve dépend d’une hypothèse particulière sur a.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "deduction-generaliser",
+              "context": "On a prouvé $P(a)$, mais la seule raison utilisée est une hypothèse encore ouverte qui affirme précisément $P(a)$.",
+              "question": "Peut-on généraliser et conclure ∀x P(x) ?",
+              "hint": "Savoir que 2 est pair permet-il de conclure que tous les entiers le sont ?",
+              "success": "Non. Le nom $a$ apparaît dans une hypothèse non déchargée dont dépend la preuve. Il ne joue pas le rôle d’un objet arbitraire soumis seulement aux conditions du domaine.",
+              "takeaway": "Introduire ∀ exige de contrôler les hypothèses dont dépend la preuve."
+            },
+            {
+              "title": "Construire une existence",
+              "kind": "fill",
+              "answers": [
+                "2",
+                "-2"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "\\exists n\\in\\mathbb Z,\\ n^2=4",
+              "source": "",
+              "rule": "",
+              "id": "deduction-existe",
+              "context": "On veut établir qu’il existe un entier $n$ tel que $n^2=4$.",
+              "question": "Donne un témoin entier.",
+              "hint": "Il y a deux carrés à tester très simplement.",
+              "success": "Les entiers 2 et -2 conviennent. Vérifier la propriété pour un témoin du bon domaine permet d’introduire le quantificateur existentiel.",
+              "takeaway": "Introduire ∃ : fournir un objet du domaine et vérifier sa propriété."
+            },
+            {
+              "title": "Utiliser une existence sans choisir plus",
+              "kind": "choice",
+              "answers": [
+                "square"
+              ],
+              "choices": [
+                {
+                  "id": "positive",
+                  "label": "$k=2$.",
+                  "feedback": "Le témoin pourrait être $-2$. Tu as ajouté une propriété qui n’était pas donnée."
+                },
+                {
+                  "id": "square",
+                  "label": "$k^2=4$.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "deduction-elim-existe",
+              "context": "On sait $\\exists n\\in\\mathbb Z,\\ n^2=4$. Dans un raisonnement local, on appelle $k$ un tel entier.",
+              "question": "Que peut-on affirmer immédiatement sur k ?",
+              "hint": "N’oublie pas le témoin négatif.",
+              "success": "On sait $k^2=4$, mais on ne peut pas décider que $k=2$ : il pourrait valoir -2. Le témoin ne possède que les propriétés données.",
+              "takeaway": "Éliminer ∃ ne permet pas de choisir les propriétés qui nous arrangent."
+            },
+            {
+              "title": "Fermer le raisonnement local",
+              "kind": "choice",
+              "answers": [
+                "exist"
+              ],
+              "choices": [
+                {
+                  "id": "local",
+                  "label": "$k\\ne0$.",
+                  "feedback": "Cette conclusion conserve le nom qui vient de sortir de portée."
+                },
+                {
+                  "id": "exist",
+                  "label": "Il existe un entier non nul.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "deduction-temoin-sortie",
+              "context": "Du fait que $k^2=4$, on déduit $k\\ne0$, puis qu’il existe un entier non nul.",
+              "question": "Quelle conclusion peut-on conserver lorsque le nom local k disparaît ?",
+              "hint": "Choisis la phrase qui ne contient plus k.",
+              "success": "« Il existe un entier non nul » ne dépend plus du nom local. La conclusion exportée et les autres hypothèses ouvertes doivent respecter la condition de fraîcheur de la règle existentielle.",
+              "takeaway": "Le témoin local sert la preuve ; son nom ne doit pas s’échapper."
+            }
+          ],
+          "id": "regles-quantificateurs",
+          "intro": "Les quantificateurs ont eux aussi des règles d’introduction et d’élimination. Les conditions sur les noms et les hypothèses protègent ces règles contre les faux raisonnements.",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "Du quelconque au témoin."
+          }
+        },
+        {
+          "title": "La poussière sous le tapis.",
+          "steps": [
+            {
+              "title": "Un passage qui réclame une raison",
+              "kind": "choice",
+              "answers": [
+                "lemma"
+              ],
+              "choices": [
+                {
+                  "id": "definition",
+                  "label": "Seulement de la définition du mot pair.",
+                  "feedback": "La définition traduit p pair par p = 2k ; elle ne relie pas directement p² à p."
+                },
+                {
+                  "id": "lemma",
+                  "label": "D’un lemme reliant la parité d’un entier à celle de son carré.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "rigueur-lemme",
+              "context": "Dans une preuve de l’irrationalité de $\\sqrt2$, on rencontre : « $p^2$ est pair, donc $p$ est pair ».",
+              "question": "De quel résultat ce passage dépend-il ?",
+              "hint": "La définition d’un entier pair parle d’une écriture sous la forme 2k.",
+              "success": "Il dépend du lemme : si le carré d’un entier naturel est pair, alors cet entier est pair. Ce passage n’est pas la définition d’un entier pair.",
+              "takeaway": "Identifier le résultat utilisé est le début du contrôle de la preuve."
+            },
+            {
+              "title": "Le carré d’un nombre de la forme 2k + 1",
+              "kind": "fill",
+              "answers": [
+                "1"
+              ],
+              "choices": [],
+              "scene": "",
+              "formula": "(2k+1)^2=2(2k^2+2k)+\\boxed{\\phantom1}",
+              "source": "",
+              "rule": "",
+              "id": "rigueur-impair",
+              "context": "Pour un entier naturel $k$, on développe $(2k+1)^2=4k^2+4k+1$.",
+              "question": "Complète l’égalité.",
+              "hint": "Regroupe les deux premiers termes sous un facteur 2.",
+              "success": "On obtient $2(2k^2+2k)+1$. Puisque $2k^2+2k$ est un entier naturel, ce carré possède lui aussi la forme d’un entier impair.",
+              "takeaway": "Une définition s’utilise en exhibant l’objet qu’elle demande."
+            },
+            {
+              "title": "Une hypothèse encore cachée",
+              "kind": "choice",
+              "answers": [
+                "cover"
+              ],
+              "choices": [
+                {
+                  "id": "definition",
+                  "label": "Aucun : c’est automatiquement vrai par la définition « impair = 2k + 1 ».",
+                  "feedback": "Cette définition ne dit pas encore que tout entier possède l’une des deux formes."
+                },
+                {
+                  "id": "cover",
+                  "label": "Que tout entier naturel est de la forme 2k ou 2k + 1.",
+                  "feedback": ""
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "rigueur-dichotomie",
+              "context": "On a montré qu’un entier de la forme $2k+1$ a un carré de cette même forme. On voudrait maintenant dire : « si $n$ n’est pas pair, il est de la forme $2k+1$ ».",
+              "question": "Quel résultat faut-il avoir établi ?",
+              "hint": "Les deux formes couvrent-elles tous les entiers par définition ?",
+              "success": "Il faut savoir que tout entier naturel est de la forme $2k$ ou $2k+1$. Définir « impair » par la seconde forme ne démontre pas que tout entier non pair possède cette forme.",
+              "takeaway": "Une définition ne remplace pas un théorème d’exhaustivité."
+            },
+            {
+              "title": "Établir l’exhaustivité",
+              "kind": "choice",
+              "answers": [
+                "all"
+              ],
+              "choices": [
+                {
+                  "id": "all",
+                  "label": "Tous les entiers naturels sont de la forme 2k ou 2k + 1.",
+                  "feedback": ""
+                },
+                {
+                  "id": "even",
+                  "label": "Tous les entiers naturels sont pairs.",
+                  "feedback": "Le premier passage donne une forme impaire, et le second une forme paire : on démontre leur alternative."
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "rigueur-recurrence",
+              "context": "Admettons le principe de récurrence sur $\\mathbb N$. Le cas 0 est pair. Si $n=2k$, alors $n+1=2k+1$. Si $n=2k+1$, alors $n+1=2(k+1)$.",
+              "question": "Que permet de conclure cette récurrence ?",
+              "hint": "Le successeur d’un pair a la forme impaire ; celui d’un impair a la forme paire.",
+              "success": "Le cas initial et les deux passages au successeur montrent que tout entier naturel possède l’une des deux formes. Le principe de récurrence utilisé est ici explicitement annoncé.",
+              "takeaway": "La preuve doit couvrir chaque cas possible au passage au successeur."
+            },
+            {
+              "title": "Les deux formes peuvent-elles coïncider ?",
+              "kind": "choice",
+              "answers": [
+                "both"
+              ],
+              "choices": [
+                {
+                  "id": "both",
+                  "label": "Dans les deux cas possibles pour r, 2r ne vaut pas 1.",
+                  "feedback": ""
+                },
+                {
+                  "id": "positive",
+                  "label": "Parce que r est forcément positif.",
+                  "feedback": "La différence a - b n’est pas nécessairement positive. Il faut traiter aussi r ≤ 0."
+                }
+              ],
+              "scene": "",
+              "formula": "2r=1\\qquad\\big(r\\leq0\\ \\text{ou}\\ r\\geq1\\big)",
+              "source": "",
+              "rule": "",
+              "id": "rigueur-incompatibles",
+              "context": "Supposons $2a=2b+1$. Alors $2(a-b)=1$. Posons $r=a-b\\in\\mathbb Z$. On utilise le fait que tout entier $r$ vérifie $r\\leq0$ ou $r\\geq1$.",
+              "question": "Pourquoi l’égalité 2r = 1 est-elle impossible ?",
+              "hint": "Examine les deux possibilités pour l’entier r.",
+              "success": "Si $r\\leq0$, alors $2r\\leq0$ ; si $r\\geq1$, alors $2r\\geq2$. Aucun cas n’autorise $2r=1$. Les deux formes sont donc incompatibles.",
+              "takeaway": "Une contradiction doit découler de faits explicitement disponibles."
+            },
+            {
+              "title": "Revenir au lemme",
+              "kind": "choice",
+              "answers": [
+                "contradiction"
+              ],
+              "choices": [
+                {
+                  "id": "contradiction",
+                  "label": "n² serait à la fois pair et impair.",
+                  "feedback": ""
+                },
+                {
+                  "id": "nothing",
+                  "label": "Rien : un carré ne conserve aucune information de parité.",
+                  "feedback": "Nous avons précisément établi que le carré d’un impair est impair."
+                }
+              ],
+              "scene": "",
+              "formula": "",
+              "source": "",
+              "rule": "",
+              "id": "rigueur-fin",
+              "context": "Tout entier est pair ou impair, jamais les deux ; le carré d’un impair est impair. Supposons maintenant que $n^2$ soit pair.",
+              "question": "Que se passerait-il si n était impair ?",
+              "hint": "Combine le résultat sur le carré d’un impair et l’incompatibilité des deux parités.",
+              "success": "Son carré serait impair et pair, ce qui est impossible. Le cas impair est exclu ; par l’exhaustivité établie, $n$ est donc pair. Nous avons rendu visibles les résultats utilisés.",
+              "takeaway": "Être rigoureux, c’est contrôler ce que chaque passage utilise et ce qu’il permet de conclure."
+            }
+          ],
+          "id": "rigueur",
+          "intro": "Un raisonnement familier peut utiliser un résultat sans le dire. Revenons sur la parité : quels faits permettent réellement de passer d’une ligne à la suivante ?",
+          "video": {
+            "provider": "placeholder",
+            "id": "",
+            "title": "La poussière sous le tapis."
+          }
+        }
+      ],
+      "id": "deduire",
+      "shortTitle": "Déduire",
+      "symbol": "03",
+      "description": "Utiliser les règles de déduction naturelle et rendre visibles les raisons qui autorisent chaque étape."
+    }
+  ]
+}

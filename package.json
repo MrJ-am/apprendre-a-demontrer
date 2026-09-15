@@ -1,0 +1,26 @@
+{
+  "name": "apprendre-a-demontrer",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Des parcours interactifs pour apprendre la démonstration.",
+  "scripts": {
+    "build:data": "python3 scripts/build_data.py",
+    "check:data": "python3 scripts/build_data.py --check",
+    "build": "npm run build:data && node scripts/build.mjs",
+    "test": "node scripts/test.mjs",
+    "dev": "node scripts/dev.mjs",
+    "format": "elm-format src tests/Check.elm --yes && prettier --write public/style.css public/bridge.js scripts/*.mjs"
+  },
+  "dependencies": {
+    "katex": "0.18.7"
+  },
+  "devDependencies": {
+    "@lydell/elm": "0.19.1-14",
+    "elm-format": "0.8.8",
+    "prettier": "3.6.2"
+  },
+  "engines": {
+    "node": ">=22",
+    "npm": ">=10"
+  }
+}
