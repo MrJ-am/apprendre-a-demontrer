@@ -1,0 +1,103 @@
+#+title: Apprendre à démontrer
+#+language: fr
+
+Un site interactif pour apprendre à formaliser et à construire des démonstrations. Il s’adresse aux élèves et aux enseignants sans formation spécifique en logique.
+
+* Les parcours
+
+| Parcours | Leçons | Exercices |
+|----------+--------+-----------|
+| Les contrats de la démonstration | Noms, portées, dépendances, objets arbitraires | 17 |
+| Apprendre à formaliser | Quantificateurs, négations, implication, domaines | 20 |
+| Construire une démonstration | Implication, conjonction et cas, quantificateurs, rigueur | 21 |
+
+Les 12 leçons sont accessibles indépendamment. Chaque étape propose une question, une réponse à choisir ou à compléter, un indice et un retour. Les bilans reprennent les points construits au cours de la leçon. La progression est conservée pendant l’utilisation de la page ; elle repart de zéro après un rechargement.
+
+Le premier parcours s’ouvre directement sur un exercice. Le bouton « Les parcours » donne accès à l’ensemble des leçons. Les petits repères numérotés permettent de revenir à une étape.
+
+* Développer
+
+Prévoir Node.js 22 ou plus récent et Python 3.10 ou plus récent.
+
+#+begin_src sh
+npm ci
+npm run build
+npm run dev
+#+end_src
+
+Le serveur de développement écoute sur ~http://127.0.0.1:4173~. Il reconstruit le site quand les sources Elm, Org ou les ressources publiques changent, puis recharge la page. Il ne conserve pas l’état après ce rechargement. La version publiée est entièrement statique et ne dépend pas de ce serveur.
+
+#+begin_src sh
+npm test
+npm run check:data
+npm run format
+#+end_src
+
+Le contrôle des données vérifie que le JSON correspond à sa source Org. Les tests exécutent le véritable correcteur Elm, contrôlent les réponses prévues, les erreurs de logique, les noms et les variables liées. Ils vérifient aussi les formules KaTeX et le compilateur éditorial. Ils ne remplacent pas une vérification de l’interface dans un navigateur.
+
+* Une source éditoriale unique
+
+Éditer les contenus dans [[file:cours/parcours.org][cours/parcours.org]], puis lancer :
+
+#+begin_src sh
+npm run build:data
+npm run check:data
+#+end_src
+
+~data/course.json~ est généré et versionné. Ne pas le modifier directement. La CI vérifie sa cohérence avant toute reconstruction.
+
+Le format accepte trois niveaux de titres : parcours, leçon, exercice. Les propriétés ~CUSTOM_ID~, ~TYPE~, ~ANSWERS~, ~RULE~, ~SOURCE~, ~FORMULA~ et ~SCENE~ définissent les exercices. Les blocs ~context~, ~question~, ~hint~, ~success~ et ~takeaway~ portent leur texte. Un tableau à trois colonnes contient l’identifiant du choix, son texte et la relance donnée si ce choix est incorrect. Dans les propriétés, plusieurs réponses sont séparées par ~;;~.
+
+Les formules en ligne sont délimitées par ~$~. La propriété ~FORMULA~ contient du LaTeX sans délimiteurs. La source est parsée sans exécuter de code Babel.
+
+* Ajouter une vidéo
+
+Chaque leçon possède une vidéo provisoire. Remplacer ses propriétés, en conservant son ~CUSTOM_ID~ :
+
+#+begin_example
+:VIDEO_PROVIDER: youtube
+:VIDEO_ID: identifiant
+#+end_example
+
+L’identifiant YouTube doit être celui de la vidéo, composé de 11 caractères. Le lecteur utilise ~youtube-nocookie.com~.
+
+Pour Vimeo :
+
+#+begin_example
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 123456789
+#+end_example
+
+Pour une vidéo Vimeo non répertoriée, utiliser ~123456789/cle~ avec sa clé de partage. Les restrictions d’intégration du propriétaire de la vidéo restent applicables.
+
+Le bloc ~video~ porte le titre accessible du lecteur. Aucun lien vidéo réel n’a encore été fourni. Revenir à ~placeholder~ et supprimer ~VIDEO_ID~ pour rétablir l’emplacement provisoire.
+
+* Organisation
+
+| Fichier | Rôle |
+|---------+------|
+| ~src/Main.elm~ | Navigation, progression, saisie et retours |
+| ~src/Course.elm~ | Types et lecture des parcours |
+| ~src/Logic.elm~ | Analyse de formules, normalisation, équivalence dans le cadre des exercices |
+| ~src/Exercise.elm~ | Vérification des réponses |
+| ~cours/parcours.org~ | Source éditoriale |
+| ~scripts/build_data.py~ | Compilation Org vers JSON |
+| ~public/style.css~ | Apparence, disposition et adaptation aux écrans |
+| ~public/bridge.js~ | Rendu KaTeX, gestion du focus et outils WebMCP facultatifs |
+| ~tests/~ | Vérifications du correcteur et du compilateur éditorial |
+
+* Cadre logique
+
+Le parcours de formalisation utilise la sémantique classique. La lecture d’un quantificateur comme une conjonction ou une disjonction infinie est une interprétation sémantique, pas un algorithme de vérification par essais.
+
+Pour les transformations propositionnelles, le correcteur compare les valeurs de vérité sur toutes les valuations, jusqu’à huit propositions distinctes. Pour les formules quantifiées, il compare les formes obtenues en propageant les négations, en tenant compte du renommage des variables liées et de l’associativité et de la commutativité de « et » et de « ou ». Il contrôle séparément la transformation demandée : disparition de l’implication, négations devant les atomes, ou structure précise d’une dérivation.
+
+La syntaxe accepte ~¬~, ~∧~, ~∨~, ~→~, ~∀x~ et ~∃x~, ainsi que des équivalents au clavier. Les prédicats s’écrivent ~P(x)~ ou ~P(x,y)~. Une quantification porte sur la formule qui la suit ; les parenthèses permettent de limiter cette portée. Les termes complexes et la reconnaissance générale de preuves libres ne font pas partie du correcteur.
+
+L’équivalence mathématique d’une proposition ne suffit pas toujours à répondre à une question sur une dérivation précise ; ces exercices exigent la structure attendue.
+
+* Références
+
+La démarche s’inspire de « Enseignement de la démonstration » et du support de Jean-Christophe Jameux. Les séquences interactives sont une transposition pédagogique, pas une transcription du dialogue. L’identité visuelle reprend celle du site [[https://github.com/MrJ-am/M-moire][Regards]].
+
+Le site expose, dans les navigateurs compatibles, trois outils WebMCP facultatifs : lire l’état, ouvrir une leçon, et vérifier une réponse. Ils emploient les mêmes actions et le même correcteur que l’interface. L’application fonctionne aussi sans cette API.
