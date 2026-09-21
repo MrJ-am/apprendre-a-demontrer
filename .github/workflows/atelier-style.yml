@@ -13,6 +13,12 @@ jobs:
       - uses: actions/checkout@v4
         with:
           persist-credentials: false
+      - uses: actions/checkout@v4
+        with:
+          repository: MrJ-am/style-mrjam
+          ref: 52ad33f881b50feef91d60915d17bae90abfc592
+          path: .cache/style-mrjam
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -31,6 +37,8 @@ jobs:
           mkdir -p "$RUNNER_TEMP/atelier"
           git rev-parse HEAD > "$RUNNER_TEMP/atelier/commit.txt"
           git archive HEAD > "$RUNNER_TEMP/atelier/sources.tar"
+          test "$(git -C .cache/style-mrjam rev-parse HEAD)" = 52ad33f881b50feef91d60915d17bae90abfc592
+          git -C .cache/style-mrjam archive HEAD > "$RUNNER_TEMP/atelier/style.tar"
           printf 'y\n' | node_modules/.bin/elm install mdgriffith/elm-ui
           node_modules/.bin/elm make src/Main.elm --output=/tmp/reference.js
           tar -czf "$RUNNER_TEMP/atelier/node_modules.tar.gz" node_modules
