@@ -6,3 +6,5 @@ elm-stuff/
 dist/
 __pycache__/
 references/
+.cache/
+controles-interface/

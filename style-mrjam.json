@@ -1,0 +1,13 @@
+{
+  "depot": "MrJ-am/style-mrjam",
+  "revision": "52ad33f881b50feef91d60915d17bae90abfc592",
+  "elm-ui": "1.1.8",
+  "fichiers": {
+    "src/MrJam.elm": "99ad5f5449f55ed1a22506387149991078311702",
+    "src/MrJam/Identite.elm": "5e63eb95897b9b39135832e53f32e6853558dbcb",
+    "src/MrJam/Theme.elm": "08aa4f2a6eedb02497bc93d3df89ca5c5b51bdee",
+    "identite.json": "8ed87df9e74063ca6a818b464ff6764466f3ad6d",
+    "public/assets/mrjam/Echologo.svg": "d0b8244f8a3a5e0d637e1ad57aedae30f2b6f2f8",
+    "public/assets/mrjam/signature.css": "db7f88b0e1ddeddd93ff34603e09cd5dfdd6fb8a"
+  }
+}

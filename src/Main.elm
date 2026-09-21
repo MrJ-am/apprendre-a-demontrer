@@ -1,16 +1,22 @@
 port module Main exposing (main)
 
 import Browser
+import Browser.Dom
+import Browser.Events
 import Browser.Navigation as Nav
 import Char
 import Course exposing (Choice, Course, Kind(..), Lesson, Step, Track)
 import Dict exposing (Dict)
+import Element as UI exposing (Element)
+import Element.Region as Region
 import Exercise
 import Html exposing (..)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onClick, onInput, onSubmit)
 import Json.Decode as D
 import Json.Encode as E
+import MrJam
+import Task
 import Url exposing (Url)
 
 
@@ -34,6 +40,7 @@ type alias Model =
     , responses : Dict String Response
     , recap : Bool
     , pending : Maybe String
+    , largeur : Int
     }
 
 
@@ -49,6 +56,7 @@ type Msg
     | Review
     | SelectLesson String
     | Agent D.Value
+    | Dimensionne Int
 
 
 type alias Position =
@@ -66,7 +74,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> agentAction Agent
+        , subscriptions = \_ -> Sub.batch [ agentAction Agent, Browser.Events.onResize (\largeur _ -> Dimensionne largeur) ]
         , onUrlRequest = LinkClicked
         , onUrlChange = UrlChanged
         }
@@ -76,9 +84,9 @@ init : D.Value -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
         model =
-            { course = D.decodeValue Course.decoder flags |> Result.mapError D.errorToString, key = key, url = url, responses = Dict.empty, recap = False, pending = Nothing }
+            { course = D.decodeValue Course.decoder flags |> Result.mapError D.errorToString, key = key, url = url, responses = Dict.empty, recap = False, pending = Nothing, largeur = 0 }
     in
-    ( model, emit model )
+    ( model, Cmd.batch [ emit model, Task.perform (\dimensions -> Dimensionne (round dimensions.viewport.width)) Browser.Dom.getViewport ] )
 
 
 route : Model -> List String
@@ -199,6 +207,9 @@ update msg model =
             ( updated, emit updated )
     in
     case msg of
+        Dimensionne largeur ->
+            ( { model | largeur = largeur }, Cmd.none )
+
         LinkClicked (Browser.Internal url) ->
             if url.fragment == Just "lesson-heading" then
                 ( model, focusElement "lesson-heading" )
@@ -466,25 +477,22 @@ role =
     attribute "role"
 
 
-icon : String -> Html Msg
-icon value =
-    span [ class "icon", attribute "aria-hidden" "true" ] [ text value ]
-
-
+{-| Les compositions pédagogiques restent ici. Les contrôles ordinaires
+appellent MrJam ; seules les saisies historiques attendent les composants
+riches de la bibliothèque, sans changer la révision commune imposée.
+-}
 view : Model -> Browser.Document Msg
 view model =
     { title = position model |> Maybe.map (\p -> p.lesson.title ++ " · Apprendre à démontrer") |> Maybe.withDefault "Apprendre à démontrer"
     , body =
-        [ div [ class "app" ]
-            [ a [ class "skip-link", href "#lesson-heading" ] [ text "Aller au contenu" ]
-            , header [ class "topbar" ]
-                [ a [ class "brand", href "#/parcours", attribute "aria-label" "Apprendre à démontrer — tous les parcours" ]
-                    [ span [ class "brand-mark", attribute "aria-hidden" "true" ] [ text "⊢" ], span [] [ text "Apprendre à ", strong [] [ text "démontrer" ] ] ]
-                , a [ class "catalog-link", href "#/parcours" ] [ icon "☷", text "Les parcours" ]
-                ]
+        [ a [ class "skip-link", href "#lesson-heading" ] [ text "Aller au contenu" ]
+        , MrJam.page "Apprendre à démontrer"
+            [ MrJam.lien "Les parcours" "#/parcours"
             , case model.course of
                 Err _ ->
-                    main_ [ class "error-page" ] [ h1 [] [ text "Le parcours n’a pas pu s’ouvrir." ], p [] [ text "Rechargez la page pour réessayer." ] ]
+                    repere "lesson-heading" <|
+                        MrJam.section "Le parcours n’a pas pu s’ouvrir."
+                            [ MrJam.paragraphe "Rechargez la page pour réessayer." ]
 
                 Ok course ->
                     if route model == [ "parcours" ] then
@@ -493,135 +501,142 @@ view model =
                     else
                         case position model of
                             Nothing ->
-                                main_ [ class "error-page" ] [ h1 [] [ text "Cette leçon est introuvable." ], a [ href "#/parcours", class "primary" ] [ text "Voir les parcours" ] ]
+                                repere "lesson-heading" <|
+                                    MrJam.section "Cette leçon est introuvable."
+                                        [ MrJam.lien "Voir les parcours" "#/parcours" ]
 
                             Just pos ->
-                                div [ class "workspace" ]
-                                    [ sidebar model course pos
-                                    , main_ [ class "lesson" ]
-                                        [ if model.recap then
+                                let
+                                    contenu =
+                                        if model.recap then
                                             recapView model pos
 
-                                          else
+                                        else
                                             lessonView model pos
+                                in
+                                if model.largeur >= 1000 then
+                                    UI.row [ UI.width UI.fill, UI.spacing 24, UI.alignTop ]
+                                        [ UI.el [ UI.width (UI.px 260), UI.alignTop ] (sidebar model course pos)
+                                        , UI.el [ UI.width (UI.minimum 0 UI.fill), UI.alignTop ] contenu
                                         ]
-                                    ]
-            , footer [ class "site-footer" ] [ text "Apprendre à démontrer", span [] [ text "Un cours de Jean-Christophe Jameux" ] ]
+
+                                else
+                                    MrJam.pile [ sidebar model course pos, contenu ]
+            , MrJam.texteSecondaire "Un cours de Jean-Christophe Jameux. Toute utilisation du logo et de la signature est strictement réservée."
             ]
         ]
     }
 
 
-sidebar : Model -> Course -> Position -> Html Msg
+repere : String -> Element Msg -> Element Msg
+repere identifiant =
+    UI.el [ UI.width UI.fill, UI.htmlAttribute (id identifiant), UI.htmlAttribute (tabindex -1) ]
+
+
+texteRiche : String -> Element Msg
+texteRiche contenu =
+    UI.paragraph [ UI.width UI.fill, UI.spacing 6 ] (List.map UI.html (richInline contenu))
+
+
+formule : String -> Element Msg
+formule contenu =
+    UI.el [ UI.width (UI.minimum 0 UI.fill) ] (UI.html (math contenu))
+
+
+navigation : String -> List (Element Msg) -> Element Msg
+navigation libelle contenu =
+    UI.el [ UI.width UI.fill, UI.htmlAttribute (role "navigation"), UI.htmlAttribute (attribute "aria-label" libelle) ] (MrJam.actions contenu)
+
+
+sidebar : Model -> Course -> Position -> Element Msg
 sidebar model course pos =
-    aside [ class "sidebar", attribute "aria-label" "Navigation dans les parcours" ]
-        [ p [ class "sidebar-label" ] [ text "VOTRE PARCOURS" ]
-        , nav [ class "track-nav" ]
-            (List.map
-                (\t ->
-                    let
-                        url =
-                            List.head t.lessons |> Maybe.map (lessonEntryUrl t) |> Maybe.withDefault "#/parcours"
-                    in
-                    a
-                        [ href url
-                        , classList [ ( "track-link", True ), ( "active", t.id == pos.track.id ) ]
-                        , attribute "aria-current"
-                            (if t.id == pos.track.id then
-                                "true"
+    let
+        liensParcours =
+            navigation "Parcours" <|
+                List.map
+                    (\parcours ->
+                        MrJam.lien
+                            ((if parcours.id == pos.track.id then
+                                "▸ "
 
-                             else
-                                "false"
+                              else
+                                ""
+                             )
+                                ++ parcours.shortTitle
                             )
-                        ]
-                        [ span [ class "track-number" ] [ text t.symbol ]
-                        , span [] [ text t.shortTitle ]
-                        , if t.id == pos.track.id then
-                            icon "·"
+                            (List.head parcours.lessons |> Maybe.map (lessonEntryUrl parcours) |> Maybe.withDefault "#/parcours")
+                    )
+                    course.tracks
 
-                          else
-                            text ""
+        lecons =
+            if model.largeur < 1000 then
+                UI.html <|
+                    label [ class "selection-historique" ]
+                        [ span [] [ text "Leçon" ]
+                        , select [ value pos.lesson.id, onInput SelectLesson ]
+                            (List.indexedMap (\i lecon -> option [ value lecon.id ] [ text (String.fromInt (i + 1) ++ " · " ++ lecon.title) ]) pos.track.lessons)
                         ]
-                )
-                course.tracks
-            )
-        , div [ class "lesson-nav-heading" ] [ text pos.track.shortTitle, span [] [ text (String.fromInt (List.length pos.track.lessons) ++ " leçons") ] ]
-        , nav [ class "lesson-nav", attribute "aria-label" "Leçons" ]
-            (List.indexedMap
-                (\i l ->
-                    let
-                        done =
-                            completed model l.steps == List.length l.steps
-                    in
-                    a
-                        [ href (lessonEntryUrl pos.track l)
-                        , classList [ ( "lesson-link", True ), ( "current", l.id == pos.lesson.id ) ]
-                        , attribute "aria-current"
-                            (if l.id == pos.lesson.id then
-                                "page"
 
-                             else
-                                "false"
+            else
+                UI.el [ UI.width UI.fill, UI.htmlAttribute (role "navigation"), UI.htmlAttribute (attribute "aria-label" "Leçons") ] <|
+                    MrJam.pile <|
+                        List.indexedMap
+                            (\i lecon ->
+                                MrJam.lien
+                                    ((if lecon.id == pos.lesson.id then
+                                        "▸ "
+
+                                      else
+                                        ""
+                                     )
+                                        ++ String.fromInt (i + 1)
+                                        ++ " · "
+                                        ++ lecon.title
+                                        ++ (if completed model lecon.steps == List.length lecon.steps then
+                                                " ✓"
+
+                                            else
+                                                ""
+                                           )
+                                    )
+                                    (lessonEntryUrl pos.track lecon)
                             )
-                        ]
-                        [ span [ classList [ ( "lesson-dot", True ), ( "done", done ) ] ]
-                            [ text
-                                (if done then
-                                    "✓"
-
-                                 else
-                                    String.fromInt (i + 1)
-                                )
-                            ]
-                        , span [] [ text l.title ]
-                        ]
-                )
-                pos.track.lessons
-            )
-        , label [ class "mobile-lesson-select" ]
-            [ span [] [ text "Leçon" ], select [ value pos.lesson.id, onInput SelectLesson ] (List.indexedMap (\i l -> option [ value l.id ] [ text (String.fromInt (i + 1) ++ " · " ++ l.title) ]) pos.track.lessons) ]
-        , div [ class "sidebar-progress" ]
-            [ p [] [ text "Étapes vérifiées", strong [] [ text (String.fromInt (completed model (Course.steps course)) ++ " / " ++ String.fromInt (List.length (Course.steps course))) ] ]
-            , progress [ Html.Attributes.max (String.fromInt (List.length (Course.steps course))), value (String.fromInt (completed model (Course.steps course))), attribute "aria-label" "Progression dans les trois parcours" ] []
-            ]
+                            pos.track.lessons
+    in
+    MrJam.carte
+        [ liensParcours
+        , lecons
+        , MrJam.texteSecondaire (String.fromInt (completed model (Course.steps course)) ++ " / " ++ String.fromInt (List.length (Course.steps course)) ++ " étapes vérifiées")
         ]
 
 
-lessonView : Model -> Position -> Html Msg
+lessonView : Model -> Position -> Element Msg
 lessonView model pos =
-    div [ class "lesson-content" ]
-        [ div [ class "lesson-kicker" ]
-            [ span [ class "eyebrow" ] [ text pos.track.title ]
-            , span [ class "step-fraction" ]
-                [ text (String.fromInt (completed model pos.lesson.steps) ++ " / " ++ String.fromInt (List.length pos.lesson.steps) ++ " étapes") ]
-            ]
-        , h1 [ id "lesson-heading", tabindex -1 ] [ text pos.lesson.title ]
-        , p [ class "intro" ] [ text pos.lesson.intro ]
-        , nav [ class "lesson-modes", attribute "aria-label" "Dans cette leçon" ]
-            [ a
-                [ href (lessonVideoUrl pos)
-                , classList [ ( "lesson-mode", True ), ( "active", isVideoPage model ) ]
-                , attribute "aria-current"
-                    (if isVideoPage model then
-                        "page"
+    MrJam.pile
+        [ MrJam.texteSecondaire (pos.track.title ++ " · " ++ String.fromInt (completed model pos.lesson.steps) ++ " / " ++ String.fromInt (List.length pos.lesson.steps) ++ " étapes")
+        , repere "lesson-heading" (MrJam.sousTitre pos.lesson.title)
+        , MrJam.paragraphe pos.lesson.intro
+        , navigation "Dans cette leçon"
+            [ MrJam.lien
+                ((if isVideoPage model then
+                    "▸ "
 
-                     else
-                        "false"
-                    )
-                ]
-                [ icon "▷", span [] [ text "Comprendre en vidéo" ] ]
-            , a
-                [ href (lessonUrl pos.track pos.lesson pos.index)
-                , classList [ ( "lesson-mode", True ), ( "active", not (isVideoPage model) ) ]
-                , attribute "aria-current"
-                    (if isVideoPage model then
-                        "false"
+                  else
+                    ""
+                 )
+                    ++ "Comprendre en vidéo"
+                )
+                (lessonVideoUrl pos)
+            , MrJam.lien
+                ((if isVideoPage model then
+                    ""
 
-                     else
-                        "page"
-                    )
-                ]
-                [ icon "↳", span [] [ text "À vous de jouer" ], span [ class "mode-count" ] [ text (String.fromInt (List.length pos.lesson.steps)) ] ]
+                  else
+                    "▸ "
+                 )
+                    ++ "À vous de jouer"
+                )
+                (lessonUrl pos.track pos.lesson pos.index)
             ]
         , if isVideoPage model then
             videoView model pos
@@ -631,165 +646,490 @@ lessonView model pos =
         ]
 
 
-exerciseView : Model -> Position -> Html Msg
+exerciseView : Model -> Position -> Element Msg
 exerciseView model pos =
     let
         r =
             response model pos.step
     in
-    div [ class "exercise-content" ]
-        [ nav [ class "stepper", attribute "aria-label" "Étapes de la leçon" ]
+    MrJam.pile
+        [ navigation "Étapes de la leçon"
             (List.indexedMap
-                (\i s ->
-                    a
-                        [ href (lessonUrl pos.track pos.lesson i)
-                        , classList [ ( "step", True ), ( "current", i == pos.index ), ( "complete", isCorrect (response model s) ) ]
-                        , attribute "aria-label" ("Étape " ++ String.fromInt (i + 1) ++ " : " ++ s.title)
-                        , attribute "aria-current"
-                            (if i == pos.index then
-                                "step"
+                (\i etape ->
+                    MrJam.lien
+                        ((if i == pos.index then
+                            "▸ "
 
-                             else
-                                "false"
-                            )
-                        ]
-                        [ span []
-                            [ text
-                                (if isCorrect (response model s) then
-                                    "✓"
+                          else
+                            ""
+                         )
+                            ++ String.fromInt (i + 1)
+                            ++ (if isCorrect (response model etape) then
+                                    " ✓"
 
-                                 else
-                                    String.fromInt (i + 1)
-                                )
-                            ]
-                        ]
+                                else
+                                    ""
+                               )
+                        )
+                        (lessonUrl pos.track pos.lesson i)
                 )
                 pos.lesson.steps
             )
-        , section [ class "problem-context", attribute "aria-label" "Situation" ]
-            [ p [ class "step-title" ] [ text pos.step.title ]
-            , p [] [ rich pos.step.context ]
+        , MrJam.carte
+            [ MrJam.sousTitre pos.step.title
+            , texteRiche pos.step.context
             , if pos.step.scene == "witness" && not r.hint && r.verdict == Nothing then
-                text ""
+                UI.none
 
               else
                 sceneView pos.step
             , if String.isEmpty pos.step.formula then
-                text ""
+                UI.none
 
               else
-                div [ class "formula" ] [ math pos.step.formula ]
+                formule pos.step.formula
             ]
-        , section [ class "exercise", attribute "aria-labelledby" "question-heading" ]
-            [ p [ class "exercise-label" ] [ span [ class "pencil-mark", attribute "aria-hidden" "true" ] [ text "↳" ], text "À VOUS DE JOUER" ]
-            , h2 [ id "question-heading" ] (richInline pos.step.question)
-            , Html.form [ id "answer-form", onSubmit Verify ]
-                [ case pos.step.kind of
-                    ChoiceQuestion ->
-                        div [ class "choices", role "radiogroup", attribute "aria-labelledby" "question-heading" ] (List.indexedMap (choiceView r) pos.step.choices)
+        , MrJam.carte
+            [ MrJam.texteSecondaire "À VOUS DE JOUER"
+            , UI.paragraph [ UI.width UI.fill, Region.heading 2, UI.htmlAttribute (id "question-heading") ] (List.map UI.html (richInline pos.step.question))
+            , UI.el [ UI.width (UI.minimum 0 UI.fill) ] (UI.html (saisieHistorique pos.step r))
+            , if pos.step.kind == Rewrite then
+                navigation "Symboles logiques"
+                    (List.map (\( libelle, insertion ) -> MrJam.boutonSecondaire libelle (AppendSymbol insertion))
+                        [ ( "¬", "¬" ), ( "∧", " ∧ " ), ( "∨", " ∨ " ), ( "→", " → " ), ( "∀x", "∀x " ), ( "∃x", "∃x " ), ( "(", "(" ), ( ")", ")" ) ]
+                    )
 
-                    _ ->
-                        div [ class "input-section" ]
-                            [ label [ for "answer-input", class "sr-only" ] [ text "Votre réponse" ]
-                            , div [ class "answer-field" ]
-                                [ input
-                                    [ id "answer-input"
-                                    , type_ "text"
-                                    , value r.value
-                                    , onInput Edit
-                                    , maxlength 500
-                                    , autocomplete False
-                                    , spellcheck False
-                                    , attribute "autocapitalize" "off"
-                                    , attribute "aria-describedby"
-                                        (if pos.step.kind == Rewrite then
-                                            "syntax-help"
+              else
+                UI.none
+            , if pos.step.kind == ChoiceQuestion then
+                UI.none
 
-                                         else
-                                            "answer-help"
-                                        )
-                                    , placeholder
-                                        (if pos.step.kind == Rewrite then
-                                            "Votre formule…"
-
-                                         else
-                                            "Votre réponse…"
-                                        )
-                                    , classList [ ( "valid", isCorrect r ) ]
-                                    ]
-                                    []
-                                , if isCorrect r then
-                                    span [ class "input-check", attribute "aria-hidden" "true" ] [ text "✓" ]
-
-                                  else
-                                    text ""
-                                ]
-                            , if pos.step.kind == Rewrite then
-                                div [ class "formula-tools" ]
-                                    [ div [ class "symbol-keyboard", attribute "aria-label" "Symboles logiques" ] (List.map (\( labelText, insertion ) -> button [ type_ "button", onClick (AppendSymbol insertion), attribute "aria-label" ("Ajouter " ++ labelText) ] [ text labelText ]) [ ( "¬", "¬" ), ( "∧", " ∧ " ), ( "∨", " ∨ " ), ( "→", " → " ), ( "∀x", "∀x " ), ( "∃x", "∃x " ), ( "(", "(" ), ( ")", ")" ) ])
-                                    , p [ id "syntax-help", class "input-help" ] [ text "Vous pouvez aussi écrire : non A, A et B, A ou B, A -> B." ]
-                                    ]
-
-                              else
-                                p [ id "answer-help", class "input-help" ]
-                                    [ text
-                                        (if pos.step.rule == "fresh" then
-                                            "Saisissez une lettre disponible."
-
-                                         else
-                                            "Complétez avec le nombre, la lettre ou l’expression demandée."
-                                        )
-                                    ]
-                            ]
-                , div [ class "hint-row" ]
-                    [ button
-                        [ class "hint-button"
-                        , type_ "button"
-                        , onClick Hint
-                        , attribute "aria-expanded"
-                            (if r.hint then
-                                "true"
+              else
+                UI.el
+                    [ UI.width UI.fill
+                    , UI.htmlAttribute
+                        (id
+                            (if pos.step.kind == Rewrite then
+                                "syntax-help"
 
                              else
-                                "false"
+                                "answer-help"
                             )
-                        , attribute "aria-controls" "hint-content"
-                        ]
-                        [ icon "?"
-                        , text
-                            (if r.hint then
-                                "Masquer l’indice"
-
-                             else
-                                "Un indice"
-                            )
-                        ]
+                        )
                     ]
-                , if r.hint then
-                    div [ class "hint-content", id "hint-content" ] [ rich pos.step.hint ]
+                <|
+                    MrJam.texteSecondaire
+                        (if pos.step.kind == Rewrite then
+                            "Vous pouvez aussi écrire : non A, A et B, A ou B, A -> B."
 
-                  else
-                    text ""
-                ]
-            , feedbackView pos.step r
-            ]
-        , div [ class "lesson-actions" ]
-            [ button [ class "quiet previous", onClick Previous, disabled (pos.index == 0), type_ "button" ] [ icon "←", text "Précédent" ]
-            , if isCorrect r then
-                button [ class "primary", onClick Next, type_ "button" ]
-                    [ text
-                        (if pos.index == List.length pos.lesson.steps - 1 then
-                            "Faire le point"
+                         else if pos.step.rule == "fresh" then
+                            "Saisissez une lettre disponible."
 
                          else
-                            "Continuer"
+                            "Complétez avec le nombre, la lettre ou l’expression demandée."
                         )
-                    , icon "→"
-                    ]
+            , MrJam.boutonSecondaire
+                (if r.hint then
+                    "Masquer l’indice"
+
+                 else
+                    "Un indice"
+                )
+                Hint
+            , if r.hint then
+                UI.el [ UI.width UI.fill, UI.htmlAttribute (id "hint-content"), Region.announce ] (texteRiche pos.step.hint)
 
               else
-                button [ class "primary", type_ "submit", attribute "form" "answer-form", disabled (String.isEmpty (String.trim r.value)) ] [ text "Vérifier", icon "→" ]
+                UI.none
+            , feedbackView pos.step r
             ]
+        , MrJam.actions
+            [ if pos.index == 0 then
+                MrJam.boutonInactif "Précédent"
+
+              else
+                MrJam.boutonSecondaire "Précédent" Previous
+            , if isCorrect r then
+                MrJam.bouton
+                    (if pos.index == List.length pos.lesson.steps - 1 then
+                        "Faire le point"
+
+                     else
+                        "Continuer"
+                    )
+                    Next
+
+              else if String.isEmpty (String.trim r.value) then
+                MrJam.boutonInactif "Vérifier"
+
+              else
+                MrJam.bouton "Vérifier" Verify
+            ]
+        ]
+
+
+{-| Îlot conservé, non réécrit : libellés KaTeX, radio natif, saisie bornée,
+identifiants de focus et soumission Entrée. Il sera remplacé par les composants
+communs riches après validation coordonnée de leur nouvelle révision.
+-}
+saisieHistorique : Step -> Response -> Html Msg
+saisieHistorique etape reponse =
+    Html.form [ id "answer-form", class "saisies-historiques", onSubmit Verify ]
+        [ case etape.kind of
+            ChoiceQuestion ->
+                div [ class "choices", role "radiogroup", attribute "aria-labelledby" "question-heading" ]
+                    (List.indexedMap (choiceView reponse) etape.choices)
+
+            _ ->
+                div []
+                    [ label [ for "answer-input", class "sr-only" ] [ text "Votre réponse" ]
+                    , div [ class "answer-field" ]
+                        [ input
+                            [ id "answer-input"
+                            , type_ "text"
+                            , value reponse.value
+                            , onInput Edit
+                            , maxlength 500
+                            , autocomplete False
+                            , spellcheck False
+                            , attribute "autocapitalize" "off"
+                            , attribute "aria-describedby"
+                                (if etape.kind == Rewrite then
+                                    "syntax-help"
+
+                                 else
+                                    "answer-help"
+                                )
+                            , placeholder
+                                (if etape.kind == Rewrite then
+                                    "Votre formule…"
+
+                                 else
+                                    "Votre réponse…"
+                                )
+                            , classList [ ( "valid", isCorrect reponse ) ]
+                            ]
+                            []
+                        ]
+                    ]
+        , button [ type_ "submit", hidden True, tabindex -1 ] [ text "Vérifier" ]
+        ]
+
+
+feedbackView : Step -> Response -> Element Msg
+feedbackView step r =
+    case r.verdict of
+        Nothing ->
+            UI.none
+
+        Just verdict ->
+            repere "feedback" <|
+                UI.el [ UI.width UI.fill, UI.htmlAttribute (role "status"), UI.htmlAttribute (attribute "aria-live" "polite") ] <|
+                    MrJam.pile
+                        [ MrJam.avis
+                            (if isCorrect r then
+                                MrJam.Succes
+
+                             else
+                                MrJam.Avertissement
+                            )
+                            (if isCorrect r then
+                                "Oui, c’est cela."
+
+                             else
+                                "Reprenons ce point."
+                            )
+                        , texteRiche
+                            (case verdict of
+                                Ok _ ->
+                                    step.success
+
+                                Err message ->
+                                    message
+                            )
+                        , if isCorrect r then
+                            texteRiche step.takeaway
+
+                          else
+                            UI.none
+                        ]
+
+
+sceneView : Step -> Element Msg
+sceneView step =
+    case step.scene of
+        "witness" ->
+            MrJam.pile
+                [ MrJam.texteSecondaire "Deux nombres pairs peuvent avoir des moitiés différentes."
+                , MrJam.actions
+                    [ MrJam.carte [ MrJam.paragraphe "Un premier entier pair", formule "a=2", MrJam.texteSecondaire "sa moitié : 1" ]
+                    , MrJam.carte [ MrJam.paragraphe "Un second entier pair", formule "b=4", MrJam.texteSecondaire "sa moitié : 2" ]
+                    ]
+                ]
+
+        "forall" ->
+            finiteScene True
+
+        "exists" ->
+            finiteScene False
+
+        "scope" ->
+            scopeScene False
+
+        "scope-closed" ->
+            scopeScene True
+
+        "cases" ->
+            MrJam.carte
+                [ MrJam.paragraphe "Les deux branches doivent atteindre la même conclusion C."
+                , formule "A\\lor B"
+                , MrJam.actions [ texteRiche "Si $A$ : $C$.", texteRiche "Si $B$ : $C$." ]
+                ]
+
+        _ ->
+            UI.none
+
+
+finiteScene : Bool -> Element Msg
+finiteScene universal =
+    MrJam.pile
+        [ formule
+            (if universal then
+                "\\forall x\\in D,\\ x^2=1"
+
+             else
+                "\\exists x\\in D,\\ x^2=1"
+            )
+        , MrJam.paragraphe
+            (if universal then
+                "Faux : toutes les propriétés doivent être vérifiées."
+
+             else
+                "Vrai : une propriété vérifiée suffit."
+            )
+        , UI.wrappedRow [ UI.width UI.fill, UI.spacing 12 ]
+            (List.intersperse
+                (UI.text
+                    (if universal then
+                        "et"
+
+                     else
+                        "ou"
+                    )
+                )
+                (List.map
+                    (\( nombre, valide ) ->
+                        UI.el [ UI.width (UI.minimum 120 UI.fill) ] <|
+                            MrJam.carte
+                                [ MrJam.paragraphe ("x = " ++ nombre)
+                                , formule
+                                    (if nombre == "−1" then
+                                        "(-1)^2=1"
+
+                                     else
+                                        nombre
+                                            ++ "^2="
+                                            ++ (if valide then
+                                                    "1"
+
+                                                else
+                                                    "0"
+                                               )
+                                    )
+                                , MrJam.texteSecondaire
+                                    (if valide then
+                                        "vérifie la propriété"
+
+                                     else
+                                        "ne la vérifie pas"
+                                    )
+                                ]
+                    )
+                    [ ( "−1", True ), ( "0", False ), ( "1", True ) ]
+                )
+            )
+        ]
+
+
+scopeScene : Bool -> Element Msg
+scopeScene closed =
+    MrJam.pile
+        [ MrJam.paragraphe "Soit x un réel."
+        , MrJam.carte
+            [ MrJam.texteSecondaire
+                (if closed then
+                    "HYPOTHÈSE DÉCHARGÉE"
+
+                 else
+                    "HYPOTHÈSE OUVERTE"
+                )
+            , texteRiche "Supposons $x>2$."
+            , MrJam.paragraphe "⋮"
+            , texteRiche "On obtient $x^2>4$."
+            ]
+        , if closed then
+            texteRiche "Donc $x>2\\Rightarrow x^2>4$."
+
+          else
+            UI.none
+        ]
+
+
+videoView : Model -> Position -> Element Msg
+videoView model pos =
+    let
+        video =
+            pos.lesson.video
+
+        started =
+            pos.index > 0 || List.any (\etape -> not (String.isEmpty (response model etape).value)) pos.lesson.steps
+    in
+    MrJam.carte
+        [ MrJam.sousTitre video.title
+        , if video.duration > 0 then
+            MrJam.texteSecondaire (clock video.duration)
+
+          else
+            UI.none
+        , if String.isEmpty video.focus then
+            UI.none
+
+          else
+            texteRiche video.focus
+        , if video.provider == "placeholder" then
+            MrJam.pile
+                [ MrJam.avis MrJam.Information "VIDÉO À VENIR"
+                , MrJam.paragraphe "La vidéo de cette leçon arrive bientôt. Vous pouvez déjà explorer les questions."
+                ]
+
+          else
+            UI.el [ UI.width (UI.minimum 0 UI.fill) ] <|
+                UI.html <|
+                    div [ class "video-integration" ]
+                        [ if video.provider == "vimeo" then
+                            node "course-video"
+                                [ attribute "video-title" video.title
+                                , attribute "src" (videoUrl video)
+                                , attribute "poster" video.poster
+                                , attribute "start" (String.fromInt video.start)
+                                , attribute "watch-url" (videoWatchUrl video)
+                                ]
+                                []
+
+                          else
+                            iframe [ title video.title, src (videoUrl video), attribute "loading" "lazy", attribute "allow" "autoplay; encrypted-media; picture-in-picture; fullscreen", attribute "allowfullscreen" "", attribute "referrerpolicy" "strict-origin-when-cross-origin" ] []
+                        ]
+        , MrJam.texteSecondaire
+            (if video.start > 0 then
+                "Passage conseillé à " ++ clock video.start ++ " · La vidéo reste accessible en entier."
+
+             else
+                "Une idée à regarder, puis à mettre à l’épreuve."
+            )
+        , if video.provider == "placeholder" then
+            UI.none
+
+          else
+            UI.html (a [ href (videoWatchUrl video), target "_blank", rel "noopener noreferrer", class "video-external" ] [ text "Ouvrir la vidéo ↗" ])
+        , MrJam.separateur
+        , MrJam.texteSecondaire
+            (if started then
+                "ON REPREND LE FIL"
+
+             else
+                "ENSUITE, À VOUS"
+            )
+        , MrJam.paragraphe pos.step.title
+        , MrJam.paragraphe "Une question à la fois. Des indices pour avancer."
+        , MrJam.lien
+            (if started then
+                "Reprendre l’exercice"
+
+             else
+                "Commencer les exercices"
+            )
+            (lessonUrl pos.track pos.lesson pos.index)
+        ]
+
+
+recapView : Model -> Position -> Element Msg
+recapView model pos =
+    let
+        done =
+            completed model pos.lesson.steps
+
+        nextLesson =
+            pos.track.lessons |> List.indexedMap Tuple.pair |> List.filter (\( _, lecon ) -> lecon.id == pos.lesson.id) |> List.head |> Maybe.andThen (\( i, _ ) -> pos.track.lessons |> List.drop (i + 1) |> List.head)
+    in
+    MrJam.carte
+        [ repere "lesson-heading" (MrJam.sousTitre "Ce qu’on vient de construire.")
+        , MrJam.texteSecondaire pos.track.shortTitle
+        , MrJam.paragraphe (String.fromInt done ++ " étapes vérifiées sur " ++ String.fromInt (List.length pos.lesson.steps) ++ ".")
+        , MrJam.pile
+            (List.map
+                (\etape ->
+                    texteRiche
+                        ((if isCorrect (response model etape) then
+                            "✓ "
+
+                          else
+                            "À reprendre · "
+                         )
+                            ++ etape.takeaway
+                        )
+                )
+                pos.lesson.steps
+            )
+        , MrJam.actions
+            [ MrJam.boutonSecondaire
+                (if done < List.length pos.lesson.steps then
+                    "Reprendre les étapes restantes"
+
+                 else
+                    "Revoir la leçon"
+                )
+                Review
+            , case nextLesson of
+                Just lecon ->
+                    MrJam.lien "Leçon suivante" (lessonEntryUrl pos.track lecon)
+
+                Nothing ->
+                    MrJam.lien "Explorer les parcours" "#/parcours"
+            ]
+        ]
+
+
+catalog : Model -> Course -> Element Msg
+catalog model course =
+    MrJam.pile
+        [ repere "lesson-heading" (MrJam.sousTitre "Trois portes d’entrée")
+        , MrJam.paragraphe "Choisissez un parcours. Chacun se construit par des questions, des essais et des raisons de recommencer."
+        , MrJam.pile
+            (List.map
+                (\parcours ->
+                    MrJam.section (parcours.symbol ++ " · " ++ parcours.title)
+                        [ MrJam.texteSecondaire (String.fromInt (completed model (List.concatMap .steps parcours.lessons)) ++ " / " ++ String.fromInt (List.length (List.concatMap .steps parcours.lessons)) ++ " étapes")
+                        , MrJam.paragraphe parcours.description
+                        , MrJam.pile
+                            (List.map
+                                (\lecon ->
+                                    MrJam.lien
+                                        (lecon.title
+                                            ++ (if completed model lecon.steps == List.length lecon.steps then
+                                                    " ✓"
+
+                                                else
+                                                    ""
+                                               )
+                                        )
+                                        (lessonEntryUrl parcours lecon)
+                                )
+                                parcours.lessons
+                            )
+                        ]
+                )
+                course.tracks
+            )
         ]
 
 
@@ -827,270 +1167,6 @@ choiceView r i choice =
         ]
 
 
-feedbackView : Step -> Response -> Html Msg
-feedbackView step r =
-    case r.verdict of
-        Nothing ->
-            text ""
-
-        Just verdict ->
-            div [ id "feedback", tabindex -1, role "status", attribute "aria-live" "polite", classList [ ( "feedback", True ), ( "success", isCorrect r ), ( "try-again", not (isCorrect r) ) ] ]
-                [ div [ class "feedback-heading" ]
-                    [ icon
-                        (if isCorrect r then
-                            "✓"
-
-                         else
-                            "↺"
-                        )
-                    , strong []
-                        [ text
-                            (if isCorrect r then
-                                "Oui, c’est cela."
-
-                             else
-                                "Reprenons ce point."
-                            )
-                        ]
-                    ]
-                , p []
-                    [ rich
-                        (case verdict of
-                            Ok _ ->
-                                step.success
-
-                            Err message ->
-                                message
-                        )
-                    ]
-                , if isCorrect r then
-                    p [ class "takeaway" ] [ rich step.takeaway ]
-
-                  else
-                    text ""
-                ]
-
-
-sceneView : Step -> Html Msg
-sceneView step =
-    case step.scene of
-        "witness" ->
-            div [ class "witness-scene", attribute "aria-label" "Deux nombres pairs peuvent avoir des moitiés différentes" ]
-                [ div [] [ span [ class "scene-label" ] [ text "Un premier entier pair" ], math "a=2", span [ class "scene-detail" ] [ text "sa moitié : 1" ] ]
-                , span [ class "scene-separator", attribute "aria-hidden" "true" ] [ text "≠" ]
-                , div [] [ span [ class "scene-label" ] [ text "Un second entier pair" ], math "b=4", span [ class "scene-detail" ] [ text "sa moitié : 2" ] ]
-                ]
-
-        "forall" ->
-            finiteScene True
-
-        "exists" ->
-            finiteScene False
-
-        "scope" ->
-            scopeScene False
-
-        "scope-closed" ->
-            scopeScene True
-
-        "cases" ->
-            div [ class "cases-scene", attribute "aria-label" "Les deux branches doivent atteindre la même conclusion C" ]
-                [ div [ class "case-branch" ] [ span [] [ text "Si A" ], span [] [ text "↓" ], strong [] [ text "C" ] ]
-                , span [ class "case-union" ] [ text "A ∨ B" ]
-                , div [ class "case-branch" ] [ span [] [ text "Si B" ], span [] [ text "↓" ], strong [] [ text "C" ] ]
-                ]
-
-        _ ->
-            text ""
-
-
-finiteScene : Bool -> Html Msg
-finiteScene universal =
-    div [ class "finite-scene" ]
-        [ div [ class "finite-heading" ]
-            [ math
-                (if universal then
-                    "\\forall x\\in D,\\ x^2=1"
-
-                 else
-                    "\\exists x\\in D,\\ x^2=1"
-                )
-            , span [ classList [ ( "truth-badge", True ), ( "false", universal ) ] ]
-                [ text
-                    (if universal then
-                        "Faux"
-
-                     else
-                        "Vrai"
-                    )
-                ]
-            ]
-        , div [ class "finite-grid" ]
-            (List.intersperse
-                (span [ class "finite-connective" ]
-                    [ text
-                        (if universal then
-                            "et"
-
-                         else
-                            "ou"
-                        )
-                    ]
-                )
-                (List.map
-                    (\( n, valid ) ->
-                        div [ classList [ ( "finite-element", True ), ( "fails", not valid ) ] ]
-                            [ span [] [ text ("x = " ++ n) ]
-                            , math
-                                (if n == "−1" then
-                                    "(-1)^2=1"
-
-                                 else
-                                    n
-                                        ++ "^2="
-                                        ++ (if valid then
-                                                "1"
-
-                                            else
-                                                "0"
-                                           )
-                                )
-                            , span [ class "element-verdict" ]
-                                [ text
-                                    (if valid then
-                                        "vérifie la propriété"
-
-                                     else
-                                        "ne la vérifie pas"
-                                    )
-                                ]
-                            ]
-                    )
-                    [ ( "−1", True ), ( "0", False ), ( "1", True ) ]
-                )
-            )
-        ]
-
-
-scopeScene : Bool -> Html Msg
-scopeScene closed =
-    div [ classList [ ( "scope-scene", True ), ( "closed", closed ) ] ]
-        [ div [ class "scope-outside" ] [ text "Soit x un réel." ]
-        , div [ class "scope-block" ]
-            [ span [ class "scope-tag" ]
-                [ text
-                    (if closed then
-                        "HYPOTHÈSE DÉCHARGÉE"
-
-                     else
-                        "HYPOTHÈSE OUVERTE"
-                    )
-                ]
-            , p [] [ rich "Supposons $x>2$." ]
-            , p [] [ text "⋮" ]
-            , p [] [ rich "On obtient $x^2>4$." ]
-            ]
-        , if closed then
-            div [ class "scope-outside conclusion" ] [ rich "Donc $x>2\\Rightarrow x^2>4$." ]
-
-          else
-            text ""
-        ]
-
-
-videoView : Model -> Position -> Html Msg
-videoView model pos =
-    let
-        video =
-            pos.lesson.video
-
-        started =
-            pos.index > 0 || List.any (\s -> not (String.isEmpty (response model s).value)) pos.lesson.steps
-    in
-    section [ class "video-section", attribute "aria-label" "La leçon en vidéo" ]
-        [ if video.provider /= "placeholder" then
-            div [ class "video-heading" ]
-                [ h2 [] [ text video.title ]
-                , if video.duration > 0 then
-                    span [ class "video-duration" ] [ text (clock video.duration) ]
-
-                  else
-                    text ""
-                ]
-
-          else
-            text ""
-        , if String.isEmpty video.focus then
-            text ""
-
-          else
-            p [ class "video-focus" ] [ rich video.focus ]
-        , div [ class "video-content" ]
-            [ if video.provider == "placeholder" then
-                div [ class "video-placeholder" ]
-                    [ span [ class "video-status" ] [ text "VIDÉO À VENIR" ]
-                    , span [ class "video-proof-mark", attribute "aria-hidden" "true" ] [ text "⊢" ]
-                    , strong [] [ text video.title ]
-                    , p [] [ text "La vidéo de cette leçon arrive bientôt. Vous pouvez déjà explorer les questions." ]
-                    ]
-
-              else if video.provider == "vimeo" then
-                node "course-video"
-                    [ attribute "video-title" video.title
-                    , attribute "src" (videoUrl video)
-                    , attribute "poster" video.poster
-                    , attribute "start" (String.fromInt video.start)
-                    , attribute "watch-url" (videoWatchUrl video)
-                    ]
-                    []
-
-              else
-                iframe [ title video.title, src (videoUrl video), attribute "loading" "lazy", attribute "allow" "autoplay; encrypted-media; picture-in-picture; fullscreen", attribute "allowfullscreen" "", attribute "referrerpolicy" "strict-origin-when-cross-origin" ] []
-            ]
-        , div [ class "video-caption" ]
-            [ span []
-                [ text
-                    (if video.start > 0 then
-                        "Passage conseillé à " ++ clock video.start ++ " · La vidéo reste accessible en entier."
-
-                     else
-                        "Une idée à regarder, puis à mettre à l’épreuve."
-                    )
-                ]
-            , if video.provider /= "placeholder" then
-                a [ href (videoWatchUrl video), target "_blank", rel "noopener noreferrer", class "video-external" ] [ text "Ouvrir la vidéo", icon "↗" ]
-
-              else
-                text ""
-            ]
-        , div [ class "video-next" ]
-            [ div []
-                [ p [ class "eyebrow" ]
-                    [ text
-                        (if started then
-                            "ON REPREND LE FIL"
-
-                         else
-                            "ENSUITE, À VOUS"
-                        )
-                    ]
-                , h2 [] [ text pos.step.title ]
-                , p [] [ text "Une question à la fois. Des indices pour avancer." ]
-                ]
-            , a [ href (lessonUrl pos.track pos.lesson pos.index), class "primary" ]
-                [ text
-                    (if started then
-                        "Reprendre l’exercice"
-
-                     else
-                        "Commencer les exercices"
-                    )
-                , icon "→"
-                ]
-            ]
-        ]
-
-
 clock : Int -> String
 clock seconds =
     String.fromInt (seconds // 60) ++ ":" ++ String.padLeft 2 '0' (String.fromInt (modBy 60 seconds))
@@ -1120,93 +1196,3 @@ videoUrl video =
 
             _ ->
                 "https://player.vimeo.com/video/" ++ video.id
-
-
-recapView : Model -> Position -> Html Msg
-recapView model pos =
-    let
-        done =
-            completed model pos.lesson.steps
-
-        nextLesson =
-            pos.track.lessons |> List.indexedMap Tuple.pair |> List.filter (\( _, l ) -> l.id == pos.lesson.id) |> List.head |> Maybe.andThen (\( i, _ ) -> pos.track.lessons |> List.drop (i + 1) |> List.head)
-    in
-    section [ class "recap" ]
-        [ p [ class "eyebrow" ] [ text pos.track.shortTitle ]
-        , div [ class "recap-symbol", attribute "aria-hidden" "true" ] [ text "⊢" ]
-        , h1 [ id "lesson-heading", tabindex -1 ] [ text "Ce qu’on vient de construire." ]
-        , p [ class "intro" ] [ text (String.fromInt done ++ " étapes vérifiées sur " ++ String.fromInt (List.length pos.lesson.steps) ++ ".") ]
-        , ul [ class "takeaways" ]
-            (List.map
-                (\s ->
-                    li []
-                        [ span [ classList [ ( "recap-check", True ), ( "pending", not (isCorrect (response model s)) ) ] ]
-                            [ text
-                                (if isCorrect (response model s) then
-                                    "✓"
-
-                                 else
-                                    "·"
-                                )
-                            ]
-                        , rich s.takeaway
-                        ]
-                )
-                pos.lesson.steps
-            )
-        , div [ class "recap-actions" ]
-            [ button [ onClick Review, class "secondary" ]
-                [ text
-                    (if done < List.length pos.lesson.steps then
-                        "Reprendre les étapes restantes"
-
-                     else
-                        "Revoir la leçon"
-                    )
-                ]
-            , case nextLesson of
-                Just l ->
-                    a [ href (lessonEntryUrl pos.track l), class "primary" ] [ text "Leçon suivante", icon "→" ]
-
-                Nothing ->
-                    a [ href "#/parcours", class "primary" ] [ text "Explorer les parcours", icon "→" ]
-            ]
-        ]
-
-
-catalog : Model -> Course -> Html Msg
-catalog model course =
-    main_ [ class "catalog" ]
-        [ p [ class "eyebrow" ] [ text "TROIS PORTES D’ENTRÉE" ]
-        , h1 [ id "lesson-heading", tabindex -1 ] [ text "Apprendre à démontrer." ]
-        , p [ class "intro" ] [ text "Choisissez un parcours. Chacun se construit par des questions, des essais et des raisons de recommencer." ]
-        , div [ class "track-catalog" ]
-            (List.map
-                (\t ->
-                    section [ class "catalog-track" ]
-                        [ div [ class "catalog-track-heading" ] [ span [ class "catalog-number" ] [ text t.symbol ], span [ class "catalog-progress" ] [ text (String.fromInt (completed model (List.concatMap .steps t.lessons)) ++ " / " ++ String.fromInt (List.length (List.concatMap .steps t.lessons)) ++ " étapes") ] ]
-                        , h2 [] [ text t.title ]
-                        , p [] [ text t.description ]
-                        , ol []
-                            (List.map
-                                (\l ->
-                                    li []
-                                        [ a [ href (lessonEntryUrl t l) ]
-                                            [ span [] [ text l.title ]
-                                            , icon
-                                                (if completed model l.steps == List.length l.steps then
-                                                    "✓"
-
-                                                 else
-                                                    "→"
-                                                )
-                                            ]
-                                        ]
-                                )
-                                t.lessons
-                            )
-                        ]
-                )
-                course.tracks
-            )
-        ]
