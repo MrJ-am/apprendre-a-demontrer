@@ -9,6 +9,12 @@ n'est réécrit. Le DOM conserve les six caractères ordinaires `MrJ.am`.
 
 Après la construction et les tests applicatifs ordinaires :
 
+Le dépôt Signature est privé. Ces commandes s'exécutent dans un atelier
+autorisé à le lire, ou avec ses trois fichiers originaux déjà placés dans
+`.cache/signature/web/` (les deux WOFF2) et
+`.cache/signature/fonts/Parisienne-OFL.txt`. Toutes les empreintes restent
+contrôlées, même lorsque les fichiers sont fournis par l'atelier.
+
 ```sh
 npm run build
 npm run preparer:identite
@@ -42,9 +48,13 @@ les contrôles. `hebergementConfirme` et `publicationAutorisee` restent faux.
 
 ## Archives et activation
 
-Le workflow archive uniquement `dist`, `controles-interface` et
-`controles-typographie` : les polices de l'atelier ne sont pas distribuées dans
-les archives de préparation, conformément au contrat du style commun.
+La CI publique conserve les contrôles fonctionnels ordinaires. La validation
+complète s'exécute dans le dépôt privé Signature, sur la branche
+`validation/logique-typographie`, avec une révision applicative exacte.
+Ce workflow n'a ni secret VPS ni droit de publication. Il archive uniquement
+`dist`, `controles-interface` et `controles-typographie` : les polices de
+l'atelier ne sont pas distribuées dans les archives de préparation,
+conformément au contrat du style commun.
 Le rapport conserve les empreintes du candidat complet ; il n'autorise pas
 à déclarer la typographie de l'archive `dist` complète.
 
