@@ -95,7 +95,7 @@ Cinq vidéos du dossier « Théorie de la démonstration » sont utilisées dans
 
 La leçon « Qui choisit après qui ? » garde sa vidéo à venir. Les autres vidéos du dossier restent des ressources pour les prochaines séquences, sans association forcée à une leçon.
 
-Les vidéos actuelles utilisent une liste de domaines autorisés dans Vimeo. Pour activer la lecture intégrée sur ce site, ajouter ~apprendre-a-demontrer.valid-rhino-3109.chatgpt.site~ aux domaines autorisés dans Partager → Intégrer. Le lecteur essaie l’intégration normalement et offre un lien de secours en cas de refus ; il ne contourne pas ces restrictions. Aucun jeton API ni sous-titre téléchargé n’est inclus dans le site.
+Les vidéos actuelles utilisent une liste de domaines autorisés dans Vimeo. Pour activer la lecture intégrée sur ce site, ajouter ~logique.echos.systems~ aux domaines autorisés dans Partager → Intégrer. Le lecteur essaie l’intégration normalement et offre un lien de secours en cas de refus ; il ne contourne pas ces restrictions. Aucun jeton API ni sous-titre téléchargé n’est inclus dans le site.
 
 Pour rétablir un emplacement provisoire, choisir ~VIDEO_PROVIDER: placeholder~ et supprimer les autres propriétés ~VIDEO_*~.
 
