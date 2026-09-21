@@ -41,6 +41,9 @@ math-tex[display-mode] {
   left: 16px;
   z-index: 100;
 }
+.skip-link:not(:focus) {
+  clip-path: inset(50%);
+}
 .skip-link:focus {
   top: 12px;
   padding: 12px;
@@ -50,6 +53,7 @@ math-tex[display-mode] {
 }
 .saisies-historiques,
 .selection-historique {
+  white-space: normal;
   width: 100%;
   min-width: 0;
   --green: #087f71;
@@ -181,6 +185,7 @@ math-tex[display-mode] {
 }
 .video-integration,
 course-video {
+  white-space: normal;
   width: 100%;
   min-width: 0;
   --green: #087f71;

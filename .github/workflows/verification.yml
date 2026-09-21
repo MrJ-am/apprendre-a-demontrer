@@ -7,8 +7,11 @@ permissions:
 jobs:
   verifier:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -19,7 +22,15 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - run: node_modules/.bin/elm-format src tests/Check.elm --validate
+      - run: python3 -m pip install -r tests/requirements.txt
+      - run: python3 -m playwright install --with-deps chromium
+      - run: npm run test:interface
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: apprendre-a-demontrer
-          path: dist
+          name: apprendre-a-demontrer-preparation
+          path: |
+            dist
+            controles-interface
+          retention-days: 7
