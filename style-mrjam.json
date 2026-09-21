@@ -1,9 +1,9 @@
 {
   "depot": "MrJ-am/style-mrjam",
-  "revision": "52ad33f881b50feef91d60915d17bae90abfc592",
+  "revision": "e8137349cdfdfd1dc0ea488af97d005fe81e3479",
   "elm-ui": "1.1.8",
   "fichiers": {
-    "src/MrJam.elm": "99ad5f5449f55ed1a22506387149991078311702",
+    "src/MrJam.elm": "9c72b1389d10b11345de53de114e3f0e822f2ac5",
     "src/MrJam/Identite.elm": "5e63eb95897b9b39135832e53f32e6853558dbcb",
     "src/MrJam/Theme.elm": "08aa4f2a6eedb02497bc93d3df89ca5c5b51bdee",
     "identite.json": "8ed87df9e74063ca6a818b464ff6764466f3ad6d",
