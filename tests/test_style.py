@@ -6,12 +6,13 @@ import unittest
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parents[1]
+REVISION_STYLE = "e8137349cdfdfd1dc0ea488af97d005fe81e3479"
 
 
 class StyleCommun(unittest.TestCase):
     def test_revision_exacte(self):
         verrou = json.loads((RACINE / "style-mrjam.json").read_text())
-        self.assertEqual(verrou["revision"], "52ad33f881b50feef91d60915d17bae90abfc592")
+        self.assertEqual(verrou["revision"], REVISION_STYLE)
         self.assertEqual(verrou["elm-ui"], "1.1.8")
 
     def test_contrats_preserves(self):
