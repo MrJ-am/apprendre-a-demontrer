@@ -70,7 +70,7 @@ writeFileSync(
       application: process.env.GITHUB_SHA ?? null,
       style: verrou.revision,
       signature: identite.revision,
-      portageComplet: false,
+      portageComplet: true,
       typographieValidee: false,
       hebergementConfirme: false,
       publicationAutorisee: false,

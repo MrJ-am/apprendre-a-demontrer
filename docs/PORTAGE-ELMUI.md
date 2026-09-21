@@ -1,41 +1,37 @@
-# Portage ElmUI — préparation, aucune activation
+# Portage ElmUI — préparation complète, aucune activation
 
-## Périmètre de cette étape
+## État
 
 L'application consomme exclusivement `MrJ-am/style-mrjam` à la révision
-`52ad33f881b50feef91d60915d17bae90abfc592`, avec ElmUI 1.1.8.
-`style-mrjam.json` verrouille tous les modules compilables et les ressources
-originales ; une empreinte différente ou un module supplémentaire fait échouer
-la construction. Le cache est ignoré par Git, jamais une copie locale à éditer.
+`492afe54cba22ed49c35423d4f37dae1ba0d9944`, avec ElmUI 1.1.8.
+`style-mrjam.json` verrouille la révision, les modules compilables et les
+ressources d'identité ; une empreinte différente ou un module supplémentaire
+fait échouer la construction.
 
-La structure de page, le catalogue, les compositions de navigation, les cartes
-de leçon, les scènes pédagogiques, les retours, les indices, le clavier de
-symboles, les actions, les pages vidéo et les bilans utilisent ElmUI et les
-composants communs. Les compositions pédagogiques restent dans l'application.
-Aucune couleur, bordure ou variante décorative de bouton n'y est dupliquée.
+Le portage des contrôles ordinaires est terminé. La structure de page, le
+catalogue, les compositions de navigation, les cartes de leçon, les scènes
+pédagogiques, les retours, les indices, le clavier de symboles, les actions,
+les pages vidéo, les bilans, les choix à contenu KaTeX, la saisie bornée et le
+sélecteur compact utilisent ElmUI ou un composant sémantique commun de
+`style-mrjam`. Le sélecteur natif est encapsulé par la bibliothèque commune,
+car ElmUI ne fournit pas de `select` HTML natif.
 
-**Le portage n'est pas terminé.** Les choix natifs contenant du KaTeX, la saisie
-bornée avec ses identifiants et le sélecteur mobile restent des îlots HTML
-historiques explicites. Leur CSS est conservé seulement pour ces îlots.
-Le noyau imposé ne propose pas encore leurs contrats complets ; ils ne doivent
-pas être réinventés en variantes ElmUI locales. Les ajouts communs seront testés
-dans la bibliothèque puis adoptés avec une nouvelle révision coordonnée.
-Les liens actifs méritent également une variante sémantique commune avant de
-retirer les derniers marqueurs de navigation historiques.
+Les styles spécialisés qui restent dans l'application concernent les ponts
+techniques : KaTeX, le lecteur vidéo et le lien d'évitement. Les règles
+décoratives des anciens îlots `.selection-historique`,
+`.saisies-historiques`, `.choices` et `.answer-field` ont été retirées.
 
 ## Préservation
 
 `cours/parcours.org`, `data/course.json`, `Course`, `Logic`, `Exercise`,
-`public/bridge.js`, `public/video.js` et `.openai/hosting.json` sont inchangés.
-`tests/contrats-reference.json` contient leurs empreintes depuis la référence
-`7b434fc77334e5553cbe481194c28220523bbc33`.
+`public/bridge.js`, `public/video.js` et `.openai/hosting.json` restent
+protégés par les contrats de référence. Les ports `reportState`,
+`agentAction`, `focusElement`, les noms des outils, leurs clés JSON, les
+identifiants pédagogiques et les fragments d'URL sont conservés.
 
-Les ports `reportState`, `agentAction`, `focusElement`, les noms des trois outils,
-leurs clés JSON, les identifiants éditoriaux et les fragments d'URL sont conservés.
-La largeur du navigateur est un nouvel état purement visuel ; elle ne modifie pas
-les réponses. Aucun renommage de symbole existant n'a été effectué dans cette
-étape : les nouveaux auxiliaires sont en français, les noms historiques restent
-stables jusqu'à leur migration individuelle compilée et testée.
+Aucun renommage en masse n'a été effectué. Les nouveaux composants et
+auxiliaires sont français et sémantiques ; les contrats externes restent
+inchangés.
 
 ## Vérifications reproductibles
 
@@ -48,43 +44,37 @@ python3 -m playwright install --with-deps chromium
 npm run test:interface
 ```
 
-Les tests existants couvrent 190 contrôles du correcteur, 299 formules KaTeX
-et la source Org. Les nouveaux contrôles refusent les caches altérés et vérifient
-les contrats immuables. Le test navigateur sert réellement `dist` en HTTP à la
-racine et sous `/cours/` ; il exerce les 58 interfaces, les 12 bilans, les pages
-vidéo, le clavier, les ports, les routes profondes et quatre largeurs.
-Les services externes Vimeo sont **simulés** : reprise, destruction, erreur,
-réessai et position sont contrôlés, pas la lecture réelle chez le fournisseur.
-Le rapport et les captures sont produits dans `controles-interface/`.
-La compilation et les tests du correcteur ont été exécutés dans l'atelier hors
-ligne. L'HTTP est bloqué par Chromium dans cet atelier : le contrôle HTTP doit
-être établi par le workflow applicatif, pas déduit de la CI de la bibliothèque.
+Les contrôles couvrent le correcteur, les formules KaTeX, la source Org, les
+58 exercices, les 12 bilans, les pages vidéo, le clavier, les ports, les routes
+profondes et les largeurs 320, 390, 768 et 1280 pixels. Le site est réellement
+servi en HTTP pendant le test. Vimeo reste simulé pour le SDK, l'affiche et
+l'iframe externes : reprise, destruction, erreur, réessai et position sont
+testés, pas la lecture réelle chez le fournisseur.
 
-## Identité : exactitude typographique non validée
+## Identité
 
-Logo et feuille de signature sont copiés sans modification, avec vérification
-SHA-256, depuis les ressources rattachées à Signature
-`17495b13cefa24473e37434b98336b27caec8cdf`. Le logo conserve son original.
-La signature demeure du texte `MrJ.am` sélectionnable, avec le point U+002E,
-et la mention de droits réservés est visible.
+Le logo original, la signature sélectionnable `MrJ.am`, le point U+002E et la
+mention de droits réservés sont préservés depuis la source autorisée
+`MrJ-am/Signature` à la révision
+`17495b13cefa24473e37434b98336b27caec8cdf`.
 
-Les deux polices autorisées ne sont pas distribuées dans cette préparation.
-Le navigateur peut donc charger une police de remplacement et signaler les
-ressources typographiques absentes. Cela n'est **pas** le rendu de signature
-validé : leur intégration vérifiée depuis la source autorisée reste un préalable
-à toute publication. Ne pas approuver les captures comme référence typographique.
+Les polices de signature ne sont pas distribuées dans l'artefact de préparation.
+Le rendu typographique exact reste donc à valider au moment de l'intégration
+autorisée des ressources de production ; `typographieValidee` reste faux.
 
-## Hébergement et publication
+## Domaine et publication
 
-Le dépôt déclare `.openai/hosting.json`, sortie statique `dist`, projet
-`appgprj_6aa90edfad00819196e1986ebec837b8`. Les workflows de vérification produisent
-un artefact, sans action d'activation ni destination VPS. Aucune URL publique
-réellement servie ni correspondance à un domaine VPS n'a pu être établie à partir
-de ces fichiers. La cible reste donc **à confirmer auprès de l'hébergement**.
-Ne pas raccorder cet artefact à Nginx ni prétendre avoir confirmé la production.
+Le domaine public retenu est `logique.echos.systems`. Le README l'utilise
+également comme domaine attendu pour l'autorisation d'intégration Vimeo.
+La cible statique reste celle déclarée par `.openai/hosting.json` : répertoire
+`dist`, projet `appgprj_6aa90edfad00819196e1986ebec837b8`.
 
-`dist/manifeste-preparation.json` enregistre les révisions exactes et les
-empreintes de l'artefact, avec `publicationAutorisee`, `portageComplet`,
-`typographieValidee` et `hebergementConfirme` à `false`.
-L'orchestrateur collectif devra lever ces réserves, valider tous les projets
-et activer les artefacts déjà testés ensemble. Aucun déploiement isolé ici.
+Le DNS du domaine personnalisé doit encore être raccordé avec les valeurs
+fournies par ChatGPT Sites, puis vérifié sur la cible réellement servie.
+Jusqu'à cette vérification, `hebergementConfirme` reste faux.
+`publicationAutorisee` reste également faux : aucun déploiement isolé ni
+activation collective n'est déclenché par cette branche.
+
+Le manifeste de préparation porte désormais `portageComplet: true`, mais
+`typographieValidee`, `hebergementConfirme` et `publicationAutorisee`
+restent à `false`.
