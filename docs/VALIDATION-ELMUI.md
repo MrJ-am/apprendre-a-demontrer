@@ -33,25 +33,26 @@ ports, les routes profondes et les largeurs 320, 390, 768 et 1280 pixels.
 reprise, destruction, erreur, réessai et position sont contrôlés, pas la lecture
 réelle chez le fournisseur.
 
-## Identité
+## Identité de l'archive fonctionnelle initiale
 
 Le logo original, la signature sélectionnable `MrJ.am`, le point U+002E et les
 droits réservés sont préservés depuis `MrJ-am/Signature` à la révision
 `17495b13cefa24473e37434b98336b27caec8cdf`.
 
-Les polices autorisées ne sont pas distribuées dans l'artefact de préparation.
-Le rendu typographique exact n'est donc pas encore une référence de production ;
-`typographieValidee` reste à `false`.
+Les polices autorisées ne sont pas distribuées dans l'artefact de préparation ;
+son indicateur `typographieValidee` reste à `false`. L'intégration complète
+et les contrôles supplémentaires sont décrits dans [TYPOGRAPHIE.md](TYPOGRAPHIE.md).
 
 ## Domaine et publication
 
 Le domaine retenu est `logique.echos.systems`. Le README le déclare aussi comme
 domaine à autoriser pour l'intégration Vimeo.
 
-La cible statique reste celle de `.openai/hosting.json` : répertoire `dist`,
-projet `appgprj_6aa90edfad00819196e1986ebec837b8`. Le domaine personnalisé doit
-encore être ajouté dans ChatGPT Sites puis raccordé au DNS Alwaysdata avec les
-valeurs fournies par Sites.
+La cible retenue est Nginx sur le VPS `187.77.95.158`, depuis
+`/srv/logique/current`. L'ancienne déclaration `.openai/hosting.json` n'est
+plus la cible souhaitée. La construction des candidats système a réussi dans
+`MrJ-am/vps-infrastructure`, exécution `35659924636`, sans activation.
+Le certificat réel et les contrôles du site publié restent à effectuer.
 
 Aucun déploiement isolé, aucune fusion de branche principale et aucune activation
 collective n'ont été effectués. `hebergementConfirme`, `typographieValidee`

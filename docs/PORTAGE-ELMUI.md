@@ -59,22 +59,24 @@ mention de droits réservés sont préservés depuis la source autorisée
 `17495b13cefa24473e37434b98336b27caec8cdf`.
 
 Les polices de signature ne sont pas distribuées dans l'artefact de préparation.
-Le rendu typographique exact reste donc à valider au moment de l'intégration
-autorisée des ressources de production ; `typographieValidee` reste faux.
+L'atelier `.cache/site-complet` les intègre depuis la révision autorisée avec
+contrôle des empreintes et de la licence. `npm run test:typographie` contrôle
+leur chargement HTTP, la géométrie et le copier-coller natif à quatre largeurs,
+à la racine et sous préfixe. Voir [TYPOGRAPHIE.md](TYPOGRAPHIE.md).
 
 ## Domaine et publication
 
 Le domaine public retenu est `logique.echos.systems`. Le README l'utilise
 également comme domaine attendu pour l'autorisation d'intégration Vimeo.
-La cible statique reste celle déclarée par `.openai/hosting.json` : répertoire
-`dist`, projet `appgprj_6aa90edfad00819196e1986ebec837b8`.
-
-Le DNS du domaine personnalisé doit encore être raccordé avec les valeurs
-fournies par ChatGPT Sites, puis vérifié sur la cible réellement servie.
-Jusqu'à cette vérification, `hebergementConfirme` reste faux.
+La cible retenue est Nginx sur le VPS `187.77.95.158`, avec
+`/srv/logique/current`. Le DNS et les candidats système sont vérifiés par
+`MrJ-am/vps-infrastructure` ; HTTPS attend son vrai certificat et les contrôles
+sur le domaine publié. `.openai/hosting.json` est une trace historique.
+Jusqu'à la validation de la cible servie, `hebergementConfirme` reste faux.
 `publicationAutorisee` reste également faux : aucun déploiement isolé ni
 activation collective n'est déclenché par cette branche.
 
-Le manifeste de préparation porte désormais `portageComplet: true`, mais
-`typographieValidee`, `hebergementConfirme` et `publicationAutorisee`
-restent à `false`.
+Le manifeste de `dist` garde `portageComplet: true` et les trois autres
+indicateurs à `false`, car cette archive n'inclut pas les polices. Seul le
+candidat complet contrôlé reçoit `typographieValidee: true` après les tests ;
+les indicateurs d'hébergement et de publication restent faux.
