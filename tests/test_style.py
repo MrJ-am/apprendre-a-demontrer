@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parents[1]
-REVISION_STYLE = "e8137349cdfdfd1dc0ea488af97d005fe81e3479"
+REVISION_STYLE = "492afe54cba22ed49c35423d4f37dae1ba0d9944"
 
 
 class StyleCommun(unittest.TestCase):
@@ -26,8 +26,13 @@ class StyleCommun(unittest.TestCase):
     def test_pas_de_theme_local(self):
         self.assertNotIn("import MrJam.Theme", (RACINE / "src/Main.elm").read_text())
         css = (RACINE / "public/style.css").read_text()
-        for selecteur in [".topbar", ".catalog-track", ".lesson-content", ".site-footer"]:
+        for selecteur in [".topbar", ".catalog-track", ".lesson-content", ".site-footer", ".selection-historique", ".saisies-historiques", ".choices", ".answer-field"]:
             self.assertNotIn(selecteur, css)
+        source = (RACINE / "src/Main.elm").read_text()
+        self.assertNotIn("saisieHistorique", source)
+        self.assertIn("MrJam.selecteur", source)
+        self.assertIn("MrJam.choixRiches", source)
+        self.assertIn("MrJam.champIdentifieSoumis", source)
 
     def controle_cache(self):
         return subprocess.run(["node", "--input-type=module", "-e", "import { preparerStyle } from './scripts/preparer-style.mjs'; preparerStyle();"], cwd=RACINE, capture_output=True, text=True)

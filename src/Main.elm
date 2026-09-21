@@ -5,14 +5,14 @@ import Browser.Dom
 import Browser.Events
 import Browser.Navigation as Nav
 import Char
-import Course exposing (Choice, Course, Kind(..), Lesson, Step, Track)
+import Course exposing (Course, Kind(..), Lesson, Step, Track)
 import Dict exposing (Dict)
 import Element as UI exposing (Element)
 import Element.Region as Region
 import Exercise
 import Html exposing (..)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick, onInput, onSubmit)
+import Html.Events exposing (onClick)
 import Json.Decode as D
 import Json.Encode as E
 import MrJam
@@ -570,12 +570,10 @@ sidebar model course pos =
 
         lecons =
             if model.largeur < 1000 then
-                UI.html <|
-                    label [ class "selection-historique" ]
-                        [ span [] [ text "Leçon" ]
-                        , select [ value pos.lesson.id, onInput SelectLesson ]
-                            (List.indexedMap (\i lecon -> option [ value lecon.id ] [ text (String.fromInt (i + 1) ++ " · " ++ lecon.title) ]) pos.track.lessons)
-                        ]
+                MrJam.selecteur "Leçon"
+                    (List.indexedMap (\i lecon -> ( lecon.id, String.fromInt (i + 1) ++ " · " ++ lecon.title )) pos.track.lessons)
+                    pos.lesson.id
+                    SelectLesson
 
             else
                 UI.el [ UI.width UI.fill, UI.htmlAttribute (role "navigation"), UI.htmlAttribute (attribute "aria-label" "Leçons") ] <|
@@ -692,7 +690,7 @@ exerciseView model pos =
         , MrJam.carte
             [ MrJam.texteSecondaire "À VOUS DE JOUER"
             , UI.paragraph [ UI.width UI.fill, Region.heading 2, UI.htmlAttribute (id "question-heading") ] (List.map UI.html (richInline pos.step.question))
-            , UI.el [ UI.width (UI.minimum 0 UI.fill) ] (UI.html (saisieHistorique pos.step r))
+            , saisieReponse pos.step r
             , if pos.step.kind == Rewrite then
                 navigation "Symboles logiques"
                     (List.map (\( libelle, insertion ) -> MrJam.boutonSecondaire libelle (AppendSymbol insertion))
@@ -768,52 +766,55 @@ exerciseView model pos =
         ]
 
 
-{-| Îlot conservé, non réécrit : libellés KaTeX, radio natif, saisie bornée,
-identifiants de focus et soumission Entrée. Il sera remplacé par les composants
-communs riches après validation coordonnée de leur nouvelle révision.
+{-| Saisie pédagogique composée uniquement de composants communs. Le rendu
+KaTeX reste fourni comme contenu riche ; la correction reste dans Exercise.
 -}
-saisieHistorique : Step -> Response -> Html Msg
-saisieHistorique etape reponse =
-    Html.form [ id "answer-form", class "saisies-historiques", onSubmit Verify ]
-        [ case etape.kind of
-            ChoiceQuestion ->
-                div [ class "choices", role "radiogroup", attribute "aria-labelledby" "question-heading" ]
-                    (List.indexedMap (choiceView reponse) etape.choices)
+saisieReponse : Step -> Response -> Element Msg
+saisieReponse etape reponse =
+    case etape.kind of
+        ChoiceQuestion ->
+            MrJam.choixRiches "Votre réponse"
+                (List.map
+                    (\possibilite ->
+                        ( possibilite.id
+                        , UI.paragraph [ UI.width UI.fill ] (List.map UI.html (richInline possibilite.label))
+                        )
+                    )
+                    etape.choices
+                )
+                (if String.isEmpty reponse.value then
+                    Nothing
 
-            _ ->
-                div []
-                    [ label [ for "answer-input", class "sr-only" ] [ text "Votre réponse" ]
-                    , div [ class "answer-field" ]
-                        [ input
-                            [ id "answer-input"
-                            , type_ "text"
-                            , value reponse.value
-                            , onInput Edit
-                            , maxlength 500
-                            , autocomplete False
-                            , spellcheck False
-                            , attribute "autocapitalize" "off"
-                            , attribute "aria-describedby"
-                                (if etape.kind == Rewrite then
-                                    "syntax-help"
+                 else
+                    Just reponse.value
+                )
+                Edit
 
-                                 else
-                                    "answer-help"
-                                )
-                            , placeholder
-                                (if etape.kind == Rewrite then
-                                    "Votre formule…"
+        _ ->
+            MrJam.champIdentifieSoumis
+                { identifiant = "answer-input"
+                , libelle = "Votre réponse"
+                , aide =
+                    Just
+                        (if etape.kind == Rewrite then
+                            "syntax-help"
 
-                                 else
-                                    "Votre réponse…"
-                                )
-                            , classList [ ( "valid", isCorrect reponse ) ]
-                            ]
-                            []
-                        ]
-                    ]
-        , button [ type_ "submit", hidden True, tabindex -1 ] [ text "Vérifier" ]
-        ]
+                         else
+                            "answer-help"
+                        )
+                , exemple =
+                    Just
+                        (if etape.kind == Rewrite then
+                            "Votre formule…"
+
+                         else
+                            "Votre réponse…"
+                        )
+                , limite = Just 500
+                }
+                reponse.value
+                Edit
+                Verify
 
 
 feedbackView : Step -> Response -> Element Msg
@@ -1130,40 +1131,6 @@ catalog model course =
                 )
                 course.tracks
             )
-        ]
-
-
-choiceView : Response -> Int -> Choice -> Html Msg
-choiceView r i choice =
-    label
-        [ classList
-            [ ( "choice", True )
-            , ( "selected", r.value == choice.id )
-            , ( "correct", r.value == choice.id && isCorrect r )
-            , ( "retry"
-              , r.value
-                    == choice.id
-                    && (case r.verdict of
-                            Just (Err _) ->
-                                True
-
-                            _ ->
-                                False
-                       )
-              )
-            ]
-        ]
-        [ input [ type_ "radio", name "answer", value choice.id, checked (r.value == choice.id), onInput (\_ -> Edit choice.id) ] []
-        , span [ class "choice-letter", attribute "aria-hidden" "true" ]
-            [ text
-                (if r.value == choice.id && isCorrect r then
-                    "✓"
-
-                 else
-                    String.fromChar (Char.fromCode (65 + i))
-                )
-            ]
-        , span [ class "choice-text" ] (richInline choice.label)
         ]
 
 
