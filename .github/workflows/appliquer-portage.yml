@@ -27,12 +27,11 @@ jobs:
           import base64, gzip, hashlib, json
           from pathlib import Path
           transfert = ''.join(p.read_text().strip() for p in sorted(Path('.atelier-portage').glob('*.b64')))
-          # Corriger deux erreurs de transcription du transport, puis vérifier les octets.
           transfert = transfert.replace('HXzlIfVCII+WHE', 'HXzlIfVCI+WHE').replace('RhLIr3d0f19uTO5', 'RhLIr3d0d19uTO5')
           octets = base64.b64decode(transfert, validate=True)
           empreinte = hashlib.sha256(octets).hexdigest()
           print('Empreinte du transfert :', empreinte)
-          assert empreinte == '4db802e602949125b8e02fa11ec9f8f3c7c89c04f657c2b1d90ba9fce6ad7925', 'Le transfert diffère des sources compilées.'
+          assert empreinte == '4db802e602949125b8e02fa11ec9f8f3c7c89c04f657c2b1d90ba9fce6ad7925'
           fichiers = json.loads(gzip.decompress(octets))
           autorises = set('''
           .github/workflows/atelier-style.yml
@@ -57,6 +56,8 @@ jobs:
           for nom, contenu in fichiers.items():
               chemin = Path(nom)
               assert not chemin.is_absolute() and '..' not in chemin.parts
+              if nom.startswith('.github/'):
+                  continue  # Le runner n'a pas le droit de modifier les workflows.
               chemin.parent.mkdir(parents=True, exist_ok=True)
               chemin.write_text(contenu)
           PY
@@ -72,10 +73,10 @@ jobs:
           set -euo pipefail
           test "$(git ls-remote origin refs/heads/migration/style-mrjam | cut -f1)" = "$GITHUB_SHA"
           rm -r .atelier-portage
-          rm .github/workflows/appliquer-portage.yml
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
           git add --all
+          git diff --cached --quiet -- .github/workflows
           git commit -m 'Porter les compositions en ElmUI et vérifier les contrats applicatifs'
           git push origin HEAD:refs/heads/migration/style-mrjam
           echo "revision=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
