@@ -67,7 +67,7 @@ def verifier_saisie(page, etape, valeur):
     if etape["kind"] == "choice":
         index = next(i for i, choix in enumerate(etape["choices"]) if choix["id"] == valeur)
         groupe = page.get_by_role("radiogroup", name="Votre réponse", exact=True)
-        groupe.get_by_role("radio").nth(index).check()
+        groupe.get_by_role("radio").nth(index).click()
     else:
         page.get_by_label("Votre réponse", exact=True).fill(valeur)
     page.get_by_role("button", name="Vérifier", exact=True).click()
