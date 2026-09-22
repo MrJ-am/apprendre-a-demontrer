@@ -1,5 +1,13 @@
 # Domaine et interface — 22 septembre 2026
 
+Le site est publié depuis le 22 septembre à 11:13 UTC sur
+[logique.echos.systems](https://logique.echos.systems/?accueil=1).
+L'[activation VPS 35720088997](https://github.com/MrJ-am/vps-infrastructure/actions/runs/35720088997)
+a vérifié le certificat réel, les ressources exactes, quatre formats d'écran,
+les anciennes redirections et les cinq lecteurs Vimeo. Version servie :
+`615439c841db1934ffaddc1dee64c85ff6c56cf2` ; style
+`b2177c0fd2c46c6f528266d30f7b933d3add1566`.
+
 La cible contractuelle est `https://logique.echos.systems/`. La préparation
 d'infrastructure antérieure n'avait pas été activée ; un domaine sans hôte Nginx
 dédié recevait le site par défaut Matheval et sa redirection `/matheval/`.
