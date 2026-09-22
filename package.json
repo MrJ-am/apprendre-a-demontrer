@@ -9,7 +9,10 @@
     "build": "npm run build:data && node scripts/build.mjs",
     "test": "node scripts/test.mjs",
     "dev": "node scripts/dev.mjs",
-    "format": "elm-format src tests/Check.elm --yes && prettier --write public/style.css public/bridge.js public/video.js scripts/*.mjs"
+    "format": "elm-format src tests/Check.elm --yes && prettier --write public/style.css public/bridge.js public/video.js scripts/*.mjs",
+    "test:interface": "python3 tests/navigation.py",
+    "preparer:identite": "node scripts/preparer-identite.mjs",
+    "test:typographie": "python3 tests/typographie.py"
   },
   "dependencies": {
     "@vimeo/player": "2.30.4",

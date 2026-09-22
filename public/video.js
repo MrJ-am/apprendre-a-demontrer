@@ -73,7 +73,8 @@
       this.stop();
       const frame = element("div", "video-poster");
       const poster = this.getAttribute("poster");
-      if (poster) {
+      // Aucun contact avec un hébergeur externe avant l'activation du lecteur.
+      if (poster && new URL(poster, location.href).origin === location.origin) {
         const img = element("img", "video-poster-image");
         img.src = poster;
         img.alt = "";
@@ -120,7 +121,10 @@
         });
         frame.append(beginning);
       }
-      this.replaceChildren(frame);
+      const information = element("p", "video-confidentialite", "Activer ce lecteur contacte l’hébergeur vidéo, qui reçoit votre adresse IP et peut utiliser des traceurs. Vous pouvez poursuivre les exercices sans l’activer.");
+      information.id = "information-video";
+      play.setAttribute("aria-describedby", information.id);
+      this.replaceChildren(information, frame);
     }
 
     showError() {
@@ -165,9 +169,9 @@
       this.timer = setTimeout(fail, 15000);
       try {
         const url = new URL(this.getAttribute("src"));
-        if (url.protocol !== "https:" || url.hostname !== "player.vimeo.com")
+        if (url.protocol !== "https:" || !["player.vimeo.com", "www.youtube-nocookie.com"].includes(url.hostname))
           throw new Error("Source vidéo invalide");
-        const Player = await loadVimeo();
+        const Player = url.hostname === "player.vimeo.com" ? await loadVimeo() : null;
         if (!current()) return;
         url.searchParams.set("autoplay", "1");
         url.searchParams.set("dnt", "1");
@@ -179,7 +183,11 @@
           "autoplay; encrypted-media; picture-in-picture; fullscreen";
         iframe.allowFullscreen = true;
         iframe.referrerPolicy = "strict-origin-when-cross-origin";
-        this.replaceChildren(iframe);
+        const arreter = element("button", "quiet", "Arrêter la vidéo");
+        arreter.type = "button";
+        arreter.addEventListener("click", () => { this.showPoster(); this.querySelector(".video-play")?.focus(); });
+        this.replaceChildren(iframe, arreter);
+        if (!Player) { clearTimeout(this.timer); this.removeAttribute("aria-busy"); iframe.focus(); return; }
         const player = new Player(iframe);
         this.player = player;
         player.on("timeupdate", ({ seconds }) => {

@@ -7,8 +7,11 @@ permissions:
 jobs:
   verifier:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
@@ -19,7 +22,32 @@ jobs:
       - run: npm ci
       - run: npm test
       - run: npm run build
+      - run: node_modules/.bin/elm-format src tests/Check.elm --validate
+      - run: python3 -m pip install -r tests/requirements.txt
+      - run: python3 -m playwright install --with-deps chromium
+      - run: npm run test:interface
+      - name: Préparer et contrôler les polices originales pour la publication demandée
+        run: |
+          npm run preparer:identite
+          npm run test:typographie
+          python3 - <<'PY'
+          import zipfile
+          from pathlib import Path
+          source=Path('.cache/site-complet')
+          with zipfile.ZipFile('logique-verifie.zip','w',zipfile.ZIP_DEFLATED) as archive:
+              for p in sorted(source.rglob('*')):
+                  if p.is_file(): archive.write(p,'dist/'+str(p.relative_to(source)))
+          PY
       - uses: actions/upload-artifact@v4
         with:
-          name: apprendre-a-demontrer
-          path: dist
+          name: site-logique-verifie
+          path: logique-verifie.zip
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: apprendre-a-demontrer-preparation
+          path: |
+            dist
+            controles-interface
+          retention-days: 7

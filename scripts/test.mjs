@@ -5,6 +5,9 @@ import { resolve, join } from "node:path";
 import vm from "node:vm";
 import katex from "katex";
 import assert from "node:assert/strict";
+import { preparerStyle, dossierStyle } from "./preparer-style.mjs";
+
+preparerStyle();
 
 execFileSync("python3", ["scripts/build_data.py", "--check"], {
   stdio: "inherit",
@@ -114,6 +117,9 @@ const temp = mkdtempSync(join(tmpdir(), "apprendre-tests-"));
 try {
   cpSync("elm.json", join(temp, "elm.json"));
   cpSync("src", join(temp, "src"), { recursive: true });
+  cpSync(join(dossierStyle, "src"), join(temp, ".cache/style-mrjam/src"), {
+    recursive: true,
+  });
   cpSync("tests/Check.elm", join(temp, "src/Check.elm"));
   execFileSync(
     resolve("node_modules/.bin/elm"),
