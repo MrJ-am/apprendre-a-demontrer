@@ -7,7 +7,9 @@
     "src/Exercise.elm": "0eb76a90c68d4b3040e7c45da1deefbf63ffbe6d",
     "src/Logic.elm": "b0a2c34d8c9af39164fd53a2a16d787659c73b94",
     "public/bridge.js": "630dbb78fb56ca3394c220fb0e37560f489e4a74",
-    "public/video.js": "511ec364c4b92b699b6f102d826460c1415cdb62",
     ".openai/hosting.json": "da980d6bc7eeb13bb24f24999fb8d1ac22deb2f2"
+  },
+  "evolutions": {
+    "public/video.js": "Protection des tiers modifiée explicitement le 22 septembre 2026 ; comportement vérifié dans tests/navigation.py."
   }
 }

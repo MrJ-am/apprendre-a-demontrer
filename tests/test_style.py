@@ -6,7 +6,7 @@ import unittest
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parents[1]
-REVISION_STYLE = "492afe54cba22ed49c35423d4f37dae1ba0d9944"
+REVISION_STYLE = "b2177c0fd2c46c6f528266d30f7b933d3add1566"
 
 
 class StyleCommun(unittest.TestCase):

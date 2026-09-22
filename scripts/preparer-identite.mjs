@@ -13,14 +13,15 @@ if (identite.depot !== "MrJ-am/Signature" || !/^[a-f0-9]{40}$/.test(identite.rev
 const sources = ["web/EchoPoint.woff2", "web/MrJamSignature.woff2"];
 if (JSON.stringify(Object.keys(identite.ressources_externes).sort()) !== JSON.stringify(sources))
   throw new Error("La liste des polices autorisées a changé.");
-if (!existsSync(join(cache, "web"))) {
-  mkdirSync(cache, { recursive: true });
-  const git = (...argumentsGit) => execFileSync("git", ["-C", cache, ...argumentsGit], { stdio: "pipe" });
-  git("init");
-  git("fetch", "--depth=1", `https://github.com/${identite.depot}.git`, identite.revision);
-  if (git("rev-parse", "FETCH_HEAD").toString().trim() !== identite.revision)
-    throw new Error("La révision de Signature diffère du verrou.");
-  git("checkout", "--detach", "FETCH_HEAD");
+if (!sources.every(source => existsSync(join(cache, source)))) {
+  // Copies déjà autorisées dans Mémoire ; Signature reste l'autorité des empreintes.
+  // Ce miroir public figé évite de donner accès au dépôt privé à une CI publique.
+  mkdirSync(join(cache, "web"), { recursive: true });
+  for (const source of sources) {
+    const reponse = await fetch("https://raw.githubusercontent.com/MrJ-am/M-moire/af8c26ea48d8a2e2af35da8245107d167b4d6821/docs/identite/" + source.slice(4));
+    if (!reponse.ok) throw new Error("Copie de la police indisponible : " + source);
+    writeFileSync(join(cache, source), Buffer.from(await reponse.arrayBuffer()));
+  }
 }
 const polices = sources.map((source) => {
   const contenu = readFileSync(join(cache, source));
@@ -30,7 +31,7 @@ const polices = sources.map((source) => {
   return { nom: source.slice(4), contenu };
 });
 // Licence des fontes dérivées, issue de la même révision de Signature.
-const licence = readFileSync(join(cache, "fonts/Parisienne-OFL.txt"));
+const licence = readFileSync("identite/Parisienne-OFL.txt");
 if (createHash("sha1").update(`blob ${licence.length}\0`).update(licence).digest("hex") !==
     "6f4c72d06b5ff3cb1ad98b0f4b5147e90d638c5f")
   throw new Error("La licence originale des fontes a changé.");
