@@ -94,6 +94,7 @@ course-video .quiet {
 course-video {
   display: block;
 }
+.video-confidentialite { color: #5b7871; font-size: 0.875rem; line-height: 1.45; margin: 0 0 12px; }
 .video-poster {
   position: relative;
   aspect-ratio: 16/9;

@@ -1007,18 +1007,14 @@ videoView model pos =
             UI.el [ UI.width (UI.minimum 0 UI.fill) ] <|
                 UI.html <|
                     div [ class "video-integration" ]
-                        [ if video.provider == "vimeo" then
-                            node "course-video"
-                                [ attribute "video-title" video.title
-                                , attribute "src" (videoUrl video)
-                                , attribute "poster" video.poster
-                                , attribute "start" (String.fromInt video.start)
-                                , attribute "watch-url" (videoWatchUrl video)
-                                ]
-                                []
-
-                          else
-                            iframe [ title video.title, src (videoUrl video), attribute "loading" "lazy", attribute "allow" "autoplay; encrypted-media; picture-in-picture; fullscreen", attribute "allowfullscreen" "", attribute "referrerpolicy" "strict-origin-when-cross-origin" ] []
+                        [ node "course-video"
+                            [ attribute "video-title" video.title
+                            , attribute "src" (videoUrl video)
+                            , attribute "poster" video.poster
+                            , attribute "start" (String.fromInt video.start)
+                            , attribute "watch-url" (videoWatchUrl video)
+                            ]
+                            []
                         ]
         , MrJam.texteSecondaire
             (if video.start > 0 then

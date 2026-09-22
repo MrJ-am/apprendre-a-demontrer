@@ -80,6 +80,7 @@ def main():
     bilan = {"transport": "HTTP local", "video": "SDK, affiche et iframe externes simulés", "typographieSignatureValidee": False}
     erreurs = []
     requetes_video = []
+    affiches_externes = []
     with TemporaryDirectory(prefix="parcours-http-") as dossier:
         # Même artefact servi à la racine et sous un préfixe réel, sans base réécrite.
         racine_http = Path(dossier)
@@ -104,6 +105,7 @@ def main():
                         requetes_video.append(adresse)
                         route.fulfill(status=200, content_type="text/html", body="<!doctype html><title>Lecteur simulé</title>")
                     elif "vimeocdn.com" in adresse:
+                        affiches_externes.append(adresse)
                         route.fulfill(status=200, content_type="image/png", body=TRANSPARENT)
                     else:
                         route.abort()
@@ -170,11 +172,17 @@ def main():
                             compteur = len(requetes_video)
                             expect(page.locator("course-video")).to_have_attribute("start", str(video["start"]))
                             assert len(requetes_video) == compteur
+                            assert not affiches_externes, "Aucune affiche tierce avant activation"
+                            expect(page.locator("course-video iframe")).to_have_count(0)
+                            expect(page.locator(".video-confidentialite")).to_be_visible()
                             page.locator("course-video .video-play").click()
                             expect(page.locator("course-video iframe")).to_have_count(1)
                             iframe = page.locator("course-video iframe")
                             assert "dnt=1" in iframe.get_attribute("src")
                             assert f"#t={video['start']}s" in iframe.get_attribute("src")
+                            page.get_by_role("button", name="Arrêter la vidéo", exact=True).click()
+                            expect(page.locator("course-video iframe")).to_have_count(0)
+                            page.locator("course-video .video-play").click()
                             page.evaluate("window.lecteursSimules.at(-1).evenements.timeupdate({seconds: 125})")
                             ouvrir(page, parcours, lecon, 1)
                             assert page.evaluate("window.lecteursSimules.at(-1).detruit") is True
