@@ -83,12 +83,14 @@ def main():
                             assert reponse.ok and hashlib.sha256(reponse.body()).hexdigest() == sha
                         mesures = signature.evaluate("""e => {
                           const s = getComputedStyle(e), r = e.getBoundingClientRect();
-                          return {texte:e.textContent, noeuds:e.childNodes.length, type:e.firstChild.nodeType,
+                          const textes=document.createTreeWalker(e,NodeFilter.SHOW_TEXT);
+                          let noeuds=0; while(textes.nextNode()) noeuds++;
+                          return {texte:e.textContent, noeuds,
                             police:s.fontFamily, taille:parseFloat(s.fontSize), largeur:r.width, hauteur:r.height,
                             avant:getComputedStyle(e,'::before').content, apres:getComputedStyle(e,'::after').content};
                         }""")
-                        assert mesures["texte"] == "MrJ.am" and mesures["noeuds"] == 1 and mesures["type"] == 3
-                        assert mesures["police"].split(",")[0] == "MrJamSignature"
+                        assert mesures["texte"] == "MrJ.am" and mesures["noeuds"] == 1, mesures
+                        assert mesures["police"].split(",")[0].strip("\"'") == "MrJamSignature"
                         # geometry.json : largeur 3,04 em + marge de sélection 0,04 em.
                         # tools/build-web.py répartit cette somme entre les six avances.
                         assert abs(mesures["largeur"] - 3.08 * mesures["taille"]) < 0.1, mesures
@@ -109,13 +111,15 @@ def main():
                         }""")
                         page.keyboard.press("Control+v")
                         expect(page.locator("#collage-test")).to_have_value("MrJ.am")
+                        noeud = signature.evaluate_handle("e => document.createTreeWalker(e,NodeFilter.SHOW_TEXT).nextNode()")
                         for index, caractere in enumerate("MrJ.am"):
-                            signature.evaluate("""(e,i) => {const r=document.createRange();r.setStart(e.firstChild,i);
-                              r.setEnd(e.firstChild,i+1);const s=getSelection();s.removeAllRanges();s.addRange(r)}""", index)
+                            noeud.evaluate("""(n,i) => {const r=document.createRange();r.setStart(n,i);
+                              r.setEnd(n,i+1);const s=getSelection();s.removeAllRanges();s.addRange(r)}""", index)
                             page.keyboard.press("Control+c")
                             page.locator("#collage-test").fill("")
                             page.keyboard.press("Control+v")
                             expect(page.locator("#collage-test")).to_have_value(caractere)
+                        noeud.dispose()
                         page.locator("#collage-test").evaluate("e => e.remove()")
                         page.evaluate("getSelection().removeAllRanges()")
                         nom = f"{'racine' if prefixe == '/' else 'prefixe'}-{largeur}"

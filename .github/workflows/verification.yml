@@ -50,4 +50,5 @@ jobs:
           path: |
             dist
             controles-interface
+            controles-typographie
           retention-days: 7
