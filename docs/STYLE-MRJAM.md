@@ -23,3 +23,20 @@ Le logo et la signature ont pour source `MrJ-am/Signature`, révision `17495b13c
 ## Publication
 
 La cible retenue est `https://logique.echos.systems`, servie par Nginx sur le VPS administré par `MrJ-am/vps-infrastructure`, depuis `/srv/logique/current`. `.openai/hosting.json` reste une trace historique, pas une instruction de publication. Les candidats système sont construits sans activation ; le certificat réel et la publication restent à effectuer dans le mécanisme coordonné avec Mémoire et Vision. Cette application ne reconstruit pas NixOS et ne dispose d'aucun workflow de déploiement isolé.
+
+## Candidat documentaire du 26 septembre 2026
+
+Le verrou candidat adopte `c6816194ee884887b8ac12daaca3d2866f40624b`.
+Les contrôles courants et tableaux sont factorisés dans le style ; les boutons
+courts ont une cible nominale de 34 px. Les attentes de densité des tests suivent
+ce contrat, sans copie de décoration dans l’application.
+
+La reconstruction et la suite navigateur ont réussi : 58 exercices, 12 bilans,
+12 pages vidéo, clavier et quatre largeurs. Les services vidéo externes sont
+simulés explicitement. Les contrôles distants, notamment typographiques, restent
+requis avant activation.
+
+La reconstruction finale conserve les SHA-256 des bundles soumis aux tests.
+Ce candidat est préparé localement : aucune nouvelle publication ni activation
+n’est revendiquée. L’adoption doit être coordonnée avec Vision et l’autre
+consommateur, après toutes les validations, avec retour applicatif conservé.

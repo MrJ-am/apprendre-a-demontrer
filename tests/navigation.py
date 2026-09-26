@@ -254,7 +254,7 @@ def main():
                     for bouton in page.get_by_role("button").all():
                         if bouton.is_visible():
                             boite = bouton.bounding_box()
-                            assert boite and boite["height"] >= 43.5, (bouton.inner_text(), boite)
+                            assert boite and boite["height"] >= 32 and boite["width"] >= 32, (bouton.inner_text(), boite)
                     page.screenshot(path=str(SORTIE / f"exercice-{largeur}.png"), full_page=True)
                 bilan["largeurs"] = [320, 390, 768, 1280]
                 page.goto(adresse + f"/cours/#/{parcours['id']}/{lecon['id']}/1")
