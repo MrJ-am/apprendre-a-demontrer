@@ -6,14 +6,25 @@ import unittest
 from pathlib import Path
 
 RACINE = Path(__file__).resolve().parents[1]
-REVISION_STYLE = "b2177c0fd2c46c6f528266d30f7b933d3add1566"
 
 
 class StyleCommun(unittest.TestCase):
     def test_revision_exacte(self):
-        verrou = json.loads((RACINE / "style-mrjam.json").read_text())
-        self.assertEqual(verrou["revision"], REVISION_STYLE)
+        fichier = RACINE / "style-mrjam.json"
+        original = fichier.read_text()
+        verrou = json.loads(original)
+        self.assertRegex(verrou["revision"], r"\A[a-f0-9]{40}\Z")
         self.assertEqual(verrou["elm-ui"], "1.1.8")
+        try:
+            for revision in ["main", verrou["revision"][:7]]:
+                with self.subTest(revision=revision):
+                    fichier.write_text(json.dumps(dict(verrou, revision=revision)))
+                    resultat = self.controle_cache()
+                    self.assertNotEqual(resultat.returncode, 0)
+                    self.assertIn("révision Git complète", resultat.stderr)
+        finally:
+            fichier.write_text(original)
+        self.assertEqual(self.controle_cache().returncode, 0)
 
     def test_contrats_preserves(self):
         contrats = json.loads((RACINE / "tests/contrats-reference.json").read_text())
