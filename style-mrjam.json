@@ -1,6 +1,6 @@
 {
   "depot": "MrJ-am/style-mrjam",
-  "revision": "c6816194ee884887b8ac12daaca3d2866f40624b",
+  "revision": "3aab7233465ac0abe49464fa26a360765ccb4004",
   "elm-ui": "1.1.8",
   "fichiers": {
     "identite.json": "8ed87df9e74063ca6a818b464ff6764466f3ad6d",
@@ -10,7 +10,7 @@
     "src/MrJam/Disposition.elm": "1dd98f971027f91e504614e1dbd25eaded68bec6",
     "src/MrJam/Donnees.elm": "09c7095e2c50ea16caec8fd9fa67fcaca4b141b1",
     "src/MrJam/Fenetres.elm": "1f5d05f9317fea8ef3fdcad7860936139239f35a",
-    "src/MrJam/Identite.elm": "384c6a6c86f8574cf2fc945975b7f1e200683026",
+    "src/MrJam/Identite.elm": "9e292b7c19e2a0459e38973da3d34f16cf59a326",
     "src/MrJam/Lecture.elm": "a8e828d60e8974fb860b36d69020464b9dfb7a9d",
     "src/MrJam/Tableaux.elm": "188acaef78197a3e5a1c27e23c539e2ce84181d5",
     "src/MrJam/Theme.elm": "a8d4ee1ecbcd782ae95f3850ebf6e536e7fa82d5",

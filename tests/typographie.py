@@ -95,7 +95,8 @@ def main():
                         # tools/build-web.py répartit cette somme entre les six avances.
                         assert abs(mesures["largeur"] - 3.08 * mesures["taille"]) < 0.1, mesures
                         assert abs(mesures["hauteur"] - 1.183 * mesures["taille"]) < 0.1, mesures
-                        assert mesures["avant"] == mesures["apres"] == "none"
+                        # ElmUI ajoute des pseudo-éléments vides pour l'interligne.
+                        assert all(mesures[cote] in ("none", '\"\"') for cote in ("avant", "apres"))
                         assert page.evaluate("document.documentElement.scrollWidth <= innerWidth + 2")
                         signature.scroll_into_view_if_needed()
                         boite = signature.bounding_box()
