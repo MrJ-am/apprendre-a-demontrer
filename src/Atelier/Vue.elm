@@ -9,9 +9,12 @@ import Atelier.Regles as R
 import Atelier.Types exposing (..)
 import Dict
 import Element as UI exposing (Element)
+import Element.Font as Police
+import Element.Region as Region
 import Html.Attributes as A
 import MrJam as M
 import MrJam.Blocs as B
+import MrJam.Identite as Identite
 import Set
 
 
@@ -28,7 +31,7 @@ attribut nom valeur =
 
 repere : String -> Element msg -> Element msg
 repere id =
-    UI.el [ UI.width UI.fill, attribut "id" id ]
+    UI.el [ UI.width (UI.minimum 0 UI.fill), attribut "id" id ]
 
 
 texte : String -> Element msg
@@ -36,20 +39,132 @@ texte =
     M.paragraphe
 
 
+petit : String -> Element msg
+petit s =
+    UI.paragraph [ UI.width UI.shrink, attribut "class" "mrjam-legende" ] [ UI.text s ]
+
+
+ligne : List (Element msg) -> Element msg
+ligne =
+    UI.row [ UI.spacing 5 ]
+
+
 source : String -> String -> Element Message
 source id libelle =
-    UI.el [ UI.width UI.shrink, UI.htmlAttribute (A.style "width" "max-content"), UI.htmlAttribute (A.style "max-width" "100%"), attribut "data-atelier-source" id, attribut "class" "atelier-poignee", attribut "data-testid" id ]
-        (M.boutonSecondaire ("⠿ " ++ libelle) (Choisir id))
+    UI.el [ attribut "data-atelier-source" id, attribut "class" "atelier-poignee", attribut "data-testid" id ] (B.poignee libelle (Choisir id))
+
+
+operateur : Formule -> ( String, List Formule )
+operateur f =
+    case f of
+        Et a b ->
+            ( "∧", [ a, b ] )
+
+        Ou a b ->
+            ( "∨", [ a, b ] )
+
+        Implique a b ->
+            ( "⇒", [ a, b ] )
+
+        Equivalent a b ->
+            ( "⇔", [ a, b ] )
+
+        Non a ->
+            ( "¬", [ a ] )
+
+        Trou _ ->
+            ( "…", [] )
+
+        _ ->
+            ( F.afficher f, [] )
+
+
+avecOperateur : Element msg -> List (Element msg) -> Element msg
+avecOperateur signe enfants =
+    case enfants of
+        [ a, b ] ->
+            ligne [ a, signe, b ]
+
+        [ a ] ->
+            ligne [ signe, a ]
+
+        _ ->
+            signe
+
+
+formuleFixe : Formule -> Element msg
+formuleFixe f =
+    let
+        ( signe, enfants ) =
+            operateur f
+    in
+    (case f of
+        Trou _ ->
+            B.logement []
+
+        _ ->
+            B.proposition []
+    )
+        (avecOperateur (UI.text signe) (List.map formuleFixe enfants))
+
+
+{-| Chaque sous-proposition possède une adresse syntaxique. Le dépôt se fait
+sur le logement réellement désigné, même après zoom ou défilement du canevas.
+-}
+formuleDirecte : Modele -> String -> List Int -> Formule -> Element Message
+formuleDirecte m base chemin f =
+    let
+        reference =
+            base
+                ++ (if List.isEmpty chemin then
+                        ""
+
+                    else
+                        "|" ++ (List.map String.fromInt chemin |> String.join ".")
+                   )
+
+        destination =
+            "formule:" ++ reference
+
+        ( signe, enfants ) =
+            operateur f
+
+        action =
+            if m.source == Nothing then
+                EditerFormule reference
+
+            else
+                Placer destination
+
+        attributs =
+            [ attribut "data-atelier-cible" destination
+            , attribut "data-atelier-source" ("prop:" ++ reference)
+            , attribut "class" "atelier-poignee"
+            , attribut "data-sous-formule" reference
+            ]
+
+        bouton =
+            B.commande [ attribut "aria-label" ("Modifier " ++ reference), UI.htmlAttribute (A.title (F.afficher f)) ] (UI.text signe) action
+    in
+    (case f of
+        Trou _ ->
+            B.logement attributs
+
+        _ ->
+            B.proposition attributs
+    )
+        (avecOperateur bouton (List.indexedMap (\i enfant -> formuleDirecte m base (chemin ++ [ i ]) enfant) enfants))
 
 
 champFormule : String -> String -> Formule -> Element Message
 champFormule cible libelle f =
-    B.proposition [ UI.width (UI.minimum 0 UI.fill), UI.htmlAttribute (A.style "width" "100%"), attribut "data-atelier-cible" ("formule:" ++ cible), attribut "data-formule" cible ]
-        (UI.wrappedRow [ UI.spacing 5, UI.width (UI.minimum 0 UI.fill) ]
-            [ M.boutonSecondaire (libelle ++ F.afficher f) (EditerFormule cible)
-            , UI.el [ attribut "data-atelier-source" ("prop:" ++ cible), attribut "class" "atelier-poignee" ] (M.boutonSecondaire "⠿" (Choisir ("prop:" ++ cible)))
-            ]
-        )
+    UI.el [ attribut "data-formule" cible ]
+        (ligne [ petit libelle, B.proposition [] (B.commande [ attribut "aria-label" ("Modifier " ++ cible) ] (UI.text (F.afficher f)) (EditerFormule cible)) ])
+
+
+champDirect : Modele -> String -> Formule -> Element Message
+champDirect m cible f =
+    UI.el [ attribut "data-formule" cible ] (formuleDirecte m cible [] f)
 
 
 classique : Bibliotheque -> Regle -> Bool
@@ -84,29 +199,92 @@ etat resultat =
             ( B.Incorrect, "! Erreur · " ++ s )
 
 
+titreCourt : Bibliotheque -> Regle -> String
+titreCourt bibliotheque regle =
+    case regle of
+        Primitive "etI" ->
+            "réunir"
+
+        Primitive "implI" ->
+            "si"
+
+        Primitive "implE" ->
+            "appliquer ⇒"
+
+        Primitive "etG" ->
+            "garder à gauche"
+
+        Primitive "etD" ->
+            "garder à droite"
+
+        Primitive "ouG" ->
+            "introduire ∨ gauche"
+
+        Primitive "ouD" ->
+            "introduire ∨ droite"
+
+        Primitive "ouE" ->
+            "raisonner par cas"
+
+        Primitive "fauxE" ->
+            "depuis ⊥"
+
+        Primitive "RA" ->
+            "par l’absurde · classique"
+
+        Reference _ ->
+            "utiliser"
+
+        Enchainement ->
+            "enchaîner"
+
+        _ ->
+            R.nom bibliotheque regle
+
+
 zone : Modele -> G.Cible -> Formule -> Bool -> Element Message
 zone m cible attendu vide =
     let
         identite =
             "preuve:" ++ G.cibleTexte cible
 
+        depart =
+            vide && cible.parent == "racine"
+
         libelle =
-            if vide then
-                "Démontrer " ++ F.afficher attendu
+            if depart then
+                "Glisser une règle ici"
+
+            else if vide then
+                "preuve de " ++ F.afficher attendu
 
             else
-                "Insérer une étape ici"
+                "+"
     in
-    B.cavite [ attribut "data-atelier-cible" identite, attribut "data-testid" identite ]
-        (M.boutonSecondaire
-            ((if m.source == Nothing then
-                "＋ "
+    B.cavite
+        [ attribut "data-atelier-cible" identite
+        , attribut "data-testid" identite
+        , attribut "class"
+            (if depart then
+                "depart"
 
-              else
-                "Placer ici · "
-             )
-                ++ libelle
+             else if vide then
+                "vide"
+
+             else
+                "interstice"
             )
+        ]
+        (B.commande
+            [ attribut "aria-label"
+                (if vide then
+                    "Démontrer " ++ F.afficher attendu
+
+                 else
+                    "Insérer une étape ici"
+                )
+            ]
+            (UI.text libelle)
             (Placer identite)
         )
 
@@ -116,28 +294,22 @@ sequence lecture m parent indice contexte attendu preuves =
     let
         avancer ( index, preuve ) ( ctx, accumulees ) =
             let
-                resultat =
-                    N.verifierBloc m.document.bibliotheque ctx preuve
-
                 suivant =
-                    Result.map (\v -> Dict.insert (identifiant preuve) v ctx) resultat |> Result.withDefault ctx
-
-                cible =
-                    { parent = parent, indice = indice, position = index }
+                    N.verifierBloc m.document.bibliotheque ctx preuve |> Result.map (\v -> Dict.insert (identifiant preuve) v ctx) |> Result.withDefault ctx
 
                 avant =
                     if lecture then
                         []
 
                     else
-                        [ zone m cible attendu (List.isEmpty preuves) ]
+                        [ zone m { parent = parent, indice = indice, position = index } attendu False ]
             in
             ( suivant, accumulees ++ avant ++ [ bloc lecture m ctx preuve ] )
 
         ( _, vues ) =
             List.foldl avancer ( contexte, [] ) (List.indexedMap Tuple.pair preuves)
     in
-    UI.column [ UI.width (UI.minimum 0 UI.fill), UI.spacing 8 ]
+    UI.column [ UI.spacing 0, UI.alignLeft ]
         (vues
             ++ (if lecture then
                     []
@@ -163,41 +335,36 @@ bloc lecture m contexte ((Bloc b) as preuve) =
         contrat =
             R.contrat bibliotheque b
 
-        titre =
-            R.nom bibliotheque b.regle
-                ++ (if classique bibliotheque b.regle && not (String.contains "classique" (R.nom bibliotheque b.regle)) then
-                        " · classique"
-
-                    else
-                        ""
-                   )
-
         ferme =
             Set.member b.id m.repli && not lecture
 
+        params =
+            R.parametres bibliotheque b.regle |> List.filterMap (\p -> Dict.get p b.parametres |> Maybe.map (Tuple.pair p))
+
         entete =
-            UI.column [ UI.spacing 6, UI.width UI.fill ]
-                [ if lecture then
-                    texte titre
+            ligne
+                ([ if lecture then
+                    UI.text (titreCourt bibliotheque b.regle)
 
-                  else
-                    UI.wrappedRow [ UI.width UI.fill, UI.spacing 5 ]
-                        [ source ("bloc:" ++ b.id) titre
-                        , M.boutonSecondaire "Inspecter" (Selectionner b.id)
-                        ]
-                , if lecture then
-                    M.texteSecondaire (Dict.toList b.parametres |> List.map (\( p, f ) -> p ++ " := " ++ F.afficher f) |> String.join " · ")
+                   else
+                    source ("bloc:" ++ b.id) (titreCourt bibliotheque b.regle)
+                 ]
+                    ++ List.map
+                        (\( p, f ) ->
+                            if lecture then
+                                formuleFixe f
 
-                  else
-                    M.actions
-                        (Dict.toList b.parametres
-                            |> List.map
-                                (\( p, f ) ->
-                                    B.proposition [ attribut "data-atelier-cible" ("formule:param:" ++ b.id ++ ":" ++ p) ]
-                                        (M.boutonSecondaire (p ++ " : " ++ F.afficher f) (EditerFormule ("param:" ++ b.id ++ ":" ++ p)))
-                                )
+                            else
+                                champDirect m ("param:" ++ b.id ++ ":" ++ p) f
                         )
-                ]
+                        params
+                    ++ [ if lecture then
+                            UI.none
+
+                         else
+                            B.commande [ attribut "aria-label" "Inspecter", UI.htmlAttribute (A.title "Inspecter, dupliquer, créer un théorème") ] (UI.text "⋯") (Selectionner b.id)
+                       ]
+                )
 
         cavites =
             case contrat of
@@ -207,18 +374,26 @@ bloc lecture m contexte ((Bloc b) as preuve) =
                 Ok c ->
                     List.map2
                         (\( i, e ) ps ->
-                            UI.column [ UI.width (UI.minimum 0 UI.fill), UI.spacing 7 ]
-                                [ B.objectif (texte ("Montrons " ++ F.afficher e.conclusion))
-                                , if List.isEmpty e.hypotheses then
-                                    UI.none
+                            UI.column [ UI.spacing 4, UI.alignLeft ]
+                                [ ligne
+                                    [ petit
+                                        (if List.isEmpty e.hypotheses then
+                                            "prouver"
 
-                                  else
-                                    M.pile (List.map (\h -> M.texteSecondaire ("Supposons " ++ F.afficher h.formule ++ " · hypothèse locale de cette cavité")) e.hypotheses)
-                                , if lecture then
-                                    UI.none
+                                         else
+                                            "sous"
+                                        )
+                                    , if List.isEmpty e.hypotheses then
+                                        formuleFixe e.conclusion
 
-                                  else
-                                    M.boutonSecondaire "Faits dans cette cavité" (ChoisirCavite { parent = b.id, indice = i, position = List.length ps })
+                                      else
+                                        ligne (List.map (.formule >> formuleFixe) e.hypotheses)
+                                    , if lecture then
+                                        UI.none
+
+                                      else
+                                        B.commande [ attribut "aria-label" "Faits dans cette cavité", UI.htmlAttribute (A.title "Faits disponibles ici") ] (UI.text "☰") (ChoisirCavite { parent = b.id, indice = i, position = List.length ps })
+                                    ]
                                 , sequence lecture m b.id i (N.ajouterHypotheses e.hypotheses contexte) e.conclusion ps
                                 ]
                         )
@@ -226,15 +401,38 @@ bloc lecture m contexte ((Bloc b) as preuve) =
                         b.entrees
 
         conclusion =
-            contrat |> Result.map (.conclusion >> F.afficher) |> Result.withDefault "?"
+            contrat |> Result.map .conclusion |> Result.withDefault (Trou "sortie")
 
-        contracte =
-            case contrat of
-                Err p ->
-                    texte (messageProbleme p)
+        pied =
+            UI.column [ UI.spacing 3 ]
+                [ if ferme then
+                    petit (contrat |> Result.map (\c -> "Entrées : " ++ String.join " ; " (List.map (.conclusion >> F.afficher) c.entrees)) |> Result.withDefault "Contrat invalide")
 
-                Ok c ->
-                    texte ("Entrées : " ++ (List.map (.conclusion >> F.afficher) c.entrees |> String.join " ; ") ++ " ⊢ " ++ conclusion)
+                  else
+                    UI.none
+                , ligne
+                    [ UI.text "donc"
+                    , formuleFixe conclusion
+                    , UI.el [ UI.htmlAttribute (A.title message), attribut "aria-label" message ]
+                        (UI.text
+                            (case resultat of
+                                Ok _ ->
+                                    "✓"
+
+                                Err (Incomplet _) ->
+                                    "○"
+
+                                _ ->
+                                    "!"
+                            )
+                        )
+                    , if classique bibliotheque b.regle then
+                        petit "classique"
+
+                      else
+                        UI.none
+                    ]
+                ]
     in
     B.emboitable
         (if m.selection == Just b.id && not lecture then
@@ -251,24 +449,7 @@ bloc lecture m contexte ((Bloc b) as preuve) =
          else
             cavites
         )
-        (M.pile
-            [ if ferme then
-                contracte
-
-              else
-                UI.none
-            , texte
-                ((if Result.toMaybe resultat == Nothing then
-                    "Conclusion attendue : "
-
-                  else
-                    "Nous obtenons donc "
-                 )
-                    ++ conclusion
-                )
-            , M.texteSecondaire message
-            ]
-        )
+        pied
 
 
 paletteRegle : Modele -> Regle -> Element Message
@@ -296,30 +477,25 @@ paletteRegle m regle =
         contrat =
             R.contrat m.document.bibliotheque b
 
-        schema =
-            contrat |> Result.map (\c -> String.join " ; " (List.map (.conclusion >> F.afficher) c.entrees) ++ " ⊢ " ++ F.afficher c.conclusion) |> Result.withDefault "Certificat absent"
+        cavites =
+            contrat |> Result.map (.entrees >> List.map (\p -> ligne [ petit "preuve", formuleFixe p.conclusion ])) |> Result.withDefault []
 
-        nombre =
-            contrat |> Result.map (.entrees >> List.length) |> Result.withDefault 0
+        conclusion =
+            contrat |> Result.map .conclusion |> Result.withDefault (Trou "sortie")
     in
     B.emboitable B.Neutre
         []
-        (source id (R.nom m.document.bibliotheque regle))
-        (if nombre == 0 then
-            []
+        (source id (titreCourt m.document.bibliotheque regle))
+        cavites
+        (ligne
+            [ UI.text "→"
+            , formuleFixe conclusion
+            , if classique m.document.bibliotheque regle then
+                petit "classique"
 
-         else
-            [ M.texteSecondaire (String.fromInt nombre ++ " cavité(s) de preuve") ]
-        )
-        (M.texteSecondaire
-            (schema
-                ++ (if classique m.document.bibliotheque regle then
-                        " · règle classique"
-
-                    else
-                        ""
-                   )
-            )
+              else
+                UI.none
+            ]
         )
 
 
@@ -329,14 +505,99 @@ faits m =
         ctx =
             Ed.contexte m m.cible |> Maybe.map Tuple.first |> Maybe.withDefault (N.contexteInitial m.document.premisses)
     in
-    M.pile
-        [ M.sousTitre "Faits disponibles ici"
-        , M.texteSecondaire ("Contexte « " ++ m.cible.parent ++ " » · chaque utilisation crée une référence, le fait reste disponible.")
+    UI.column [ UI.spacing 12, UI.width UI.fill ]
+        [ petit "Chaque utilisation crée une référence. Un fait reste disponible."
         , if Dict.isEmpty ctx then
-            texte "Aucun fait disponible. Vous pouvez raisonner sous une hypothèse locale ou déclarer une prémisse de l’exercice."
+            petit "Aucun fait ici. Sélectionnez une cavité ou déclarez une prémisse."
 
           else
-            M.pile (Dict.toList ctx |> List.map (\( id, v ) -> source ("fait:" ++ id) (F.afficher v.conclusion)))
+            UI.column [ UI.spacing 12 ]
+                (Dict.toList ctx |> List.map (\( id, v ) -> B.emboitable B.Neutre [] (ligne [ source ("fait:" ++ id) "utiliser", formuleFixe v.conclusion ]) [] UI.none))
+        ]
+
+
+arbreFormule : Modele -> List Int -> Formule -> Element Message
+arbreFormule m chemin f =
+    let
+        adresse =
+            List.map String.fromInt chemin |> String.join "."
+
+        cible =
+            "formule:trou:" ++ adresse
+
+        ( signe, enfants ) =
+            operateur f
+
+        bouton =
+            B.commande []
+                (UI.text signe)
+                (if m.source == Nothing then
+                    CheminFormule chemin
+
+                 else
+                    Placer cible
+                )
+    in
+    (case f of
+        Trou _ ->
+            B.logement
+
+        _ ->
+            B.proposition
+    )
+        [ attribut "data-atelier-cible" cible, attribut "data-chemin" adresse ]
+        (avecOperateur bouton (List.indexedMap (\i enfant -> arbreFormule m (chemin ++ [ i ]) enfant) enfants))
+
+
+palettePropositions : Modele -> Element Message
+palettePropositions m =
+    let
+        connecteur ( r, signe ) =
+            let
+                contenu =
+                    Ed.connecteur r
+
+                ( _, enfants ) =
+                    operateur contenu
+
+                bouton =
+                    B.commande [ attribut "aria-label" signe ]
+                        (UI.text signe)
+                        (if m.cibleFormule /= Nothing then
+                            Connecteur r
+
+                         else
+                            Choisir ("connecteur:" ++ r)
+                        )
+            in
+            B.proposition [ attribut "data-atelier-source" ("connecteur:" ++ r), attribut "class" "atelier-poignee" ]
+                (avecOperateur bouton (List.map (\_ -> B.logement [] (UI.text "…")) enfants))
+    in
+    UI.column [ UI.spacing 14, UI.alignLeft ]
+        ([ petit "Glisser dans un emplacement vert."
+         , UI.wrappedRow [ UI.spacing 6, UI.width UI.fill ] (List.map (\a -> B.proposition [] (source ("atome:" ++ a) a)) [ "A", "B", "C", "D", "P", "Q", "R", "S" ])
+         ]
+            ++ List.map connecteur [ ( "et", "∧" ), ( "ou", "∨" ), ( "implique", "⇒" ), ( "non", "¬" ), ( "equivalent", "⇔" ), ( "faux", "⊥" ) ]
+        )
+
+
+composeur : Modele -> Element Message
+composeur m =
+    UI.column [ UI.width UI.fill, UI.spacing 12 ]
+        [ palettePropositions m
+        , UI.el [ attribut "class" "mrjam-outils" ]
+            (M.pile
+                [ M.sousTitre "Proposition"
+                , arbreFormule m [] m.brouillon
+                , source "prop:brouillon" (F.afficher m.brouillon)
+                , M.bouton "Utiliser cette proposition" AppliquerFormule
+                , M.champ "Nom de l’atome" m.nomAtome NomAtome
+                , M.boutonSecondaire "Insérer cet atome" InsererAtome
+                , M.champ "Saisie textuelle facultative" m.texteFormule TexteFormule
+                , M.boutonSecondaire "Lire la saisie" AnalyserFormule
+                , M.boutonSecondaire "Fermer le composeur" FermerFormule
+                ]
+            )
         ]
 
 
@@ -388,91 +649,6 @@ inspecteur m =
                 ]
 
 
-arbreFormule : Modele -> List Int -> Formule -> Element Message
-arbreFormule m chemin f =
-    let
-        cible =
-            "formule:trou:" ++ (List.map String.fromInt chemin |> String.join ".")
-
-        enfants =
-            case f of
-                Et a b ->
-                    [ a, b ]
-
-                Ou a b ->
-                    [ a, b ]
-
-                Implique a b ->
-                    [ a, b ]
-
-                Equivalent a b ->
-                    [ a, b ]
-
-                Non a ->
-                    [ a ]
-
-                _ ->
-                    []
-
-        operateur =
-            case f of
-                Et _ _ ->
-                    "∧"
-
-                Ou _ _ ->
-                    "∨"
-
-                Implique _ _ ->
-                    "⇒"
-
-                Equivalent _ _ ->
-                    "⇔"
-
-                Non _ ->
-                    "¬"
-
-                _ ->
-                    F.afficher f
-    in
-    B.proposition [ UI.width (UI.minimum 0 UI.fill), UI.htmlAttribute (A.style "width" "100%"), attribut "data-atelier-cible" cible, attribut "data-chemin" (List.map String.fromInt chemin |> String.join ".") ]
-        (UI.column [ UI.spacing 6, UI.width (UI.minimum 0 UI.fill) ]
-            [ M.boutonSecondaire
-                ((if m.chemin == chemin then
-                    "▸ "
-
-                  else
-                    ""
-                 )
-                    ++ operateur
-                )
-                (if m.source == Nothing then
-                    CheminFormule chemin
-
-                 else
-                    Placer cible
-                )
-            , UI.column [ UI.spacing 5, UI.width UI.fill ] (List.indexedMap (\i enfant -> arbreFormule m (chemin ++ [ i ]) enfant) enfants)
-            ]
-        )
-
-
-composeur : Modele -> Element Message
-composeur m =
-    M.pile
-        [ M.sousTitre "Composer une proposition"
-        , M.texteSecondaire "Sélectionnez un emplacement rond, puis un connecteur ou un atome. Vous pouvez aussi les glisser. Une proposition n’est jamais une preuve."
-        , M.actions ([ ( "et", "∧" ), ( "ou", "∨" ), ( "implique", "⇒" ), ( "non", "¬" ), ( "equivalent", "⇔" ), ( "faux", "⊥" ) ] |> List.map (\( r, s ) -> UI.el [ attribut "data-atelier-source" ("connecteur:" ++ r), attribut "class" "atelier-poignee" ] (M.boutonSecondaire s (Connecteur r))))
-        , M.actions (List.map (\a -> source ("atome:" ++ a) a) [ "A", "B", "C", "P", "Q", "R", "S" ])
-        , M.champ "Nom de l’atome" m.nomAtome NomAtome
-        , M.boutonSecondaire "Insérer cet atome" InsererAtome
-        , arbreFormule m [] m.brouillon
-        , source "prop:brouillon" (F.afficher m.brouillon)
-        , M.bouton "Utiliser cette proposition" AppliquerFormule
-        , M.champ "Saisie textuelle facultative" m.texteFormule TexteFormule
-        , M.actions [ M.boutonSecondaire "Lire la saisie" AnalyserFormule, M.boutonSecondaire "Fermer le composeur" FermerFormule ]
-        ]
-
-
 extraction : Modele -> Element Message
 extraction m =
     case m.extraction of
@@ -506,42 +682,58 @@ palette : Modele -> Element Message
 palette m =
     let
         regles =
-            case m.panneau of
-                "utiliser" ->
-                    List.map Primitive [ "etG", "etD", "implE", "ouE", "fauxE", "RA" ] ++ List.map (\id -> Application id 1) [ "fourni-contradiction", "fourni-double-non", "fourni-equivG", "fourni-equivD" ]
+            if m.panneau == "utiliser" then
+                List.map Primitive [ "etG", "etD", "implE", "ouE", "fauxE", "RA" ] ++ List.map (\id -> Application id 1) [ "fourni-contradiction", "fourni-double-non", "fourni-equivG", "fourni-equivD" ]
 
-                _ ->
-                    List.map Primitive [ "etI", "implI", "ouG", "ouD" ] ++ List.map (\id -> Application id 1) [ "fourni-nonI", "fourni-equivI" ]
+            else
+                List.map Primitive [ "etI", "implI", "ouG", "ouD" ] ++ List.map (\id -> Application id 1) [ "fourni-nonI", "fourni-equivI" ]
+
+        contenu =
+            if m.extraction /= Nothing then
+                extraction m
+
+            else if m.cibleFormule /= Nothing then
+                composeur m
+
+            else
+                case m.panneau of
+                    "faits" ->
+                        faits m
+
+                    "inspecter" ->
+                        UI.el [ attribut "class" "mrjam-outils" ] (inspecteur m)
+
+                    "formules" ->
+                        palettePropositions m
+
+                    "enonce" ->
+                        M.pile
+                            ([ M.sousTitre "Prémisses", petit "Données admises dans cet exercice." ]
+                                ++ List.map (\h -> M.pile [ champDirect m ("premisse:" ++ h.id) h.formule, M.boutonSecondaire "Retirer la prémisse" (RetirerPremisse h.id) ]) m.document.premisses
+                                ++ [ M.boutonSecondaire "Déclarer une prémisse" AjouterPremisse ]
+                            )
+
+                    "theoremes" ->
+                        let
+                            defs =
+                                List.filter (\d -> not (String.startsWith "fourni-" d.id)) m.document.bibliotheque
+                        in
+                        if List.isEmpty defs then
+                            petit "Vos théorèmes apparaîtront ici. Inspectez un bloc terminé, puis choisissez Créer un théorème."
+
+                        else
+                            UI.column [ UI.spacing 18, attribut "class" "mrjam-palette-blocs" ] (List.map (\d -> paletteRegle m (Application d.id d.version)) defs)
+
+                    _ ->
+                        UI.column [ UI.spacing 18, attribut "class" "mrjam-palette-blocs" ] (List.map (paletteRegle m) regles)
     in
-    UI.column [ UI.width (UI.minimum 0 UI.fill), UI.spacing 12, attribut "id" "atelier-palette" ]
-        [ M.actions ([ ( "construire", "Construire" ), ( "utiliser", "Utiliser" ), ( "faits", "Faits" ), ( "theoremes", "Mes théorèmes" ), ( "formules", "Propositions" ), ( "inspecter", "Inspecteur" ) ] |> List.map (\( p, libelle ) -> M.boutonSecondaire libelle (Panneau p)))
-        , if m.cibleFormule /= Nothing then
-            composeur m
-
-          else
-            case m.panneau of
-                "faits" ->
-                    faits m
-
-                "inspecter" ->
-                    inspecteur m
-
-                "formules" ->
-                    composeur m
-
-                "theoremes" ->
-                    let
-                        defs =
-                            List.filter (\d -> not (String.startsWith "fourni-" d.id)) m.document.bibliotheque
-                    in
-                    if List.isEmpty defs then
-                        texte "Vos théorèmes apparaîtront ici. Construisez une preuve, inspectez sa conclusion, puis choisissez Créer un théorème."
-
-                    else
-                        M.pile (List.map (\d -> paletteRegle m (Application d.id d.version)) defs)
-
-                _ ->
-                    M.pile (List.map (paletteRegle m) regles)
+    UI.column [ UI.width (UI.minimum 0 UI.fill), UI.spacing 14, attribut "id" "atelier-palette" ]
+        [ UI.wrappedRow [ UI.width UI.fill, UI.spacing 3 ]
+            (List.map
+                (\( p, famille, nom ) -> B.onglet (p == m.panneau) famille nom (Panneau p))
+                [ ( "construire", "regles", "Construire" ), ( "utiliser", "regles", "Utiliser" ), ( "formules", "propositions", "Propositions" ), ( "faits", "regles", "Faits" ), ( "theoremes", "regles", "Mes théorèmes" ), ( "enonce", "", "Énoncé" ), ( "inspecter", "", "Inspecteur" ) ]
+            )
+        , contenu
         ]
 
 
@@ -557,97 +749,112 @@ vue largeur m =
         verification =
             case resultat of
                 Ok v ->
-                    "✓ Preuve vérifiée dans les hypothèses affichées"
+                    "✓ Preuve vérifiée"
                         ++ (if v.classique then
-                                " · raisonnement classique"
+                                " · classique"
 
                             else
                                 " · sans règle classique"
                            )
 
                 Err (Incomplet _) ->
-                    "○ À compléter : il reste à démontrer " ++ F.afficher doc.objectif
+                    "○ À compléter : " ++ F.afficher doc.objectif
 
                 Err (Erreur s) ->
-                    "! Erreur : " ++ s
+                    "! " ++ s
+
+        commandes =
+            UI.column [ UI.width UI.fill, UI.spacing 6 ]
+                [ UI.wrappedRow [ UI.width UI.fill, UI.spacing 12 ]
+                    [ ligne
+                        [ Identite.logo
+                        , UI.el
+                            [ Region.heading 1
+                            , Police.bold
+                            , Police.size
+                                (if largeur < 600 then
+                                    16
+
+                                 else
+                                    20
+                                )
+                            , attribut "id" "lesson-heading"
+                            , UI.htmlAttribute (A.tabindex -1)
+                            ]
+                            (UI.text "Atelier de preuves")
+                        ]
+                    , UI.el [ UI.alignRight ] (ligne [ B.outil "Annuler" "↶" Annuler, B.outil "Rétablir" "↷" Retablir, B.outil "Exporter JSON" "↥" Exporter, B.outil "Importer JSON" "↧" Importer ])
+                    ]
+                , UI.wrappedRow [ UI.width UI.fill, UI.spacing 7 ]
+                    [ UI.el
+                        [ UI.width
+                            (UI.px
+                                (if largeur < 500 then
+                                    148
+
+                                 else
+                                    245
+                                )
+                            )
+                        ]
+                        (M.selecteur "Exemple" Ex.titres m.exemple Exemple)
+                    , B.commande [ attribut "aria-label" "Construire l’énoncé", UI.htmlAttribute (A.title "Charger l’énoncé à construire") ] (UI.text "Énoncé") (Charger False)
+                    , B.commande [ attribut "aria-label" "Charger la solution manipulable", UI.htmlAttribute (A.title "Charger la solution manipulable") ] (UI.text "Solution") (Charger True)
+                    , UI.el [ UI.alignRight ] (ligne [ B.outil "Réduire" "−" (Zoomer -10), UI.text (String.fromInt m.zoom ++ "%"), B.outil "Agrandir" "+" (Zoomer 10), B.outil "Recentrer" "⌖" Recentrer ])
+                    ]
+                ]
+
+        projet =
+            UI.el [ attribut "class" "mrjam-projet" ]
+                (UI.column [ UI.spacing 5, UI.width UI.fill ]
+                    [ ligne [ petit "OBJECTIF", champDirect m "objectif" doc.objectif ]
+                    , UI.wrappedRow [ UI.width UI.fill, UI.spacing 5 ]
+                        ([ petit "DONNÉES" ]
+                            ++ List.map (\h -> champDirect m ("premisse:" ++ h.id) h.formule) doc.premisses
+                            ++ [ B.commande [ attribut "aria-label" "Déclarer une prémisse", UI.htmlAttribute (A.title "Ajouter une donnée") ] (UI.text "+") AjouterPremisse ]
+                        )
+                    ]
+                )
 
         canevas =
-            UI.column [ UI.width (UI.minimum 0 UI.fill), UI.spacing 14, attribut "id" "atelier-canevas" ]
-                [ M.sousTitre "Votre démonstration"
-                , B.objectif (champFormule "objectif" "Objectif · " doc.objectif)
-                , M.texteSecondaire "Les cavités contiennent des preuves. Chaque dernière étape en donne la conclusion. Les hypothèses locales restent dans leur cavité."
-                , UI.el [ UI.width UI.fill, attribut "class" "atelier-canevas-defilant" ] (sequence False m "racine" 0 (N.contexteInitial doc.premisses) doc.objectif doc.preuves)
-                , repere "atelier-verification"
-                    (M.avis
-                        (if Result.toMaybe resultat == Nothing then
-                            M.Avertissement
+            UI.column [ UI.width UI.fill, UI.height UI.fill, attribut "id" "atelier-canevas" ]
+                [ projet
+                , UI.el
+                    [ attribut "class" "mrjam-canevas"
+                    , attribut "id" "atelier-surface"
+                    , attribut "data-atelier-defile" "canevas"
+                    , attribut "aria-label" "Espace d’assemblage des preuves"
+                    , UI.htmlAttribute (A.tabindex 0)
+                    ]
+                    (UI.column
+                        [ attribut "class" "mrjam-canevas-contenu"
+                        , UI.htmlAttribute (A.style "zoom" (String.fromFloat (toFloat m.zoom / 100)))
+                        , UI.spacing 18
+                        ]
+                        [ sequence False m "racine" 0 (N.contexteInitial doc.premisses) doc.objectif doc.preuves
+                        , case m.inspection of
+                            Nothing ->
+                                UI.none
 
-                         else
-                            M.Succes
-                        )
-                        verification
+                            Just preuve ->
+                                M.pile [ petit "Démonstration instanciée · lecture", bloc True m (Ed.selectionnee m |> Maybe.map Tuple.second |> Maybe.withDefault Dict.empty) preuve, M.boutonSecondaire "Fermer la démonstration" FermerInspection ]
+                        ]
                     )
                 ]
-    in
-    UI.column [ UI.width UI.fill, UI.spacing 18, attribut "id" "atelier" ]
-        [ repere "lesson-heading" (M.sousTitre "Atelier de preuves — prototype")
-        , texte "Construisez une démonstration. Faites-en un théorème. Composez la suite."
-        , M.actions [ M.boutonSecondaire "Annuler" Annuler, M.boutonSecondaire "Rétablir" Retablir, M.boutonSecondaire "Exporter JSON" Exporter, M.boutonSecondaire "Importer JSON" Importer ]
-        , M.selecteur "Exemple" Ex.titres m.exemple Exemple
-        , M.actions [ M.bouton "Construire l’énoncé" (Charger False), M.boutonSecondaire "Charger la solution manipulable" (Charger True) ]
-        , M.carte
-            [ M.sousTitre "Prémisses déclarées"
-            , if List.isEmpty doc.premisses then
-                M.texteSecondaire "Aucune prémisse extérieure. L’objectif n’est pas un fait acquis."
 
-              else
-                M.pile
-                    (List.map
-                        (\h ->
-                            M.pile
-                                [ champFormule ("premisse:" ++ h.id) "Hypothèse · " h.formule, M.actions [ source ("fait:" ++ h.id) "Utiliser ce fait", M.boutonSecondaire "Retirer la prémisse" (RetirerPremisse h.id) ] ]
-                        )
-                        doc.premisses
-                    )
-            , M.boutonSecondaire "Déclarer une prémisse" AjouterPremisse
-            ]
-        , repere "atelier-message" (UI.el [ attribut "role" "status", attribut "aria-live" "polite", UI.width UI.fill ] (M.avis M.Information m.message))
-        , if m.stockageBloque then
-            M.actions [ M.bouton "Exporter avant de continuer" Exporter, M.boutonSecondaire "Reprendre la sauvegarde locale" ReprendreStockage ]
-
-          else
-            M.texteSecondaire "Sauvegarde locale automatique · aucune démonstration n’est envoyée à un serveur."
-        , if largeur >= 1000 then
-            UI.row [ UI.width UI.fill, UI.spacing 20, UI.alignTop ]
-                [ UI.el [ UI.width (UI.px 300), UI.alignTop, attribut "class" "atelier-palette-defilante" ] (palette m), UI.el [ UI.width (UI.minimum 0 UI.fill), UI.alignTop ] canevas ]
-
-          else
-            M.pile
-                [ M.boutonDevoiler "atelier-palette"
-                    "Palette et outils"
-                    (m.panneau /= "ferme")
-                    (Panneau
-                        (if m.panneau == "ferme" then
-                            "construire"
-
-                         else
-                            "ferme"
-                        )
-                    )
-                , if m.panneau == "ferme" then
-                    UI.none
+        statut =
+            UI.column [ UI.width UI.fill, UI.spacing 3 ]
+                [ UI.wrappedRow [ UI.width UI.fill, UI.spacing 8 ]
+                    [ UI.el [ attribut "id" "atelier-verification", Police.bold ] (UI.text verification)
+                    , UI.el [ UI.alignRight ] (M.lien "Les parcours" "#/parcours")
+                    , Identite.signature
+                    ]
+                , UI.el [ attribut "id" "atelier-message", attribut "role" "status", attribut "aria-live" "polite" ] (petit m.message)
+                , if m.stockageBloque then
+                    M.actions [ M.bouton "Exporter avant de continuer" Exporter, M.boutonSecondaire "Reprendre la sauvegarde locale" ReprendreStockage ]
 
                   else
-                    palette m
-                , canevas
+                    UI.none
                 ]
-        , extraction m
-        , case m.inspection of
-            Nothing ->
-                UI.none
-
-            Just preuve ->
-                M.section "Démonstration instanciée — lecture du certificat"
-                    [ bloc True m (Ed.selectionnee m |> Maybe.map Tuple.second |> Maybe.withDefault Dict.empty) preuve, M.boutonSecondaire "Fermer la démonstration" FermerInspection ]
-        , M.texteSecondaire "Cadre propositionnel. ¬A abrège A ⇒ ⊥ ; A ⇔ B abrège (A ⇒ B) ∧ (B ⇒ A). Les règles classiques restent signalées, même dans les théorèmes repliés."
-        ]
+    in
+    UI.el [ attribut "id" "atelier", UI.width UI.fill ] (B.espace commandes (palette m) canevas statut)

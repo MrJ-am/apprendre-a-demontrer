@@ -58,8 +58,8 @@ def drag(page,source,destination,tactile=False,cdp=None):
     page.wait_for_timeout(80)
     source.scroll_into_view_if_needed()
     a=source.bounding_box(); z=destination.bounding_box()
-    sx=a['x']+min(40,a['width']/2); sy=a['y']+22
-    tx=z['x']+min(45,z['width']/2); ty=z['y']+24
+    sx=a['x']+min(40,a['width']/2); sy=a['y']+a['height']/2
+    tx=z['x']+min(45,z['width']/2); ty=z['y']+z['height']/2
     if tactile:
         cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':sx,'y':sy}]})
         for i in range(1,13):
@@ -88,7 +88,7 @@ def inspecter(page,id):
 
 def parametre(page,id,nom,formule):
     inspecter(page,id)
-    page.locator(f'[data-formule="param:{id}:{nom}"]').get_by_role('button').first.click()
+    page.locator('#atelier-palette').get_by_role('button',name=f'Modifier param:{id}:{nom}',exact=True).click()
     page.get_by_label('Saisie textuelle facultative',exact=True).fill(formule)
     page.get_by_role('button',name='Lire la saisie',exact=True).click()
     page.get_by_role('button',name='Utiliser cette proposition',exact=True).click()
@@ -170,7 +170,7 @@ def main():
             assert len(chain['entrees'])==3 and chain['parametres']==['A','B','C','D']
             inspecter(page,seconde)
             page.get_by_role('button',name='Voir la démonstration',exact=True).click()
-            expect(page.get_by_text('Démonstration instanciée — lecture du certificat',exact=True)).to_be_visible()
+            expect(page.get_by_text('Démonstration instanciée · lecture',exact=True)).to_be_visible()
             page.get_by_role('button',name='Fermer la démonstration',exact=True).click()
             page.get_by_role('button',name='Développer cette occurrence',exact=True).click()
             expect(page.locator('#atelier-verification')).to_contain_text('✓ Preuve vérifiée')
@@ -190,11 +190,11 @@ def main():
             charger(page,'echange',True)
             echange=extraire(page,'echange','Échanger les termes')
             charger(page,'echange')
-            page.locator('[data-formule="premisse:hAB"]').get_by_role('button').first.click()
+            page.get_by_role('button',name='Modifier premisse:hAB',exact=True).first.click()
             page.get_by_label('Saisie textuelle facultative',exact=True).fill('(P => Q) & (R | S)')
             page.get_by_role('button',name='Lire la saisie',exact=True).click()
             page.get_by_role('button',name='Utiliser cette proposition',exact=True).click()
-            page.locator('[data-formule="objectif"]').get_by_role('button').first.click()
+            page.get_by_role('button',name='Modifier objectif',exact=True).first.click()
             page.get_by_label('Saisie textuelle facultative',exact=True).fill('(R | S) & (P => Q)')
             page.get_by_role('button',name='Lire la saisie',exact=True).click()
             page.get_by_role('button',name='Utiliser cette proposition',exact=True).click()
@@ -207,7 +207,7 @@ def main():
             resultats.append('Théorème personnel instancié avec deux propositions composées')
             # Composer par les trous et les connecteurs, puis par des gestes de proposition.
             charger(page,'vide')
-            page.locator('[data-formule="objectif"]').get_by_role('button').first.click()
+            page.get_by_role('button',name='Modifier objectif',exact=True).first.click()
             page.locator('#atelier-palette').get_by_role('button',name='∧',exact=True).click()
             page.locator('[data-chemin="0"]').get_by_role('button').first.click()
             page.locator('#atelier-palette').get_by_role('button',name='⇒',exact=True).click()
@@ -219,14 +219,32 @@ def main():
             assert doc(page)['objectif']['arguments'][0]['type']=='implique'
             assert not doc(page)['preuves']
             resultats.append('Composition visuelle d’une proposition imbriquée sans saisir une formule au clavier')
-            page.locator('[data-formule="objectif"]').get_by_role('button').first.click()
+            page.get_by_role('button',name='Modifier objectif',exact=True).first.click()
             page.locator('#atelier-palette').get_by_role('button',name='∨',exact=True).click()
             for chemin,atome in [('0','P'),('1','Q')]:
                 page.locator(f'[data-atelier-source="atome:{atome}"]').get_by_role('button').click()
                 page.locator(f'[data-chemin="{chemin}"]').get_by_role('button').first.click()
-            drag(page,page.locator('[data-atelier-source="prop:brouillon"]'),page.locator('[data-formule="objectif"]'))
+            drag(page,page.locator('[data-atelier-source="prop:brouillon"]'),page.get_by_role('button',name='Modifier objectif',exact=True))
             assert doc(page)['objectif']['type']=='ou'
             resultats.append('Proposition composée déplacée dans un emplacement de formule par la souris')
+            charger(page,'double')
+            placer(page,'regle:etI');nid=id_regle(page,'etI')
+            page.get_by_role('button',name='Réduire',exact=True).click()
+            page.get_by_role('button',name='Réduire',exact=True).click()
+            palette(page,'Propositions')
+            drag(page,page.locator('[data-atelier-source="connecteur:implique"]'),page.get_by_role('button',name=f'Modifier param:{nid}:A',exact=True))
+            for i,atome in [(0,'P'),(1,'Q')]:
+                drag(page,page.locator(f'[data-atelier-source="atome:{atome}"]'),page.get_by_role('button',name=f'Modifier param:{nid}:A|{i}',exact=True))
+            formule=doc(page)['preuves'][0]['parametres']['A']
+            assert formule=={'type':'implique','arguments':[{'type':'atome','nom':'P'},{'type':'atome','nom':'Q'}]},formule
+            assert not doc(page)['preuves'][0]['entrees'][0]
+            page.get_by_role('button',name='Annuler',exact=True).click()
+            assert doc(page)['preuves'][0]['parametres']['A']['arguments'][1]['type']=='trou'
+            page.get_by_role('button',name='Rétablir',exact=True).click()
+            assert doc(page)['preuves'][0]['parametres']['A']==formule
+            page.get_by_role('button',name='Recentrer',exact=True).click()
+            page.screenshot(path=str(SORTIE/'propositions-emboitees.png'),full_page=True)
+            resultats.append('Propositions vertes : implication puis P et Q emboîtés directement dans une règle à 80 %, avec annuler/rétablir')
             # Clavier : sélectionner, placer, annuler, rétablir.
             charger(page,'double')
             origine=preparer_source(page,'regle:etI')
@@ -252,11 +270,13 @@ def main():
             for w,h in [(1440,1000),(768,1024),(1024,768),(390,844),(844,390),(320,740)]:
                 page.set_viewport_size({'width':w,'height':h});page.wait_for_timeout(100)
                 largeur(page)
-                if w<1000:
-                    if not page.locator('#atelier-palette').count():
-                        page.get_by_role('button',name='Palette et outils',exact=True).click()
-                    hauteur=page.locator('#atelier-palette').bounding_box()['height']
-                    assert h*.45 < hauteur <= h*.56, (w,h,hauteur)
+                gauche=page.locator('.mrjam-atelier-palette').bounding_box()
+                droite=page.locator('#atelier-surface').bounding_box()
+                assert gauche['x']==0 and droite['x']>=gauche['width']-1
+                assert droite['height']>h*.3 and droite['y']<h*.55, (w,h,droite)
+                assert page.evaluate('document.documentElement.scrollHeight <= innerHeight + 2')
+                assert page.locator('.mrjam-bloc-entete').first.evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(255, 203, 56)'
+                assert page.locator('.mrjam-proposition').first.evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(88, 182, 83)'
                 page.screenshot(path=str(SORTIE/f'atelier-{w}x{h}.png'),full_page=True)
             resultats.append('Six formats contrôlés : ordinateur, tablette et téléphone, portrait/paysage')
             # Vrais événements tactiles reçus par Pointer Events via Chrome DevTools.
@@ -272,14 +292,17 @@ def main():
                 origine=preparer_source(tp,'fait:hA',destination)
                 drag(tp,origine,destination,tactile=True,cdp=cdp)
             expect(tp.locator('#atelier-verification')).to_contain_text('✓ Preuve vérifiée')
-            # Défilement natif hors poignée : aucun touch-action:none global.
-            tp.evaluate('window.scrollTo(0,0)');tp.wait_for_timeout(80)
+            # Défilement natif du canevas, indépendant de la palette.
+            charger(tp,'transitivite',True)
+            tp.locator('#atelier-surface').evaluate('e=>e.scrollTo(0,0)');tp.wait_for_timeout(80)
             cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':980,'y':760}]})
             for y in [690,590,490,390,290]:
                 cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':980,'y':y}]})
             cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
             tp.wait_for_timeout(150)
-            assert tp.evaluate('window.scrollY')>100
+            assert tp.locator('#atelier-surface').evaluate('e=>e.scrollTop')>100
+            assert tp.evaluate('window.scrollY')==0
+            charger(tp,'double',True);tr='double'
             # Annulation d'un geste interrompu conserve le document.
             avant=doc(tp);poignee=tp.locator(f'[data-testid="bloc:{tr}"]');poignee.scroll_into_view_if_needed();bb=poignee.bounding_box()
             cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':bb['x']+30,'y':bb['y']+20}]})
@@ -292,22 +315,28 @@ def main():
             # Téléphone : atteindre une cible initialement hors écran par défilement actif.
             telephone=navigateur.new_context(viewport={'width':390,'height':844},has_touch=True,is_mobile=True,reduced_motion='reduce')
             ph=telephone.new_page();ph.goto(adresse);ph.wait_for_selector('#atelier');tcdp=telephone.new_cdp_session(ph)
-            charger(ph,'double');origine=preparer_source(ph,'regle:etI');origine.scroll_into_view_if_needed();boite=origine.bounding_box()
-            tcdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':boite['x']+40,'y':boite['y']+20}]})
-            tcdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':375,'y':820}]})
+            charger(ph,'transitivite',True)
+            origine=preparer_source(ph,'fait:hAB');origine.scroll_into_view_if_needed()
+            ph.locator('#atelier-surface').evaluate('e=>e.scrollTo(0,0)')
+            destination=cible(ph,'racine',0,1)
+            assert destination.bounding_box()['y']>844
+            boite=origine.bounding_box();surface=ph.locator('#atelier-surface').bounding_box()
+            x=surface['x']+surface['width']/2;y=surface['y']+surface['height']-12
+            tcdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':boite['x']+20,'y':boite['y']+boite['height']/2}]})
+            tcdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x,'y':y}]})
             expect(ph.locator('.atelier-fantome')).to_have_count(1)
-            for _ in range(80):
-                z=cible(ph).bounding_box()
-                if 100<z['y']<700:break
+            for _ in range(160):
+                z=destination.bounding_box()
+                if surface['y']+40<z['y']<y-50:break
                 ph.wait_for_timeout(50)
-            assert 100<z['y']<700, z
-            tcdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':375,'y':400}]})
-            ph.wait_for_timeout(60)
-            z=cible(ph).bounding_box()
-            tcdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':z['x']+45,'y':z['y']+24}]})
+            assert surface['y']+40<z['y']<y-50, z
+            tcdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x,'y':surface['y']+surface['height']/2}]})
+            ph.wait_for_timeout(80)
+            z=destination.bounding_box()
+            tcdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':z['x']+45,'y':z['y']+z['height']/2}]})
             expect(ph.locator('[data-depot-actif]')).to_have_count(1)
             tcdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-            ph.wait_for_function('JSON.parse(localStorage.getItem("mrjam.atelier-preuves.v1")).preuves.length === 1')
+            ph.wait_for_function('JSON.parse(localStorage.getItem("mrjam.atelier-preuves.v1")).preuves.length === 2')
             largeur(ph)
             ph.screenshot(path=str(SORTIE/'tactile-telephone-depot-defile.png'),full_page=True)
             resultats.append('Téléphone tactile CDP : cible hors écran atteinte par défilement pendant le geste')

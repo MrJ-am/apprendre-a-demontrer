@@ -12,6 +12,8 @@ window.installerAtelier = (app) => {
       } catch {
         erreur("Le navigateur refuse la sauvegarde locale.");
       }
+    } else if (operation === "recentrer") {
+      document.getElementById("atelier-surface")?.scrollTo(0, 0);
     } else if (operation === "exporter") {
       const blob = new Blob([JSON.stringify(travail, null, 2) + "\n"], {
         type: "application/json",
@@ -58,6 +60,7 @@ window.installerAtelier = (app) => {
     geste.fantome?.remove();
     geste.zone?.removeAttribute("data-depot-actif");
     geste.poignee.removeAttribute("data-saisie-active");
+    document.getElementById("atelier")?.classList.remove("en-deplacement");
     const { poignee, id } = geste;
     geste = null;
     cancelAnimationFrame(frame);
@@ -83,23 +86,24 @@ window.installerAtelier = (app) => {
   };
   const defiler = () => {
     if (!geste?.actif) return;
-    const marge = 85;
-    const delta =
-      geste.y < marge
-        ? -Math.ceil((marge - geste.y) / 5)
-        : geste.y > innerHeight - marge
-          ? Math.ceil((geste.y - innerHeight + marge) / 5)
-          : 0;
-    if (delta) {
-      // Défiler le panneau situé sous le pointeur, puis la page s'il est en butée.
-      const sous = document.elementFromPoint(
-        geste.x,
-        Math.max(0, Math.min(innerHeight - 1, geste.y)),
+    const sous = document.elementFromPoint(geste.x, geste.y);
+    const panneau = sous?.closest(
+      "[data-atelier-defile], .mrjam-atelier-palette",
+    );
+    if (panneau) {
+      const cadre = panneau.getBoundingClientRect();
+      const vitesse = (point, debut, fin) => {
+        const marge = Math.min(50, (fin - debut) / 5);
+        return point < debut + marge
+          ? -Math.ceil((debut + marge - point) / 6)
+          : point > fin - marge
+            ? Math.ceil((point - fin + marge) / 6)
+            : 0;
+      };
+      panneau.scrollBy(
+        vitesse(geste.x, cadre.left, cadre.right),
+        vitesse(geste.y, cadre.top, cadre.bottom),
       );
-      const panneau = sous?.closest(".atelier-palette-defilante");
-      const avant = panneau?.scrollTop;
-      if (panneau) panneau.scrollTop += delta;
-      if (!panneau || panneau.scrollTop === avant) window.scrollBy(0, delta);
     }
     actualiser();
     frame = requestAnimationFrame(defiler);
@@ -132,8 +136,14 @@ window.installerAtelier = (app) => {
         Math.hypot(e.clientX - geste.departX, e.clientY - geste.departY) >= 7
       ) {
         geste.actif = true;
+        document.getElementById("atelier")?.classList.add("en-deplacement");
         geste.poignee.setPointerCapture(e.pointerId);
-        const modele = geste.poignee.closest(".mrjam-bloc") || geste.poignee;
+        const modele =
+          geste.source.startsWith("prop:") ||
+          geste.source.startsWith("atome:") ||
+          geste.source.startsWith("connecteur:")
+            ? geste.poignee
+            : geste.poignee.closest(".mrjam-bloc") || geste.poignee;
         const fantome = modele.cloneNode(true);
         fantome.classList.add("atelier-fantome");
         fantome.setAttribute("aria-hidden", "true");
@@ -144,7 +154,7 @@ window.installerAtelier = (app) => {
           el.removeAttribute("data-testid");
           el.setAttribute("tabindex", "-1");
         }
-        fantome.style.width = `${Math.min(400, Math.max(220, modele.getBoundingClientRect().width))}px`;
+        fantome.style.width = `${Math.min(500, modele.getBoundingClientRect().width)}px`;
         document.body.append(fantome);
         geste.fantome = fantome;
         geste.poignee.setAttribute("data-saisie-active", "true");

@@ -1,5 +1,6 @@
 port module AtelierCheck exposing (main)
 
+import Atelier.Editeur as Ed
 import Atelier.Exemples as X
 import Atelier.Formule as F exposing (Formule(..))
 import Atelier.Graphe as G
@@ -146,11 +147,25 @@ checks =
         expansionConserve bibliotheque contexte preuve =
             T.developper bibliotheque contexte preuve |> Result.andThen (\developpee -> N.verifierBloc bibliotheque contexte developpee) |> ok
 
+        montage =
+            Ed.initial
+                |> Ed.update (Ed.Deposer "connecteur:et" "formule:objectif")
+                |> Ed.update (Ed.Deposer "connecteur:implique" "formule:objectif|0")
+                |> Ed.update (Ed.Deposer "atome:P" "formule:objectif|0.0")
+                |> Ed.update (Ed.Deposer "atome:Q" "formule:objectif|0.1")
+                |> Ed.update (Ed.Deposer "atome:R" "formule:objectif|1")
+
         doubled =
             { echange | preuves = G.dupliquer "copie/" trans.preuves, premisses = trans.premisses, objectif = trans.objectif }
     in
     List.map (\nom -> ( "exemple " ++ nom, ok (verifierDoc (X.charger nom True)) )) [ "double", "echange", "transitivite", "cas", "contraposition", "classique" ]
-        ++ [ ( "certificats dérivés", ok (N.verifierBibliotheque R.initiale) )
+        ++ [ ( "sous-propositions composées par dépôt", montage.document.objectif == Et p (Atome "R") )
+           , ( "composer ne démontre pas", List.isEmpty montage.document.preuves && not (ok (verifierDoc montage.document)) )
+           , ( "annuler un emboîtement", (Ed.update Ed.Annuler montage).document.objectif == Et p (Trou "droite") )
+           , ( "rétablir un emboîtement", (montage |> Ed.update Ed.Annuler |> Ed.update Ed.Retablir).document == montage.document )
+           , ( "copier une sous-proposition", (Ed.update (Ed.Deposer "prop:objectif|0" "formule:objectif|1") montage).document.objectif == Et p p )
+           , ( "zoom sans modification de la preuve", (Ed.update (Ed.Zoomer -20) montage).document == montage.document )
+           , ( "certificats dérivés", ok (N.verifierBibliotheque R.initiale) )
            , ( "transitivité exactement deux entrées", Result.map (.entrees >> List.length >> (==) 2) t |> Result.withDefault False )
            , ( "transitivité trois paramètres", Result.map (.parametres >> (==) [ "A", "B", "C" ]) t |> Result.withDefault False )
            , ( "application directe", ok (N.verifierBloc lib ctx occurrence) )

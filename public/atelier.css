@@ -5,11 +5,7 @@
 #atelier .atelier-poignee {
   touch-action: none;
   cursor: grab;
-  min-height: 44px;
   user-select: none;
-}
-#atelier .atelier-poignee > * {
-  min-height: 44px;
 }
 #atelier [data-saisie-active] {
   opacity: 0.45;
@@ -19,19 +15,6 @@
   outline: 3px solid #087f71;
   outline-offset: 2px;
   position: relative;
-}
-#atelier [data-depot-actif]::after {
-  content: "↓ Insérer ici";
-  position: absolute;
-  top: -23px;
-  right: 2px;
-  background: #193d38;
-  color: white;
-  padding: 3px 8px;
-  border-radius: 4px;
-  font: 13px sans-serif;
-  z-index: 4;
-  pointer-events: none;
 }
 .atelier-fantome {
   position: fixed !important;
@@ -47,37 +30,11 @@
 .atelier-fantome * {
   pointer-events: none !important;
 }
-.atelier-canevas-defilant {
-  overflow-x: auto !important;
-  padding: 4px;
-}
-#atelier .mrjam-bloc {
-  overflow-wrap: anywhere;
-}
-@media (min-width: 1000px) {
-  .atelier-palette-defilante {
-    max-height: 82vh;
-    overflow-y: auto !important;
-    padding: 4px;
-    position: sticky !important;
-    top: 8px;
-  }
-}
 @media (prefers-reduced-motion: reduce) {
   #atelier *,
   .atelier-fantome {
     transition: none !important;
     animation: none !important;
     scroll-behavior: auto !important;
-  }
-}
-@media (max-width: 999px) {
-  #atelier-palette {
-    height: 55vh !important;
-    flex: 0 0 55vh !important;
-    min-height: 0 !important;
-    max-height: 55vh;
-    overflow-y: auto !important;
-    padding: 4px;
   }
 }

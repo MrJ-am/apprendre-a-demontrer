@@ -43,6 +43,7 @@ type alias Modele =
     , extraction : Maybe Extraction
     , inspection : Maybe Preuve
     , stockageBloque : Bool
+    , zoom : Int
     }
 
 
@@ -90,11 +91,13 @@ type Message
     | Importer
     | AnnulerGeste
     | AucuneAction
+    | Zoomer Int
+    | Recentrer
 
 
 initial : Modele
 initial =
-    { document = Ex.vide, passes = [], futurs = [], selection = Nothing, cible = { parent = "racine", indice = 0, position = 0 }, source = Nothing, repli = Set.empty, panneau = "ferme", message = "Choisissez un exemple ou composez votre objectif, puis saisissez un bloc.", exemple = "vide", cibleFormule = Nothing, brouillon = Atome "A", chemin = [], texteFormule = "A", nomAtome = "A", extraction = Nothing, inspection = Nothing, stockageBloque = False }
+    { document = Ex.vide, passes = [], futurs = [], selection = Nothing, cible = { parent = "racine", indice = 0, position = 0 }, source = Nothing, repli = Set.empty, panneau = "construire", message = "Glissez une règle jaune dans l’atelier. Les propositions vertes s’emboîtent dans ses paramètres.", exemple = "vide", cibleFormule = Nothing, brouillon = Atome "A", chemin = [], texteFormule = "A", nomAtome = "A", extraction = Nothing, inspection = Nothing, stockageBloque = False, zoom = 100 }
 
 
 modifier : Document -> Modele -> Modele
@@ -148,6 +151,52 @@ selectionnee m =
 
 formuleCible : Modele -> String -> Maybe Formule
 formuleCible m cible =
+    case String.split "|" cible of
+        [ base, chemin ] ->
+            formuleCible m base |> Maybe.andThen (sousFormule (lireChemin chemin))
+
+        _ ->
+            formuleSimple m cible
+
+
+lireChemin : String -> List Int
+lireChemin =
+    String.split "." >> List.filterMap String.toInt
+
+
+sousFormule : List Int -> Formule -> Maybe Formule
+sousFormule chemin formule =
+    case chemin of
+        [] ->
+            Just formule
+
+        indice :: suite ->
+            let
+                enfants =
+                    case formule of
+                        Et a b ->
+                            [ a, b ]
+
+                        Ou a b ->
+                            [ a, b ]
+
+                        Implique a b ->
+                            [ a, b ]
+
+                        Equivalent a b ->
+                            [ a, b ]
+
+                        Non a ->
+                            [ a ]
+
+                        _ ->
+                            []
+            in
+            List.drop indice enfants |> List.head |> Maybe.andThen (sousFormule suite)
+
+
+formuleSimple : Modele -> String -> Maybe Formule
+formuleSimple m cible =
     case String.split ":" cible of
         [ "objectif" ] ->
             Just m.document.objectif
@@ -403,6 +452,18 @@ poser source cible m =
 
 appliquer : String -> Formule -> Modele -> Modele
 appliquer cible formule m =
+    case String.split "|" cible of
+        [ base, chemin ] ->
+            formuleCible m base
+                |> Maybe.map (\origine -> appliquerSimple base (F.remplacer (lireChemin chemin) formule origine) m)
+                |> Maybe.withDefault { m | message = "Emplacement de proposition introuvable." }
+
+        _ ->
+            appliquerSimple cible formule m
+
+
+appliquerSimple : String -> Formule -> Modele -> Modele
+appliquerSimple cible formule m =
     let
         doc =
             m.document
@@ -513,6 +574,12 @@ update msg m =
             selectionnee m |> Maybe.map fn |> Maybe.withDefault { m | message = "Sélectionnez un bloc." }
     in
     case msg of
+        Zoomer ecart ->
+            { m | zoom = clamp 50 150 (m.zoom + ecart) }
+
+        Recentrer ->
+            { m | zoom = 100 }
+
         AnnulerGeste ->
             { m | source = Nothing, extraction = Nothing, inspection = Nothing, cibleFormule = Nothing, message = "Geste annulé." }
 
@@ -550,7 +617,7 @@ update msg m =
             { m | cible = c, panneau = "faits" }
 
         Panneau p ->
-            { m | panneau = p }
+            { m | panneau = p, cibleFormule = Nothing, extraction = Nothing }
 
         Exemple e ->
             { m | exemple = e }

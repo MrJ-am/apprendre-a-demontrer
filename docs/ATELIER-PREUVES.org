@@ -24,10 +24,10 @@ Playwright est fixé dans =tests/requirements.txt= ; installer Chromium avec
 =python3 -m playwright install chromium= avant les suites navigateur.
 
 * Un premier théorème
-1. Choisir « C · Transitivité de l'implication », puis « Construire l'énoncé ».
-2. Placer « Montrons une implication » dans la démonstration. Le contrat
+1. Choisir « C · Transitivité de l'implication », puis « Énoncé ».
+2. Placer « si » dans la démonstration. Le contrat
    devient =A ⇒ C= ; l'hypothèse =A= est disponible seulement dans sa cavité.
-3. Dans cette cavité, placer « Appliquons une implication ». Modifier son
+3. Dans cette cavité, placer « appliquer ⇒ ». Modifier son
    paramètre =A= en =B= : ses entrées sont alors =B ⇒ C= et =B=.
 4. Fournir =B ⇒ C= depuis les faits. Dans l'entrée =B=, placer une seconde
    application d'implication ; lui fournir =A ⇒ B= et l'hypothèse locale =A=.
@@ -43,25 +43,32 @@ Playwright est fixé dans =tests/requirements.txt= ; installer Chromium avec
    occurrence » le rend éditable. Recharger la page conserve les définitions ;
    exporter puis importer le JSON conserve aussi leurs dépendances.
 
-Pour découvrir les gestes plus rapidement, « Charger la solution manipulable »
+Pour découvrir les gestes plus rapidement, « Solution »
 reste une action séparée du chargement de l'énoncé. Les six exemples A–F sont
 fournis ; C+ est l'exercice de composition avec le théorème personnel créé en C.
 
 * Manipuler
-- Saisir une poignée =⠿= déplace une construction avec ses descendants.
+- La palette reste à gauche et le canevas pointillé à droite, y compris sur
+  téléphone. Les deux zones défilent indépendamment. Les règles jaunes ont
+  des encoches et des cavités ouvertes ; les propositions sont vertes.
+- Saisir le nom d’une règle déplace la construction avec ses descendants.
   Depuis la palette, le geste crée une occurrence ; depuis les faits, une
   référence non consommée. Une même hypothèse peut servir deux fois.
-- Le fantôme et la zone marquée « Insérer ici » suivent le pointeur. Le bord
-  de l'écran fait défiler pendant le geste. Hors poignée, le défilement natif
+- Le fantôme et le contour de la destination suivent le pointeur. Les bords
+  du canevas font défiler dans les deux directions pendant le geste. Hors poignée, le défilement natif
   reste disponible. Échap et pointercancel annulent le déplacement.
 - Une activation au toucher ou au clavier sélectionne l'objet ; activer ensuite
   l'emplacement le place. Ctrl/Cmd+Z annule, Maj+Ctrl/Cmd+Z rétablit.
-- Les propositions ont des contours ronds ; leurs connecteurs contiennent des
-  emplacements emboîtés. Sélectionner un trou puis un atome ou un connecteur,
-  ou glisser une proposition. La saisie textuelle est facultative.
+- Les propositions vertes ont des contours hexagonaux. Depuis « Propositions »,
+  glisser un connecteur directement sur un paramètre du bloc jaune, puis
+  placer des atomes ou d’autres connecteurs dans ses logements. Chaque
+  sous-proposition peut être remplacée ou copiée. Un clic ouvre le composeur ;
+  la saisie textuelle reste facultative.
+- Les commandes − et + règlent le zoom de 50 % à 150 %. « Recentrer » revient
+  à 100 % et au début du canevas. Le zoom ne change jamais la preuve.
 - Les cibles d'insertion permettent des résultats intermédiaires. La dernière
   étape d'une cavité est sa conclusion ; les étapes précédentes sont citables.
-- L'inspecteur donne les paramètres, le repli, la duplication, l'extraction et
+- Le bouton ⋯ du bloc ouvre l’inspecteur et donne les paramètres, le repli, la duplication, l'extraction et
   le développement. Replier est une opération d'affichage, sans nouveau théorème.
 - L'extraction peut inclure les étapes précédentes de la cavité. Elle produit
   une seule conclusion et conserve la construction source ainsi que tous ses
@@ -163,32 +170,23 @@ comme Pointer Events. Ils ne constituent pas un essai sur une tablette physique.
 Les captures des six formats et les résultats machine sont produits dans
 =controles-atelier/=, conservés comme artefacts de CI.
 
-* État de livraison
-Le code est implémenté sur =fonctionnalite/atelier-preuves=. Les validations
-locales du 7 octobre 2026 réussissent : 91 contrôles du noyau et du modèle,
-190 cas du correcteur existant, 299 rendus KaTeX, 14 tests Python, source Org,
-compilation optimisée, parcours historiques, douze parcours de l'atelier,
-six formats et huit contextes typographiques avec copier-coller natif.
-Les gestes tactiles sont simulés par CDP ; aucun appareil physique n'est revendiqué.
+* Refonte graphique du 7 octobre
+La demande précisée par vidéo conduit à une disposition permanente à deux
+panneaux et à des pièces jaunes/vertes à largeur naturelle. La représentation
+antérieure en larges cartes est remplacée. Les sous-propositions se déposent
+directement dans les paramètres ; leurs adresses syntaxiques et le zoom ne
+changent ni le format de stockage ni le noyau de déduction.
 
-Le style adopté est =90ced00b49bf1e26bea0c8b8477b630c966e2082=, validé par ses
-contrôles et sa CI =37553448100=. Les autres applications gardent leurs artefacts.
-L'atelier est publié et vérifié à
-[[https://logique.echos.systems/#/atelier][https://logique.echos.systems/#/atelier]].
-Code réellement servi : =63f8a7fe940f3384e76ab8fb4764f033a49f02ca=, validé par
-la [[https://github.com/MrJ-am/apprendre-a-demontrer/actions/runs/37554360513][CI applicative 37554360513]].
-Les modifications documentaires ultérieures ne changent pas cet artefact.
+La branche =refonte/atelier-graphique= adopte le style
+=eaee86024ac2d158f507bfe798cee3af3a923930=. Les vérifications comprennent
+97 contrôles Elm de l’atelier, les parcours historiques et les gestes réels
+souris/clavier/tactiles CDP. Les captures et résultats sont des artefacts de CI.
+L’activation et son constat sont consignés après la validation de l’archive.
 
-Opérateur VPS : =94f48f49efcfaa05fdc77af54fe036a5363e5ee6= ; CI infrastructure
-=37554642021= réussie (145 tests, évaluations NixOS et restauration PostgreSQL
-dans un conteneur jetable). Préparation inactive =37554886674=, activation
-=37555013283= et [[https://github.com/MrJ-am/vps-infrastructure/actions/runs/37555292312][constat indépendant 37555292312]] réussis.
-L'archive testée et ses 84 fichiers sont identifiés dans
-=operations/logique-atelier-publication.json= du dépôt privé VPS.
-
-Les 35 sondes HTTP/TLS, les 83 ressources comparées octet pour octet (plus le
-manifeste de publication), trois formats HTTPS, l'extraction et le rechargement
-ont passé deux contrôles successifs. Les captures de production ont été examinées.
-Ancienne release conservée, retour autonome désarmé ; générations système,
-configuration et autres applications conservées. Aucune migration SQL,
-restauration de production ou reconstruction NixOS.
+* Publication antérieure, avant la refonte graphique
+La première version a été publiée à
+[[https://logique.echos.systems/#/atelier][https://logique.echos.systems/#/atelier]], code
+=63f8a7fe940f3384e76ab8fb4764f033a49f02ca=, style
+=90ced00b49bf1e26bea0c8b8477b630c966e2082= ; CI applicative =37554360513=,
+activation VPS =37555013283= et constat indépendant =37555292312=.
+Ces références historiques ne prouvent pas l’activation de la refonte.

@@ -231,6 +231,9 @@ update msg model =
                         Atelier.Importer ->
                             Just "importer"
 
+                        Atelier.Recentrer ->
+                            Just "recentrer"
+
                         Atelier.ReprendreStockage ->
                             Just "sauvegarder"
 
@@ -529,14 +532,16 @@ view model =
         else
             position model |> Maybe.map (\p -> p.lesson.title ++ " · Apprendre à démontrer") |> Maybe.withDefault "Apprendre à démontrer"
     , body =
-        [ a [ class "skip-link", href "#lesson-heading" ] [ text "Aller au contenu" ]
-        , MrJam.page "Apprendre à démontrer"
-            [ MrJam.actions [ MrJam.lien "Les parcours" "#/parcours", MrJam.lien "Atelier de preuves — prototype" "#/atelier" ]
-            , if route model == [ "atelier" ] then
-                UI.map MessageAtelier (VueAtelier.vue model.largeur model.atelier)
+        if route model == [ "atelier" ] then
+            [ a [ class "skip-link", href "#lesson-heading" ] [ text "Aller au contenu" ]
+            , UI.layout [] (UI.map MessageAtelier (VueAtelier.vue model.largeur model.atelier))
+            ]
 
-              else
-                case model.course of
+        else
+            [ a [ class "skip-link", href "#lesson-heading" ] [ text "Aller au contenu" ]
+            , MrJam.page "Apprendre à démontrer"
+                [ MrJam.actions [ MrJam.lien "Les parcours" "#/parcours", MrJam.lien "Atelier de preuves — prototype" "#/atelier" ]
+                , case model.course of
                     Err _ ->
                         repere "lesson-heading" <|
                             MrJam.section "Le parcours n’a pas pu s’ouvrir."
@@ -570,9 +575,9 @@ view model =
 
                                     else
                                         MrJam.pile [ sidebar model course pos, contenu ]
-            , MrJam.texteSecondaire "Un cours de Jean-Christophe Jameux. Toute utilisation du logo et de la signature est strictement réservée."
+                , MrJam.texteSecondaire "Un cours de Jean-Christophe Jameux. Toute utilisation du logo et de la signature est strictement réservée."
+                ]
             ]
-        ]
     }
 
 
