@@ -129,3 +129,14 @@ L’équivalence mathématique d’une proposition ne suffit pas toujours à ré
 La démarche s’inspire de « Enseignement de la démonstration » et du support de Jean-Christophe Jameux. Les séquences interactives sont une transposition pédagogique, pas une transcription du dialogue. L’identité visuelle reprend celle du site [[https://github.com/MrJ-am/M-moire][Regards]].
 
 Le site expose, dans les navigateurs compatibles, trois outils WebMCP facultatifs : lire l’état, ouvrir une leçon, et vérifier une réponse. Ils emploient les mêmes actions et le même correcteur que l’interface. L’application fonctionne aussi sans cette API.
+
+* Atelier de preuves — prototype
+La route =#/atelier= permet de composer des démonstrations propositionnelles par
+blocs, d'en extraire des théorèmes paramétriques et de les réutiliser. La palette
+s'enrichit sans modifier le code ; le noyau Elm revérifie les certificats, les
+portées et les versions. Sauvegarde locale et export/import JSON sont disponibles.
+
+Le [[file:docs/ATELIER-PREUVES.org][guide de l'atelier]] décrit les gestes, le modèle,
+les limites et un parcours complet de création puis de réutilisation de la
+transitivité. Les tests supplémentaires se lancent par =npm run test:atelier=
+et =npm run test:atelier:interface=.

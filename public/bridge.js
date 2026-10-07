@@ -37,6 +37,7 @@
     node: document.getElementById("app"),
     flags: course,
   });
+  window.installerAtelier?.(app);
   let latest = null;
   let sequence = 0;
   const pending = new Map();

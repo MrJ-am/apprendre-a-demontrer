@@ -1,5 +1,19 @@
 # Reprise : style MrJ.am
 
+## Atelier de preuves — 7 octobre 2026
+
+Le verrou courant adopte `90ced00b49bf1e26bea0c8b8477b630c966e2082`.
+Le module additionnel `MrJam.Blocs` fournit les contours à cavités, les propositions
+et les objectifs ; il ne contient aucune règle mathématique. Ses contrôles,
+exemples et documentation sont dans `docs/BLOCS.md` du dépôt partagé.
+Logique est le seul nouveau consommateur ; les autres applications conservent
+leurs versions figées. Leurs composants existants ne sont pas modifiés.
+
+La publication actuelle de Logique passe par le dépôt VPS et ses Actions,
+avec artefact exact, préparation inactive, retour autonome et constat HTTPS.
+Les états ci-dessous sont historiques. La livraison et ses preuves sont suivies
+dans `docs/ATELIER-PREUVES.org`.
+
 ## État au 21 septembre 2026
 
 La préparation est sur `migration/style-mrjam`, sans modification de la production. Le portage ElmUI est complet et contrôlé ; `docs/VALIDATION-ELMUI.md` conserve les preuves. Le workflow `atelier-style.yml` et son exécution `35604499617` constituent la référence historique avant portage.

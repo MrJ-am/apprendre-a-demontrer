@@ -1,5 +1,8 @@
 port module Main exposing (main)
 
+import Atelier.Editeur as Atelier
+import Atelier.Sauvegarde as SauvegardeAtelier
+import Atelier.Vue as VueAtelier
 import Browser
 import Browser.Dom
 import Browser.Events
@@ -29,6 +32,12 @@ port agentAction : (D.Value -> msg) -> Sub msg
 port focusElement : String -> Cmd msg
 
 
+port atelierCommande : E.Value -> Cmd msg
+
+
+port atelierEvenement : (D.Value -> msg) -> Sub msg
+
+
 type alias Response =
     { value : String, verdict : Maybe (Result String ()), hint : Bool }
 
@@ -41,6 +50,7 @@ type alias Model =
     , recap : Bool
     , pending : Maybe String
     , largeur : Int
+    , atelier : Atelier.Modele
     }
 
 
@@ -57,6 +67,7 @@ type Msg
     | SelectLesson String
     | Agent D.Value
     | Dimensionne Int
+    | MessageAtelier Atelier.Message
 
 
 type alias Position =
@@ -74,7 +85,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.batch [ agentAction Agent, Browser.Events.onResize (\largeur _ -> Dimensionne largeur) ]
+        , subscriptions = \_ -> Sub.batch [ agentAction Agent, atelierEvenement (Atelier.Evenement >> MessageAtelier), Browser.Events.onResize (\largeur _ -> Dimensionne largeur) ]
         , onUrlRequest = LinkClicked
         , onUrlChange = UrlChanged
         }
@@ -84,7 +95,7 @@ init : D.Value -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
         model =
-            { course = D.decodeValue Course.decoder flags |> Result.mapError D.errorToString, key = key, url = url, responses = Dict.empty, recap = False, pending = Nothing, largeur = 0 }
+            { course = D.decodeValue Course.decoder flags |> Result.mapError D.errorToString, key = key, url = url, responses = Dict.empty, recap = False, pending = Nothing, largeur = 0, atelier = Atelier.initial }
     in
     ( model, Cmd.batch [ emit model, Task.perform (\dimensions -> Dimensionne (round dimensions.viewport.width)) Browser.Dom.getViewport ] )
 
@@ -207,6 +218,34 @@ update msg model =
             ( updated, emit updated )
     in
     case msg of
+        MessageAtelier message ->
+            let
+                nouvelAtelier =
+                    Atelier.update message model.atelier
+
+                operation =
+                    case message of
+                        Atelier.Exporter ->
+                            Just "exporter"
+
+                        Atelier.Importer ->
+                            Just "importer"
+
+                        Atelier.ReprendreStockage ->
+                            Just "sauvegarder"
+
+                        _ ->
+                            if nouvelAtelier.document /= model.atelier.document && not nouvelAtelier.stockageBloque then
+                                Just "sauvegarder"
+
+                            else
+                                Nothing
+
+                commande =
+                    operation |> Maybe.map (\op -> atelierCommande (E.object [ ( "operation", E.string op ), ( "document", SauvegardeAtelier.encoder nouvelAtelier.document ) ])) |> Maybe.withDefault Cmd.none
+            in
+            ( { model | atelier = nouvelAtelier }, commande )
+
         Dimensionne largeur ->
             ( { model | largeur = largeur }, Cmd.none )
 
@@ -483,45 +522,54 @@ riches de la bibliothèque, sans changer la révision commune imposée.
 -}
 view : Model -> Browser.Document Msg
 view model =
-    { title = position model |> Maybe.map (\p -> p.lesson.title ++ " · Apprendre à démontrer") |> Maybe.withDefault "Apprendre à démontrer"
+    { title =
+        if route model == [ "atelier" ] then
+            "Atelier de preuves — prototype"
+
+        else
+            position model |> Maybe.map (\p -> p.lesson.title ++ " · Apprendre à démontrer") |> Maybe.withDefault "Apprendre à démontrer"
     , body =
         [ a [ class "skip-link", href "#lesson-heading" ] [ text "Aller au contenu" ]
         , MrJam.page "Apprendre à démontrer"
-            [ MrJam.lien "Les parcours" "#/parcours"
-            , case model.course of
-                Err _ ->
-                    repere "lesson-heading" <|
-                        MrJam.section "Le parcours n’a pas pu s’ouvrir."
-                            [ MrJam.paragraphe "Rechargez la page pour réessayer." ]
+            [ MrJam.actions [ MrJam.lien "Les parcours" "#/parcours", MrJam.lien "Atelier de preuves — prototype" "#/atelier" ]
+            , if route model == [ "atelier" ] then
+                UI.map MessageAtelier (VueAtelier.vue model.largeur model.atelier)
 
-                Ok course ->
-                    if route model == [ "parcours" ] then
-                        catalog model course
+              else
+                case model.course of
+                    Err _ ->
+                        repere "lesson-heading" <|
+                            MrJam.section "Le parcours n’a pas pu s’ouvrir."
+                                [ MrJam.paragraphe "Rechargez la page pour réessayer." ]
 
-                    else
-                        case position model of
-                            Nothing ->
-                                repere "lesson-heading" <|
-                                    MrJam.section "Cette leçon est introuvable."
-                                        [ MrJam.lien "Voir les parcours" "#/parcours" ]
+                    Ok course ->
+                        if route model == [ "parcours" ] then
+                            catalog model course
 
-                            Just pos ->
-                                let
-                                    contenu =
-                                        if model.recap then
-                                            recapView model pos
+                        else
+                            case position model of
+                                Nothing ->
+                                    repere "lesson-heading" <|
+                                        MrJam.section "Cette leçon est introuvable."
+                                            [ MrJam.lien "Voir les parcours" "#/parcours" ]
 
-                                        else
-                                            lessonView model pos
-                                in
-                                if model.largeur >= 1000 then
-                                    UI.row [ UI.width UI.fill, UI.spacing 24, UI.alignTop ]
-                                        [ UI.el [ UI.width (UI.px 260), UI.alignTop ] (sidebar model course pos)
-                                        , UI.el [ UI.width (UI.minimum 0 UI.fill), UI.alignTop ] contenu
-                                        ]
+                                Just pos ->
+                                    let
+                                        contenu =
+                                            if model.recap then
+                                                recapView model pos
 
-                                else
-                                    MrJam.pile [ sidebar model course pos, contenu ]
+                                            else
+                                                lessonView model pos
+                                    in
+                                    if model.largeur >= 1000 then
+                                        UI.row [ UI.width UI.fill, UI.spacing 24, UI.alignTop ]
+                                            [ UI.el [ UI.width (UI.px 260), UI.alignTop ] (sidebar model course pos)
+                                            , UI.el [ UI.width (UI.minimum 0 UI.fill), UI.alignTop ] contenu
+                                            ]
+
+                                    else
+                                        MrJam.pile [ sidebar model course pos, contenu ]
             , MrJam.texteSecondaire "Un cours de Jean-Christophe Jameux. Toute utilisation du logo et de la signature est strictement réservée."
             ]
         ]

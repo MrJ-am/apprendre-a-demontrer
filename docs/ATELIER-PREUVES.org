@@ -1,0 +1,179 @@
+#+title: Atelier de preuves — prototype
+#+language: fr
+
+* Ouvrir et essayer
+Route : =#/atelier=, accessible depuis la navigation des parcours.
+Le site reste statique. Aucune démonstration n'est transmise à un serveur.
+
+#+begin_src sh
+npm ci
+npm run build
+npm run dev
+# http://127.0.0.1:4173/#/atelier
+npm test
+npm run check:data
+npm run test:interface
+npm run test:atelier:interface
+NODE_USE_ENV_PROXY=1 npm run preparer:identite # dans l'environnement cloud à proxy
+npm run test:typographie
+#+end_src
+
+La suite historique comprend le véritable correcteur Elm et les parcours
+navigateur. La suite de l'atelier compile aussi ses tests Elm en worker sans DOM.
+Playwright est fixé dans =tests/requirements.txt= ; installer Chromium avec
+=python3 -m playwright install chromium= avant les suites navigateur.
+
+* Un premier théorème
+1. Choisir « C · Transitivité de l'implication », puis « Construire l'énoncé ».
+2. Placer « Montrons une implication » dans la démonstration. Le contrat
+   devient =A ⇒ C= ; l'hypothèse =A= est disponible seulement dans sa cavité.
+3. Dans cette cavité, placer « Appliquons une implication ». Modifier son
+   paramètre =A= en =B= : ses entrées sont alors =B ⇒ C= et =B=.
+4. Fournir =B ⇒ C= depuis les faits. Dans l'entrée =B=, placer une seconde
+   application d'implication ; lui fournir =A ⇒ B= et l'hypothèse locale =A=.
+5. Inspecter le bloc extérieur, puis « Créer un théorème ». Donner le nom
+   « Transitivité ». Vérifier les trois paramètres et les deux entrées.
+   L'hypothèse locale déchargée ne figure pas parmi ces entrées.
+6. Enregistrer : le nouveau bloc apparaît immédiatement dans « Mes théorèmes ».
+7. Charger l'énoncé « C+ · Chaîne de trois implications ». Placer la transitivité
+   pour =A ⇒ D=, avec son paramètre =B := C=. Dans sa première entrée =A ⇒ C=,
+   placer une seconde occurrence, avec =A := A, B := B, C := C=. Fournir les
+   trois prémisses déclarées. Extraire « Chaîne de trois implications ».
+8. « Voir la démonstration » montre le certificat instancié. « Développer cette
+   occurrence » le rend éditable. Recharger la page conserve les définitions ;
+   exporter puis importer le JSON conserve aussi leurs dépendances.
+
+Pour découvrir les gestes plus rapidement, « Charger la solution manipulable »
+reste une action séparée du chargement de l'énoncé. Les six exemples A–F sont
+fournis ; C+ est l'exercice de composition avec le théorème personnel créé en C.
+
+* Manipuler
+- Saisir une poignée =⠿= déplace une construction avec ses descendants.
+  Depuis la palette, le geste crée une occurrence ; depuis les faits, une
+  référence non consommée. Une même hypothèse peut servir deux fois.
+- Le fantôme et la zone marquée « Insérer ici » suivent le pointeur. Le bord
+  de l'écran fait défiler pendant le geste. Hors poignée, le défilement natif
+  reste disponible. Échap et pointercancel annulent le déplacement.
+- Une activation au toucher ou au clavier sélectionne l'objet ; activer ensuite
+  l'emplacement le place. Ctrl/Cmd+Z annule, Maj+Ctrl/Cmd+Z rétablit.
+- Les propositions ont des contours ronds ; leurs connecteurs contiennent des
+  emplacements emboîtés. Sélectionner un trou puis un atome ou un connecteur,
+  ou glisser une proposition. La saisie textuelle est facultative.
+- Les cibles d'insertion permettent des résultats intermédiaires. La dernière
+  étape d'une cavité est sa conclusion ; les étapes précédentes sont citables.
+- L'inspecteur donne les paramètres, le repli, la duplication, l'extraction et
+  le développement. Replier est une opération d'affichage, sans nouveau théorème.
+- L'extraction peut inclure les étapes précédentes de la cavité. Elle produit
+  une seule conclusion et conserve la construction source ainsi que tous ses
+  consommateurs ; elle ne supprime donc aucune autre sortie utilisée ailleurs.
+
+* Ce que vérifie le noyau
+| Objet | Sens |
+|-------+------|
+| Proposition | Arbre syntaxique ; ne constitue jamais une preuve |
+| Objectif | Proposition attendue dans un contexte ; peut rester non résolue |
+| Prémisse déclarée | Hypothèse de l'exercice, avec identité propre |
+| Référence | Citation d'un fait effectivement disponible, non consommée |
+| Primitive | Une des règles de déduction naturelle explicitement contrôlées |
+| Théorème | Contrat paramétrique et certificat vérifié, avec version et dépendances |
+
+Le noyau primitif vérifie ∧I, les deux projections, ⇒I/⇒E, les deux introductions
+de ∨, ∨E, ⊥E et RA. Négation, contradiction, équivalence et double négation sont
+présentées par des certificats dérivés dans la bibliothèque fournie. =¬A= abrège
+=A ⇒ ⊥= ; =A ⇔ B= abrège =(A ⇒ B) ∧ (B ⇒ A)=. L'expansion rend ces définitions
+inspectables. Aucune commutativité, table de vérité ou équivalence sémantique ne
+remplace l'égalité structurelle des ports. =Logic.checkRewrite= n'est pas appelé.
+
+Chaque branche reçoit le même contexte extérieur et ses seuls lieurs locaux.
+Une hypothèse inutilisée est permise ; une hypothèse locale d'une autre branche
+ne l'est pas. Les identifiants des faits, nœuds et lieurs sont distincts. Une
+référence anticipée ou circulaire n'est pas disponible. Les trous ne sont jamais
+convertis en prémisses. Une preuve est vérifiée relativement aux hypothèses
+indiquées ; la provenance classique se propage par les certificats.
+
+Les ports hypothétiques des certificats fournis sont des paramètres de preuve
+contrôlés dans le contexte exact de leurs lieurs. Ils ne sont pas des axiomes.
+L'extraction utilisateur se limite aux constructions complètes, avec entrées
+ordinaires : elle n'abstrait pas un gabarit inachevé.
+
+* Invariants de l'extraction et du développement
+- Vérifier toute la sélection avant de construire son certificat. Un trou dans
+  une étape inutilisée empêche donc la certification.
+- Dans le certificat seulement, garder la conclusion et sa fermeture de
+  dépendances ; conserver l'ordre des étapes. Les références extérieures deviennent
+  des entrées, dédupliquées par identité, jamais par affichage de leur formule.
+- L'ordre des entrées est déterministe, par identité. Le contrat est présenté
+  avant enregistrement. Les lieurs introduits et déchargés restent internes.
+- La généralisation est explicitement cochée ; la substitution est structurale
+  et simultanée. Les occurrences d'un paramètre restent liées, les occurrences
+  de théorème possèdent chacune leur instanciation. Deux paramètres peuvent
+  recevoir la même proposition. Aucune métavariable cyclique n'est introduite.
+- Revérifier le certificat relativement à ses seuls ports, tous nécessaires.
+  Un atome fixé dans une dépendance ne devient pas silencieusement un paramètre.
+- Développer renouvelle les identités du certificat et de chaque copie de preuve
+  fournie. Les hypothèses des ports sont reliées aux nouveaux lieurs ; les
+  références externes sont conservées. L'identité de sortie de l'application
+  reste stable pour ses consommateurs.
+- Le noyau contrôle la conclusion, les dépendances libres et la provenance
+  classique avant d'accepter le développement. La définition reste inchangée.
+  Choisir une définition existante à l'extraction crée une nouvelle version ;
+  les anciennes applications continuent à référencer leur ancienne version.
+
+* Organisation
+| Module | Responsabilité |
+|--------+----------------|
+| =Formule= | Syntaxe, parseur, substitutions et conversions définitionnelles |
+| =Types= | Preuves, ports, contextes, contrats et définitions |
+| =Regles= | Contrats primitifs et certificats dérivés fournis |
+| =Graphe= | Parcours, identités, duplication, séquences et positions logiques |
+| =Noyau= | Vérification pure, portées, références et cycles de théorèmes |
+| =Theoremes= | Frontière de sélection, extraction et développement |
+| =Sauvegarde= | JSON déclaratif versionné et revalidation de la bibliothèque |
+| =Editeur= | Actions pédagogiques, édition et historique atomique |
+| =Vue= | Présentation ElmUI et composants partagés |
+| =Exemples= | Énoncés et solutions manipulables |
+| =public/atelier.js= | Capture du pointeur, défilement, fichiers et stockage |
+
+Les positions de dépôt ne sont que des adresses de séquence. La géométrie du DOM
+ne participe jamais à la validité. Les contours génériques sont dans
+=MrJam.Blocs=, sans connaissance des règles mathématiques. La révision exacte
+consommée reste celle de =style-mrjam.json= ; le cache n'est pas une copie éditable.
+
+* Conservation et limites
+Le format =atelier-preuves= version 1 exporte le document actif et toute sa
+bibliothèque, certificats et versions compris. Le stockage local utilise
+=mrjam.atelier-preuves.v1=. Les verrous logiques sont distincts de l'affichage.
+L'historique (80 modifications), le repli et la sélection restent en mémoire.
+Un import échoué conserve le travail ; une sauvegarde locale illisible est
+préservée, sans écrasement, jusqu'à la reprise explicite de la sauvegarde.
+Les brouillons peuvent rester incomplets ou erronés ; seuls les certificats
+revérifiés sont acceptés dans la bibliothèque. Aucun champ « valide » du fichier
+n'est une autorité. Aucun code importé n'est exécuté.
+
+Un document actif à la fois ; exporter des fichiers pour conserver plusieurs
+ateliers indépendants. Charger un exemple conserve la bibliothèque et s'annule.
+Les limites de prototype sont de 2 Mo par import, 1 500 nœuds par construction,
+100 définitions et une profondeur JSON de 60. Les preuves profondes demandent
+un défilement et peuvent être repliées. Ni quantificateurs, ni calcul arithmétique,
+ni serveur de preuves, ni synchronisation entre appareils. Il n'y a pas encore
+de sélecteur interdisant les règles classiques ; leur provenance reste visible.
+
+Les essais tactiles automatisés utilisent de vrais événements tactiles CDP reçus
+comme Pointer Events. Ils ne constituent pas un essai sur une tablette physique.
+Les captures des six formats et les résultats machine sont produits dans
+=controles-atelier/=, conservés comme artefacts de CI.
+
+* État de livraison
+Le code est implémenté sur =fonctionnalite/atelier-preuves=. Les validations
+locales du 7 octobre 2026 réussissent : 91 contrôles du noyau et du modèle,
+190 cas du correcteur existant, 299 rendus KaTeX, 14 tests Python, source Org,
+compilation optimisée, parcours historiques, douze parcours de l'atelier,
+six formats et huit contextes typographiques avec copier-coller natif.
+Les gestes tactiles sont simulés par CDP ; aucun appareil physique n'est revendiqué.
+
+Le style adopté est =90ced00b49bf1e26bea0c8b8477b630c966e2082=, validé par ses
+contrôles et sa CI =37553448100=. Les autres applications gardent leurs artefacts.
+La cible est =https://logique.echos.systems/#/atelier=. La publication suit les
+Actions de vps-infrastructure : artefact CI exact, préparation inactive, retour
+autonome et constat HTTPS. Les preuves finales seront ajoutées après exécution ;
+les contrôles locaux ne constituent pas une publication.
