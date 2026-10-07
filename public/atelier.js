@@ -55,6 +55,18 @@ window.installerAtelier = (app) => {
   let geste = null;
   let bloquerClic = false;
   let frame = null;
+  // Une pièce se prend par sa surface, pas seulement par son libellé.
+  // Les cavités restent défilables et les commandes gardent leur action.
+  const poigneeAuPoint = (element) => {
+    const directe = element.closest("#atelier [data-atelier-source]");
+    if (directe) return directe;
+    if (element.closest('button, input, textarea, select, a, [role="button"]'))
+      return null;
+    const surface = element.closest(
+      ".mrjam-bloc-entete, .mrjam-bloc-pied, .mrjam-bloc-epine, .mrjam-bloc-traverse, .mrjam-proposition",
+    );
+    return surface?.closest("#atelier [data-atelier-piece]") ?? null;
+  };
   const nettoyer = () => {
     if (!geste) return;
     geste.fantome?.remove();
@@ -70,6 +82,16 @@ window.installerAtelier = (app) => {
     for (const element of document.elementsFromPoint(x, y)) {
       const cible = element.closest("#atelier [data-atelier-cible]");
       if (cible) return cible;
+    }
+    const element = document.elementFromPoint(x, y);
+    // Le fond libre est la fin de la séquence ; aucune coordonnée n'entre
+    // dans le modèle logique. Une formule garde ses emplacements spécifiques.
+    if (
+      !/^(prop:|atome:|connecteur:)/.test(geste.source) &&
+      !element?.closest(".mrjam-bloc, [data-atelier-cible]")
+    ) {
+      const fond = element?.closest("#atelier [data-atelier-fond]");
+      if (fond) return fond;
     }
     return null;
   };
@@ -109,13 +131,14 @@ window.installerAtelier = (app) => {
     frame = requestAnimationFrame(defiler);
   };
   document.addEventListener("pointerdown", (e) => {
-    if (!e.isPrimary || e.button !== 0 || geste) return;
-    const poignee = e.target.closest("#atelier [data-atelier-source]");
+    if (!e.isPrimary || (e.pointerType !== "touch" && e.button !== 0) || geste)
+      return;
+    const poignee = poigneeAuPoint(e.target);
     if (!poignee) return;
     geste = {
       id: e.pointerId,
       poignee,
-      source: poignee.dataset.atelierSource,
+      source: poignee.dataset.atelierSource ?? poignee.dataset.atelierPiece,
       departX: e.clientX,
       departY: e.clientY,
       x: e.clientX,
@@ -174,7 +197,8 @@ window.installerAtelier = (app) => {
       geste.x = e.clientX;
       geste.y = e.clientY;
       actualiser();
-      const cible = geste.zone?.dataset.atelierCible;
+      const cible =
+        geste.zone?.dataset.atelierCible ?? geste.zone?.dataset.atelierFond;
       const source = geste.source;
       bloquerClic = true;
       setTimeout(() => {
@@ -184,7 +208,15 @@ window.installerAtelier = (app) => {
       if (cible) envoyer({ type: "depot", source, cible });
     } else nettoyer();
   });
-  document.addEventListener("pointercancel", nettoyer);
+  document.addEventListener("pointercancel", (e) => {
+    if (geste?.id === e.pointerId) nettoyer();
+  });
+  document.addEventListener("contextmenu", (e) => {
+    if (geste || poigneeAuPoint(e.target)) e.preventDefault();
+  });
+  document.addEventListener("dragstart", (e) => {
+    if (poigneeAuPoint(e.target)) e.preventDefault();
+  });
   document.addEventListener("lostpointercapture", (e) => {
     if (
       geste &&
@@ -197,7 +229,7 @@ window.installerAtelier = (app) => {
   document.addEventListener(
     "click",
     (e) => {
-      if (bloquerClic) {
+      if (bloquerClic && e.detail !== 0) {
         e.preventDefault();
         e.stopImmediatePropagation();
       }

@@ -441,7 +441,14 @@ bloc lecture m contexte ((Bloc b) as preuve) =
          else
             statut
         )
-        [ attribut "data-bloc" b.id ]
+        ([ attribut "data-bloc" b.id ]
+            ++ (if lecture then
+                    []
+
+                else
+                    [ attribut "data-atelier-piece" ("bloc:" ++ b.id) ]
+               )
+        )
         entete
         (if ferme then
             []
@@ -484,7 +491,7 @@ paletteRegle m regle =
             contrat |> Result.map .conclusion |> Result.withDefault (Trou "sortie")
     in
     B.emboitable B.Neutre
-        []
+        [ attribut "data-atelier-piece" id ]
         (source id (titreCourt m.document.bibliotheque regle))
         cavites
         (ligne
@@ -512,7 +519,7 @@ faits m =
 
           else
             UI.column [ UI.spacing 12 ]
-                (Dict.toList ctx |> List.map (\( id, v ) -> B.emboitable B.Neutre [] (ligne [ source ("fait:" ++ id) "utiliser", formuleFixe v.conclusion ]) [] UI.none))
+                (Dict.toList ctx |> List.map (\( id, v ) -> B.emboitable B.Neutre [ attribut "data-atelier-piece" ("fait:" ++ id) ] (ligne [ source ("fait:" ++ id) "utiliser", formuleFixe v.conclusion ]) [] UI.none))
         ]
 
 
@@ -575,7 +582,7 @@ palettePropositions m =
     in
     UI.column [ UI.spacing 14, UI.alignLeft ]
         ([ petit "Glisser dans un emplacement vert."
-         , UI.wrappedRow [ UI.spacing 6, UI.width UI.fill ] (List.map (\a -> B.proposition [] (source ("atome:" ++ a) a)) [ "A", "B", "C", "D", "P", "Q", "R", "S" ])
+         , UI.wrappedRow [ UI.spacing 6, UI.width UI.fill ] (List.map (\a -> B.proposition [ attribut "data-atelier-piece" ("atome:" ++ a) ] (source ("atome:" ++ a) a)) [ "A", "B", "C", "D", "P", "Q", "R", "S" ])
          ]
             ++ List.map connecteur [ ( "et", "∧" ), ( "ou", "∨" ), ( "implique", "⇒" ), ( "non", "¬" ), ( "equivalent", "⇔" ), ( "faux", "⊥" ) ]
         )
@@ -823,6 +830,7 @@ vue largeur m =
                     [ attribut "class" "mrjam-canevas"
                     , attribut "id" "atelier-surface"
                     , attribut "data-atelier-defile" "canevas"
+                    , attribut "data-atelier-fond" ("preuve:racine|0|" ++ String.fromInt (List.length doc.preuves))
                     , attribut "aria-label" "Espace d’assemblage des preuves"
                     , UI.htmlAttribute (A.tabindex 0)
                     ]

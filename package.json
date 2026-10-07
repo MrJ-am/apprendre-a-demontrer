@@ -14,7 +14,7 @@
     "preparer:identite": "node scripts/preparer-identite.mjs",
     "test:typographie": "python3 tests/typographie.py",
     "test:atelier": "node scripts/test-atelier.mjs",
-    "test:atelier:interface": "python3 tests/atelier.py"
+    "test:atelier:interface": "python3 tests/atelier.py && python3 tests/tactile.py"
   },
   "dependencies": {
     "@vimeo/player": "2.30.4",

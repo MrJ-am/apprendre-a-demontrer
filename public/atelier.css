@@ -2,10 +2,18 @@
 #atelier {
   min-width: 0;
 }
-#atelier .atelier-poignee {
+#atelier .atelier-poignee,
+#atelier [data-atelier-piece] .mrjam-bloc-entete,
+#atelier [data-atelier-piece] .mrjam-bloc-pied,
+#atelier [data-atelier-piece] .mrjam-bloc-epine,
+#atelier [data-atelier-piece] .mrjam-bloc-traverse,
+#atelier [data-atelier-piece] .mrjam-proposition,
+#atelier .mrjam-proposition[data-atelier-piece] {
   touch-action: none;
   cursor: grab;
   user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
 }
 #atelier [data-saisie-active] {
   opacity: 0.45;

@@ -51,7 +51,9 @@ fournis ; C+ est l'exercice de composition avec le théorème personnel créé e
 - La palette reste à gauche et le canevas pointillé à droite, y compris sur
   téléphone. Les deux zones défilent indépendamment. Les règles jaunes ont
   des encoches et des cavités ouvertes ; les propositions sont vertes.
-- Saisir le nom d’une règle déplace la construction avec ses descendants.
+- Saisir une surface jaune (en-tête, pied ou épine) déplace la construction
+  avec ses descendants. Le nom reste aussi une poignée. Un bloc de palette
+  peut être déposé sur le fond libre du canevas pour terminer la séquence.
   Depuis la palette, le geste crée une occurrence ; depuis les faits, une
   référence non consommée. Une même hypothèse peut servir deux fois.
 - Le fantôme et le contour de la destination suivent le pointeur. Les bords
@@ -202,3 +204,19 @@ La première version a été publiée à
 =90ced00b49bf1e26bea0c8b8477b630c966e2082= ; CI applicative =37554360513=,
 activation VPS =37555013283= et constat indépendant =37555292312=.
 Ces références historiques ne prouvent pas l’activation de la refonte.
+
+* Correction de la prise tactile
+Le signalement sur téléphone révèle une limite des premiers essais : ils
+saisissaient précisément les libellés. Un nouveau scénario CDP reproduit
+l’échec en prenant le fond jaune : aucune source détectée, aucun fantôme,
+aucun bloc créé. Les surfaces peintes portent désormais la même identité
+que leur poignée ; les marges vertes des atomes sont aussi saisissables.
+Les cavités restent défilables et les commandes ne deviennent pas des poignées.
+Le fond libre du canevas reçoit la fin de la séquence de preuves ; les
+propositions gardent leurs emplacements syntaxiques spécifiques.
+
+=tests/tactile.py= contrôle les prises hors texte, le dépôt sur fond libre,
+les faits réutilisés et la marge verte sur deux formats tactiles CDP.
+Le navigateur et le modèle du téléphone signalé ne sont pas encore connus ;
+ces essais ne constituent pas une validation sur cet appareil physique.
+La publication du correctif sera attestée par le constat VPS.

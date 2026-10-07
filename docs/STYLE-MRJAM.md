@@ -2,7 +2,7 @@
 
 ## Atelier de preuves — 7 octobre 2026
 
-Le verrou courant adopte `90ced00b49bf1e26bea0c8b8477b630c966e2082`.
+Le verrou courant adopte `eaee86024ac2d158f507bfe798cee3af3a923930`.
 Le module additionnel `MrJam.Blocs` fournit les contours à cavités, les propositions
 et les objectifs ; il ne contient aucune règle mathématique. Ses contrôles,
 exemples et documentation sont dans `docs/BLOCS.md` du dépôt partagé.
