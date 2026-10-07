@@ -181,7 +181,19 @@ La branche =refonte/atelier-graphique= adopte le style
 =eaee86024ac2d158f507bfe798cee3af3a923930=. Les vérifications comprennent
 97 contrôles Elm de l’atelier, les parcours historiques et les gestes réels
 souris/clavier/tactiles CDP. Les captures et résultats sont des artefacts de CI.
-L’activation et son constat sont consignés après la validation de l’archive.
+Cette refonte est publiée à [[https://logique.echos.systems/#/atelier][l’adresse de l’atelier]]. Code réellement servi :
+=fb21030ca35fed6a82f65729e6f91e8562760e9f= ; CI applicative =37597158853=
+et style =37596804467= réussies. Les modifications documentaires ultérieures
+ne changent pas cet artefact.
+
+Opérateur VPS =95e4fa1af48b0dce5e473510b9f7180cfa65a8c5=, CI
+=37597525950=. Préparation =37597865546=, activation =37598028422= et
+[[https://github.com/MrJ-am/vps-infrastructure/actions/runs/37598302049][constat indépendant 37598302049]] réussis. Les 84 fichiers de la release et
+les 83 ressources HTTPS sont contrôlés. Sur trois formats, le constat vérifie
+les deux panneaux, les couleurs, le dépôt direct d’un connecteur, l’annulation,
+l’extraction d’un théorème et sa restauration. Les captures de production sont
+examinées. Preuves durables : =operations/logique-atelier-publication.json=
+dans le dépôt VPS. Ancienne release conservée, retour autonome désarmé.
 
 * Publication antérieure, avant la refonte graphique
 La première version a été publiée à
