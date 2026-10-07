@@ -219,4 +219,11 @@ propositions gardent leurs emplacements syntaxiques spécifiques.
 les faits réutilisés et la marge verte sur deux formats tactiles CDP.
 Le navigateur et le modèle du téléphone signalé ne sont pas encore connus ;
 ces essais ne constituent pas une validation sur cet appareil physique.
-La publication du correctif sera attestée par le constat VPS.
+Le correctif est publié : code servi =808483d4789172113b120b44fe5767d9cd3cc983=,
+CI applicative =37603672723=. Opérateur VPS
+=47d24ecb676c57ac1fa51b42a61d5fc9e9f08bc3=, CI =37603994825=,
+préparation =37604334515= et [[https://github.com/MrJ-am/vps-infrastructure/actions/runs/37604573774][activation 37604573774]] réussies. Le constat HTTPS confirme
+les ressources exactes et une prise tactile CDP hors libellé suivie d’un dépôt
+sur le fond libre. Le rapport est conservé dans
+=operations/logique-atelier-publication.json= du dépôt VPS. Il faut recharger
+la page déjà ouverte pour exécuter le nouveau pont de gestes.
