@@ -1,4 +1,4 @@
-"""Verrou exact, contrats immuables et refus d'un cache commun altéré."""
+"""Verrou exact, corpus/correcteur préservés et refus d'un cache commun altéré."""
 import hashlib
 import json
 import subprocess
@@ -36,9 +36,11 @@ class StyleCommun(unittest.TestCase):
 
     def test_pas_de_theme_local(self):
         self.assertNotIn("import MrJam.Theme", (RACINE / "src/Main.elm").read_text())
-        css = (RACINE / "public/style.css").read_text()
-        for selecteur in [".topbar", ".catalog-track", ".lesson-content", ".site-footer", ".selection-historique", ".saisies-historiques", ".choices", ".answer-field"]:
-            self.assertNotIn(selecteur, css)
+        # La présentation appartient au socle : les deux anciennes feuilles
+        # ont été retirées. Les capacités/imports/usages sont contrôlés par
+        # elm-review central et le garde-fou AST JavaScript sur les vraies sources.
+        for feuille in ("style.css", "atelier.css"):
+            self.assertFalse((RACINE / "public" / feuille).exists(), feuille)
         source = (RACINE / "src/Main.elm").read_text()
         self.assertNotIn("saisieHistorique", source)
         self.assertIn("MrJam.selecteur", source)
