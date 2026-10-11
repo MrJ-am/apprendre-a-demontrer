@@ -158,7 +158,10 @@ execFileSync(
 execFileSync(process.execPath, ["--check", "public/bridge.js"], {
   stdio: "inherit",
 });
-execFileSync(process.execPath, ["--check", "public/video.js"], {
-  stdio: "inherit",
-});
+for (const fichier of [
+  "public/atelier.js",
+  join(dossierStyle, "public/assets/mrjam/videos.js"),
+  join(dossierStyle, "public/assets/mrjam/mathematiques.js"),
+])
+  execFileSync(process.execPath, ["--check", fichier], { stdio: "inherit" });
 console.log("Données, formules, correcteur et syntaxe JavaScript vérifiés.");
