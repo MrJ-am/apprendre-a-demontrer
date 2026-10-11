@@ -44,7 +44,7 @@ npm run build:data
 npm run check:data
 #+end_src
 
-~data/course.json~ est généré et versionné. Ne pas le modifier directement. La CI vérifie sa cohérence avant toute reconstruction.
+~data/course.json~ est généré et versionné. Ne pas le modifier directement. La commande locale centrale vérifie sa cohérence avant toute reconstruction.
 
 Le format accepte trois niveaux de titres : parcours, leçon, exercice. Les propriétés ~CUSTOM_ID~, ~TYPE~, ~ANSWERS~, ~RULE~, ~SOURCE~, ~FORMULA~ et ~SCENE~ définissent les exercices. Les blocs ~context~, ~question~, ~hint~, ~success~ et ~takeaway~ portent leur texte. Un tableau à trois colonnes contient l’identifiant du choix, son texte et la relance donnée si ce choix est incorrect. Dans les propriétés, plusieurs réponses sont séparées par ~;;~.
 
@@ -109,7 +109,7 @@ Pour rétablir un emplacement provisoire, choisir ~VIDEO_PROVIDER: placeholder~ 
 | ~src/Exercise.elm~ | Vérification des réponses |
 | ~cours/parcours.org~ | Source éditoriale |
 | ~scripts/build_data.py~ | Compilation Org vers JSON |
-| ~public/style.css~ | Apparence, disposition et adaptation aux écrans |
+| ~style-mrjam~ | Présentation elm-ui et transitions elm-animator communes |
 | ~public/bridge.js~ | Rendu KaTeX, gestion du focus et outils WebMCP facultatifs |
 | ~public/video.js~ | Chargement à la demande, reprise et repli du lecteur Vimeo |
 | ~tests/~ | Vérifications du correcteur et du compilateur éditorial |

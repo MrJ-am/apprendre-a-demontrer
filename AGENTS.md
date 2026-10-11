@@ -1,36 +1,43 @@
-# Apprendre à démontrer
+# Composant Logique
 
-## Assemblage central
+L’assemblage, les commandes locales et toute la CI/CD appartiennent à
+[MrJ-am/vps-infrastructure](https://github.com/MrJ-am/vps-infrastructure).
+Lire le [contrat central](https://github.com/MrJ-am/vps-infrastructure/blob/main/coordination/CONTRATS.org),
+le [manifeste](https://github.com/MrJ-am/vps-infrastructure/blob/main/assemblage/manifest.json)
+et les [commandes de développement](https://github.com/MrJ-am/vps-infrastructure/blob/main/assemblage/DEVELOPPEMENT.md).
+Interfaces Elm : elm-ui pour la présentation et elm-animator pour les transitions,
+mutualisés dans style-mrjam. Pas de Html/Html.Styled/elm-css, CSS/HTML applicatif ou
+animation ad hoc. Adaptateurs techniques étroits, documentés/testés ; Element.html
+et htmlAttribute bornés. elm-review central obligatoire, sans suppressions/exclusions
+générales ; tests des règles et parcours Continuous UI (interruptions/inversions,
+focus/clavier/reduced-motion, rafraîchissement arrêté). Lire le
+[contrat frontend](https://github.com/MrJ-am/vps-infrastructure/blob/main/assemblage/FRONTENDS.md).
 
-La mission du 11 octobre 2026 remplace la coordination par messages et les
-publications autonomes. Source centrale : [contrat v2](https://github.com/MrJ-am/vps-infrastructure/blob/main/coordination/CONTRATS.org),
-[manifeste](https://github.com/MrJ-am/vps-infrastructure/blob/main/assemblage/manifest.json)
-et [reprise](https://github.com/MrJ-am/vps-infrastructure/blob/main/assemblage/REPRISE.md).
-Ce dépôt conserve sources, contrats et tests ; toutes les exécutions CI/CD et
-publications sont orchestrées dans vps-infrastructure à une révision exacte.
-Aucun acquittement ni validation entre conversations. Les bibliothèques métier
-ASDF ne démarrent aucun service/connexion/migration au chargement ; le serveur
-commun possède le cycle de vie. Les projets statiques restent statiques.
-Préserver données, secrets, contrats, écritures concurrentes et retour arrière.
-Publier les commits de composants avant leur référencement central ; aucune
-modification de licence ou visibilité, aucun PR, aucun push forcé.
+Ce dépôt conserve ses sources, contrats et tests ; publier son commit avant
+référencement central. Aucun workflow satellite, publication autonome, échange
+obligatoire entre conversations ou acquittement. L’intégration centrale et les
+tests pertinents valident un changement.
 
+Préserver les modifications concurrentes, les données et les secrets. Commits
+français, push sans force ; aucune PR ni modification de visibilité ou licence.
+Une compilation ou un test local ne prouve pas une publication : citer les
+révisions et les contrôles de la version réellement servie. Les anciennes règles
+sont conservées dans `coordination/historique/AGENTS-avant-composants-20261011.md`.
 
-- Le site est développé en Elm. Garder le correcteur et l’état pédagogique dans Elm ; réserver JavaScript au rendu KaTeX, au navigateur et aux intégrations.
-- Modifier les contenus dans `cours/parcours.org`. Générer `data/course.json` avec `npm run build:data`, puis vérifier avec `npm run check:data`. Ne pas modifier les données générées à la main.
-- Conserver les identifiants des parcours, leçons et exercices lorsqu’ils représentent les mêmes contenus.
-- Vérifier les corrections mathématiques, les réponses alternatives et les conditions de portée. Les exercices de formalisation utilisent le cadre classique annoncé dans le cours.
-- Utiliser `npm test` pour les changements du correcteur ou des données. Utiliser `npm run build` pour les changements du site avant publication.
-- Préserver l’identité visuelle, la compacité sur téléphone, les cibles tactiles et la navigation au clavier.
-- Les vidéos provisoires restent explicitement annoncées comme telles jusqu’à la fourniture d’un identifiant réel.
-- Le support LaTeX original fourni dans la conversation sert de référence ; son ajout à un dépôt public exige une demande explicite de l’auteur.
-- Enregistrer les changements avec un message de commit en français, puis synchroniser le dépôt demandé.
+Le projet est statique : interface, correcteur et état pédagogique restent en
+Elm/ElmUI. Aucun backend ou système ASDF artificiel. JavaScript est réservé à
+KaTeX, au navigateur et aux intégrations légitimes. L’infrastructure construit
+et publie les ressources aux domaines et chemins existants.
 
-## Style MrJ.am et code français
+Modifier les contenus dans `cours/parcours.org` ; générer et vérifier
+`data/course.json` par les commandes centrales, sans édition manuelle des données
+générées. Conserver identifiants des parcours/leçons/exercices. Qualifier le
+correcteur après impact : corrections mathématiques, réponses alternatives,
+portées et cadre classique du cours. Garder l’état local et ses reprises.
 
-- Lire `docs/STYLE-MRJAM.md` avant de modifier les interfaces. Le passage à ElmUI et à la bibliothèque commune est décidé, mais la préparation ne doit pas être présentée comme un portage ou un déploiement terminé.
-- Utiliser les composants de `MrJ-am/style-mrjam` à une révision exacte, fournie à la compilation. L’appel courant est `bouton "Valider" Valider`. Les variantes expriment une sémantique, pas des options de décoration répétées dans chaque projet.
-- Écrire les noms, les commentaires et la documentation en français lorsque nous les contrôlons ; garder le code lisible et compact.
-- Pour les noms existants, établir une compilation de référence, renommer un seul symbole avec tous ses usages, compiler tous les consommateurs et vérifier les échanges JavaScript avant le renommage suivant. Ne pas traduire aveuglément les identifiants de contenus ou les noms externes.
-- Le logo et la signature sont d’utilisation strictement réservée. `MrJ-am/Signature` est la source de référence à version précise ; conserver le texte sélectionnable `MrJ.am`.
-- Une adoption du style reconstruit et redéploie tous les projets concernés, seulement après validation de tous les artefacts. Ne pas supposer qu’un artefact `dist` produit par la CI a été déployé : vérifier la cible réellement servie.
+Lire `docs/STYLE-MRJAM.md` avant une modification d’interface. Réutiliser le
+style verrouillé, préserver compacité/tactile/clavier et identité visuelle.
+Les vidéos provisoires restent annoncées ; le support LaTeX original privé
+ne devient pas public sans instruction de son auteur. Logo/signature réservés,
+source Signature, texte sélectionnable `MrJ.am`. Noms français sous notre
+contrôle ; aucun renommage aveugle des contenus ou contrats externes.

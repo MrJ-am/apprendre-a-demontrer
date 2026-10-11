@@ -1,0 +1,142 @@
+#+title: Apprendre à démontrer
+#+language: fr
+
+Un site interactif pour apprendre à formaliser et à construire des démonstrations. Il s’adresse aux élèves et aux enseignants sans formation spécifique en logique.
+
+* Les parcours
+
+| Parcours | Leçons | Exercices |
+|----------+--------+-----------|
+| Les contrats de la démonstration | Noms, portées, dépendances, objets arbitraires | 17 |
+| Apprendre à formaliser | Quantificateurs, négations, implication, domaines | 20 |
+| Construire une démonstration | Implication, conjonction et cas, quantificateurs, rigueur | 21 |
+
+Les 12 leçons sont accessibles indépendamment. Chaque étape propose une question, une réponse à choisir ou à compléter, un indice et un retour. Les bilans reprennent les points construits au cours de la leçon. La progression est conservée pendant l’utilisation de la page ; elle repart de zéro après un rechargement.
+
+Chaque leçon s’ouvre sur sa vidéo, puis propose de commencer ou de reprendre les exercices. Les deux entrées « Comprendre en vidéo » et « À vous de jouer » restent accessibles pendant la leçon. Revenir à la vidéo conserve la question courante, les réponses et les indices ; le lecteur Vimeo retrouve sa position pendant l’utilisation de la page. Le bouton « Les parcours » donne accès à l’ensemble des leçons. Les liens directs vers une question restent valides.
+
+* Développer
+
+Prévoir Node.js 22 ou plus récent et Python 3.10 ou plus récent.
+
+#+begin_src sh
+npm ci
+npm run build
+npm run dev
+#+end_src
+
+Le serveur de développement écoute sur ~http://127.0.0.1:4173~. Il reconstruit le site quand les sources Elm, Org ou les ressources publiques changent, puis recharge la page. Il ne conserve pas l’état après ce rechargement. La version publiée est entièrement statique et ne dépend pas de ce serveur.
+
+#+begin_src sh
+npm test
+npm run check:data
+npm run format
+#+end_src
+
+Le contrôle des données vérifie que le JSON correspond à sa source Org. Les tests exécutent le véritable correcteur Elm, contrôlent les réponses prévues, les erreurs de logique, les noms et les variables liées. Ils vérifient aussi les formules KaTeX et le compilateur éditorial. Ils ne remplacent pas une vérification de l’interface dans un navigateur.
+
+* Une source éditoriale unique
+
+Éditer les contenus dans [[file:cours/parcours.org][cours/parcours.org]], puis lancer :
+
+#+begin_src sh
+npm run build:data
+npm run check:data
+#+end_src
+
+~data/course.json~ est généré et versionné. Ne pas le modifier directement. La CI vérifie sa cohérence avant toute reconstruction.
+
+Le format accepte trois niveaux de titres : parcours, leçon, exercice. Les propriétés ~CUSTOM_ID~, ~TYPE~, ~ANSWERS~, ~RULE~, ~SOURCE~, ~FORMULA~ et ~SCENE~ définissent les exercices. Les blocs ~context~, ~question~, ~hint~, ~success~ et ~takeaway~ portent leur texte. Un tableau à trois colonnes contient l’identifiant du choix, son texte et la relance donnée si ce choix est incorrect. Dans les propriétés, plusieurs réponses sont séparées par ~;;~.
+
+Les formules en ligne sont délimitées par ~$~. La propriété ~FORMULA~ contient du LaTeX sans délimiteurs. La source est parsée sans exécuter de code Babel.
+
+* Ajouter une vidéo
+
+Les vidéos sont placées au début des leçons. Les lecteurs Vimeo et leur SDK ne sont chargés qu’à la demande de l’élève. Les miniatures ont la place du futur lecteur, ce qui évite un saut de mise en page. Si Vimeo refuse la lecture intégrée, un lien de secours permet de retrouver la vidéo sur Vimeo.
+
+Modifier les propriétés de la leçon, en conservant son ~CUSTOM_ID~ :
+
+#+begin_example
+:VIDEO_PROVIDER: youtube
+:VIDEO_ID: identifiant
+#+end_example
+
+L’identifiant YouTube doit être celui de la vidéo, composé de 11 caractères. Le lecteur utilise ~youtube-nocookie.com~.
+
+Pour Vimeo :
+
+#+begin_example
+:VIDEO_PROVIDER: vimeo
+:VIDEO_ID: 123456789
+#+end_example
+
+Pour une vidéo Vimeo non répertoriée, utiliser ~123456789/cle~ avec sa clé de partage. Les restrictions d’intégration du propriétaire de la vidéo restent applicables.
+
+Le bloc ~video~ porte le titre accessible du lecteur. Le bloc facultatif ~video_focus~ prépare une observation ou une question à garder en tête pendant la vidéo. Les métadonnées facultatives sont :
+
+| Propriété | Usage |
+|-----------+-------|
+| ~VIDEO_DURATION~ | Durée complète en secondes |
+| ~VIDEO_START~ | Début conseillé en secondes, strictement avant la fin |
+| ~VIDEO_POSTER~ | Miniature HTTPS de Vimeo |
+| ~VIDEO_WATCH_URL~ | Lien HTTPS de secours Vimeo ou YouTube |
+
+Un repère ne découpe pas la vidéo : l’élève peut toujours choisir « Depuis le début ». Les repères initiaux ont été relevés dans les sous-titres disponibles des vidéos sur les notations et les quantificateurs. Ils ne prétendent pas constituer un nouveau montage.
+
+Cinq vidéos du dossier « Théorie de la démonstration » sont utilisées dans onze leçons :
+
+| Vidéo | Leçons |
+|-------+--------|
+| Les notations de la logique | Tous / au moins un ; négations ; implication ; négation des quantificateurs |
+| Les quantificateurs | Nommer ; portées ; objet arbitraire ; règles des quantificateurs |
+| Qu’est-ce qu’un théorème, transitivité de l’implication | Construire un « si… alors » |
+| Conjonction, disjonction, implication | Assembler, séparer, traiter les cas |
+| Irrationalité de racine de 2 | La poussière sous le tapis |
+
+La leçon « Qui choisit après qui ? » garde sa vidéo à venir. Les autres vidéos du dossier restent des ressources pour les prochaines séquences, sans association forcée à une leçon.
+
+Les vidéos actuelles utilisent une liste de domaines autorisés dans Vimeo. Pour activer la lecture intégrée sur ce site, ajouter ~logique.echos.systems~ aux domaines autorisés dans Partager → Intégrer. Le lecteur essaie l’intégration normalement et offre un lien de secours en cas de refus ; il ne contourne pas ces restrictions. Aucun jeton API ni sous-titre téléchargé n’est inclus dans le site.
+
+Pour rétablir un emplacement provisoire, choisir ~VIDEO_PROVIDER: placeholder~ et supprimer les autres propriétés ~VIDEO_*~.
+
+* Organisation
+
+| Fichier | Rôle |
+|---------+------|
+| ~src/Main.elm~ | Navigation, progression, saisie et retours |
+| ~src/Course.elm~ | Types et lecture des parcours |
+| ~src/Logic.elm~ | Analyse de formules, normalisation, équivalence dans le cadre des exercices |
+| ~src/Exercise.elm~ | Vérification des réponses |
+| ~cours/parcours.org~ | Source éditoriale |
+| ~scripts/build_data.py~ | Compilation Org vers JSON |
+| ~public/style.css~ | Apparence, disposition et adaptation aux écrans |
+| ~public/bridge.js~ | Rendu KaTeX, gestion du focus et outils WebMCP facultatifs |
+| ~public/video.js~ | Chargement à la demande, reprise et repli du lecteur Vimeo |
+| ~tests/~ | Vérifications du correcteur et du compilateur éditorial |
+
+* Cadre logique
+
+Le parcours de formalisation utilise la sémantique classique. La lecture d’un quantificateur comme une conjonction ou une disjonction infinie est une interprétation sémantique, pas un algorithme de vérification par essais.
+
+Pour les transformations propositionnelles, le correcteur compare les valeurs de vérité sur toutes les valuations, jusqu’à huit propositions distinctes. Pour les formules quantifiées, il compare les formes obtenues en propageant les négations, en tenant compte du renommage des variables liées et de l’associativité et de la commutativité de « et » et de « ou ». Il contrôle séparément la transformation demandée : disparition de l’implication, négations devant les atomes, ou structure précise d’une dérivation.
+
+La syntaxe accepte ~¬~, ~∧~, ~∨~, ~→~, ~∀x~ et ~∃x~, ainsi que des équivalents au clavier. Les prédicats s’écrivent ~P(x)~ ou ~P(x,y)~. Une quantification porte sur la formule qui la suit ; les parenthèses permettent de limiter cette portée. Les termes complexes et la reconnaissance générale de preuves libres ne font pas partie du correcteur.
+
+L’équivalence mathématique d’une proposition ne suffit pas toujours à répondre à une question sur une dérivation précise ; ces exercices exigent la structure attendue.
+
+* Références
+
+La démarche s’inspire de « Enseignement de la démonstration » et du support de Jean-Christophe Jameux. Les séquences interactives sont une transposition pédagogique, pas une transcription du dialogue. L’identité visuelle reprend celle du site [[https://github.com/MrJ-am/M-moire][Regards]].
+
+Le site expose, dans les navigateurs compatibles, trois outils WebMCP facultatifs : lire l’état, ouvrir une leçon, et vérifier une réponse. Ils emploient les mêmes actions et le même correcteur que l’interface. L’application fonctionne aussi sans cette API.
+
+* Atelier de preuves — prototype
+La route =#/atelier= permet de composer des démonstrations propositionnelles par
+blocs, d'en extraire des théorèmes paramétriques et de les réutiliser. La palette
+s'enrichit sans modifier le code ; le noyau Elm revérifie les certificats, les
+portées et les versions. Sauvegarde locale et export/import JSON sont disponibles.
+
+Le [[file:docs/ATELIER-PREUVES.org][guide de l'atelier]] décrit les gestes, le modèle,
+les limites et un parcours complet de création puis de réutilisation de la
+transitivité. Les tests supplémentaires se lancent par =npm run test:atelier=
+et =npm run test:atelier:interface=.
