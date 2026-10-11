@@ -32,6 +32,9 @@ aucune campagne de développement distante, aucun workflow composant ou acquitte
 
 Logique reste statique, avec correcteur Elm, cours, état local et reprises.
 Conserver KaTeX, vidéos, ports techniques, clavier et le cadre classique du cours.
-Le rendu mathématique est un candidat d’adaptateur étroit ; public/style.css
-ne constitue pas une autorisation de présentation parallèle. Les violations
-existantes sont à corriger avant nouvelle qualification.
+Le rendu TeX/vidéo et les gestes composent les façades communes Mathématiques,
+Videos et Manipulation. Les adaptateurs privés ne sont pas importés par les vues.
+Les gestes sont transitoires, hors document/certificat/historique ; le zoom est
+borné50–150% et l’horloge commune s’arrête à la fin du geste. JS conserve les
+événements, fichiers, géométrie et stockage ; aucun clone/style/RAF de présentation.
+Les contrôles centraux et parcours navigateur qualifient la révision consommée.

@@ -10,6 +10,7 @@ import Atelier.Theoremes as T
 import Atelier.Types exposing (..)
 import Dict exposing (Dict)
 import Json.Decode as D
+import MrJam.Manipulation as Manipulation
 import Set exposing (Set)
 
 
@@ -43,6 +44,7 @@ type alias Modele =
     , extraction : Maybe Extraction
     , inspection : Maybe Preuve
     , stockageBloque : Bool
+    , geste : Maybe Manipulation.Geste
     , zoom : Int
     }
 
@@ -91,13 +93,15 @@ type Message
     | Importer
     | AnnulerGeste
     | AucuneAction
+    | Geste (Maybe Manipulation.Geste)
+    | ImageGeste Float
     | Zoomer Int
     | Recentrer
 
 
 initial : Modele
 initial =
-    { document = Ex.vide, passes = [], futurs = [], selection = Nothing, cible = { parent = "racine", indice = 0, position = 0 }, source = Nothing, repli = Set.empty, panneau = "construire", message = "Glissez une règle jaune dans l’atelier. Les propositions vertes s’emboîtent dans ses paramètres.", exemple = "vide", cibleFormule = Nothing, brouillon = Atome "A", chemin = [], texteFormule = "A", nomAtome = "A", extraction = Nothing, inspection = Nothing, stockageBloque = False, zoom = 100 }
+    { document = Ex.vide, passes = [], futurs = [], selection = Nothing, cible = { parent = "racine", indice = 0, position = 0 }, source = Nothing, repli = Set.empty, panneau = "construire", message = "Glissez une règle jaune dans l’atelier. Les propositions vertes s’emboîtent dans ses paramètres.", exemple = "vide", cibleFormule = Nothing, brouillon = Atome "A", chemin = [], texteFormule = "A", nomAtome = "A", extraction = Nothing, inspection = Nothing, stockageBloque = False, geste = Nothing, zoom = 100 }
 
 
 modifier : Document -> Modele -> Modele
@@ -574,6 +578,12 @@ update msg m =
             selectionnee m |> Maybe.map fn |> Maybe.withDefault { m | message = "Sélectionnez un bloc." }
     in
     case msg of
+        Geste geste ->
+            { m | geste = geste }
+
+        ImageGeste _ ->
+            m
+
         Zoomer ecart ->
             { m | zoom = clamp 50 150 (m.zoom + ecart) }
 
@@ -581,7 +591,7 @@ update msg m =
             { m | zoom = 100 }
 
         AnnulerGeste ->
-            { m | source = Nothing, extraction = Nothing, inspection = Nothing, cibleFormule = Nothing, message = "Geste annulé." }
+            { m | geste = Nothing, source = Nothing, extraction = Nothing, inspection = Nothing, cibleFormule = Nothing, message = "Geste annulé." }
 
         AucuneAction ->
             m
@@ -893,6 +903,12 @@ update msg m =
                         |> D.andThen
                             (\genre ->
                                 case genre of
+                                    "geste" ->
+                                        D.map (Just >> Geste) Manipulation.decoder
+
+                                    "fin-geste" ->
+                                        D.succeed (Geste Nothing)
+
                                     "depot" ->
                                         D.map2 Deposer (D.field "source" D.string) (D.field "cible" D.string)
 

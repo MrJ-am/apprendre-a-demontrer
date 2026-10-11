@@ -57,6 +57,7 @@ def drag(page,source,destination,tactile=False,cdp=None):
     destination.evaluate('e=>e.scrollIntoView({block:"center"})')
     page.wait_for_timeout(80)
     source.scroll_into_view_if_needed()
+    avant=doc(page)
     a=source.bounding_box(); z=destination.bounding_box()
     sx=a['x']+min(40,a['width']/2); sy=a['y']+a['height']/2
     tx=z['x']+min(45,z['width']/2); ty=z['y']+z['height']/2
@@ -64,15 +65,34 @@ def drag(page,source,destination,tactile=False,cdp=None):
         cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':sx,'y':sy}]})
         for i in range(1,13):
             cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':sx+(tx-sx)*i/12,'y':sy+(ty-sy)*i/12}]})
-        expect(page.locator('.atelier-fantome')).to_have_count(1)
+        verifier_fantome(page, avant)
         cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
     else:
         page.mouse.move(sx,sy);page.mouse.down()
         page.mouse.move(tx,ty,steps=12)
-        expect(page.locator('.atelier-fantome')).to_have_count(1)
+        verifier_fantome(page, avant)
         page.mouse.up()
     page.wait_for_timeout(100)
-    expect(page.locator('.atelier-fantome')).to_have_count(0)
+    expect(page.locator('[data-mrjam-fantome]')).to_have_count(0)
+
+def verifier_fantome(page, avant):
+    fantome=page.locator('[data-mrjam-fantome]')
+    expect(fantome).to_have_count(1)
+    expect(fantome).to_have_attribute('inert', '')
+    expect(fantome.locator('[id], [data-bloc], [data-testid], [data-atelier-cible]')).to_have_count(0)
+    assert doc(page)==avant, 'Un aperçu a modifié le document avant le dépôt'
+
+
+def observer_frames(page):
+    page.add_init_script('window.framesAtelier=0;const origineRAF=window.requestAnimationFrame;window.requestAnimationFrame=f=>origineRAF.call(window,t=>{framesAtelier++;f(t)});')
+
+
+def verifier_repos(page):
+    page.wait_for_timeout(150)
+    avant=page.evaluate('framesAtelier')
+    page.wait_for_timeout(250)
+    assert page.evaluate('framesAtelier')==avant, 'Le geste annulé conserve une horloge active'
+
 
 def placer(page,source,parent='racine',indice=0,position=0,glisser=False):
     destination=cible(page,parent,indice,position)
@@ -105,11 +125,11 @@ def extraire(page,id,nom):
 
 def largeur(page):
     assert page.evaluate('document.documentElement.scrollWidth <= innerWidth + 2')
-    assert not page.locator('.atelier-fantome').count()
+    assert not page.locator('[data-mrjam-fantome]').count()
 
 def main():
     SORTIE.mkdir(exist_ok=True)
-    serveur=ThreadingHTTPServer(('127.0.0.1',0),partial(Silencieux,directory=str(RACINE/'dist')))
+    serveur=ThreadingHTTPServer(('127.0.0.1',0),partial(Silencieux,directory=os.environ.get('ATELIER_SITE',str(RACINE/'dist'))))
     Thread(target=serveur.serve_forever,daemon=True).start()
     adresse=os.environ.get('ATELIER_URL',f'http://127.0.0.1:{serveur.server_port}/#/atelier')
     resultats=[]; erreurs=[]
@@ -270,18 +290,18 @@ def main():
             for w,h in [(1440,1000),(768,1024),(1024,768),(390,844),(844,390),(320,740)]:
                 page.set_viewport_size({'width':w,'height':h});page.wait_for_timeout(100)
                 largeur(page)
-                gauche=page.locator('.mrjam-atelier-palette').bounding_box()
+                gauche=page.locator('[data-mrjam-construction="palette"]').bounding_box()
                 droite=page.locator('#atelier-surface').bounding_box()
                 assert gauche['x']==0 and droite['x']>=gauche['width']-1
                 assert droite['height']>h*.3 and droite['y']<h*.55, (w,h,droite)
                 assert page.evaluate('document.documentElement.scrollHeight <= innerHeight + 2')
-                assert page.locator('.mrjam-bloc-entete').first.evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(255, 203, 56)'
-                assert page.locator('.mrjam-proposition').first.evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(88, 182, 83)'
+                assert page.locator('[data-mrjam-construction="entete"]').first.evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(255, 203, 56)'
+                assert page.locator('[data-mrjam-construction="objet"]').first.evaluate('e=>getComputedStyle(e).backgroundColor')=='rgb(88, 182, 83)'
                 page.screenshot(path=str(SORTIE/f'atelier-{w}x{h}.png'),full_page=True)
             resultats.append('Six formats contrôlés : ordinateur, tablette et téléphone, portrait/paysage')
             # Vrais événements tactiles reçus par Pointer Events via Chrome DevTools.
             tactile=navigateur.new_context(viewport={'width':1024,'height':900},has_touch=True,is_mobile=True,reduced_motion='reduce')
-            tp=tactile.new_page();tp.goto(adresse);tp.wait_for_selector('#atelier')
+            tp=tactile.new_page();observer_frames(tp);tp.goto(adresse);tp.wait_for_selector('#atelier')
             cdp=tactile.new_cdp_session(tp)
             charger(tp,'double')
             origine=preparer_source(tp,'regle:etI')
@@ -308,8 +328,9 @@ def main():
             cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':bb['x']+30,'y':bb['y']+20}]})
             cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':bb['x']+60,'y':bb['y']+45}]})
             cdp.send('Input.dispatchTouchEvent',{'type':'touchCancel','touchPoints':[]})
-            expect(tp.locator('.atelier-fantome')).to_have_count(0)
+            expect(tp.locator('[data-mrjam-fantome]')).to_have_count(0)
             assert doc(tp)==avant
+            verifier_repos(tp)
             tp.screenshot(path=str(SORTIE/'tactile-tablette.png'),full_page=True)
             resultats.append('Tactile CDP : palette, deux cavités après défilement, défilement natif et pointercancel')
             # Téléphone : atteindre une cible initialement hors écran par défilement actif.
@@ -324,7 +345,7 @@ def main():
             x=surface['x']+surface['width']/2;y=surface['y']+surface['height']-12
             tcdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':boite['x']+20,'y':boite['y']+boite['height']/2}]})
             tcdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x,'y':y}]})
-            expect(ph.locator('.atelier-fantome')).to_have_count(1)
+            expect(ph.locator('[data-mrjam-fantome]')).to_have_count(1)
             for _ in range(160):
                 z=destination.bounding_box()
                 if surface['y']+40<z['y']<y-50:break

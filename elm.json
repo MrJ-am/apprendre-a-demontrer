@@ -14,11 +14,14 @@
       "elm/parser": "1.1.0",
       "elm/url": "1.0.0",
       "mdgriffith/elm-ui": "1.1.8",
-      "elm/svg": "1.0.1"
+      "elm/svg": "1.0.1",
+      "elm/time": "1.0.0",
+      "mdgriffith/elm-animator": "2.0.0"
     },
     "indirect": {
-      "elm/time": "1.0.0",
-      "elm/virtual-dom": "1.0.3"
+      "elm/virtual-dom": "1.0.3",
+      "avh4/elm-color": "1.0.0",
+      "mdgriffith/elm-bezier": "2.0.0"
     }
   },
   "test-dependencies": {

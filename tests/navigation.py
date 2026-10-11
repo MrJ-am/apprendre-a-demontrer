@@ -1,6 +1,7 @@
 """Contrôles HTTP de l'application ; services vidéo externes simulés explicitement."""
 from __future__ import annotations
 
+import argparse
 import base64
 import hashlib
 import json
@@ -74,7 +75,7 @@ def verifier_saisie(page, etape, valeur):
     page.wait_for_function("document.activeElement.id === 'feedback'")
 
 
-def main():
+def main(site=None):
     SORTIE.mkdir(exist_ok=True)
     cours = json.loads((RACINE / "data/course.json").read_text())
     bilan = {"transport": "HTTP local", "video": "SDK, affiche et iframe externes simulés", "typographieSignatureValidee": False}
@@ -84,9 +85,9 @@ def main():
     with TemporaryDirectory(prefix="parcours-http-") as dossier:
         # Même artefact servi à la racine et sous un préfixe réel, sans base réécrite.
         racine_http = Path(dossier)
-        for ressource in (RACINE / "dist").iterdir():
+        for ressource in (site or RACINE / "dist").iterdir():
             (racine_http / ressource.name).symlink_to(ressource, target_is_directory=ressource.is_dir())
-        (racine_http / "cours").symlink_to(RACINE / "dist", target_is_directory=True)
+        (racine_http / "cours").symlink_to(site or RACINE / "dist", target_is_directory=True)
         serveur = ThreadingHTTPServer(("127.0.0.1", 0), partial(Silencieux, directory=dossier))
         fil = Thread(target=serveur.serve_forever, daemon=True)
         fil.start()
@@ -98,6 +99,7 @@ def main():
                 navigateur = pilote.chromium.launch(**options)
                 contexte = navigateur.new_context(viewport={"width": 390, "height": 844}, reduced_motion="reduce")
                 contexte.add_init_script(AMORCE)
+                contexte.route("**/vimeo/player.min.js", lambda route: route.fulfill(content_type="application/javascript", body="/* SDK isolé installé par la fixture */"))
 
                 def externe(route):
                     adresse = route.request.url
@@ -170,32 +172,39 @@ def main():
                             expect(page.get_by_text("VIDÉO À VENIR", exact=False)).to_be_visible()
                         elif video["provider"] == "vimeo":
                             compteur = len(requetes_video)
-                            expect(page.locator("course-video")).to_have_attribute("start", str(video["start"]))
+                            expect(page.locator("#video-activer")).to_have_attribute("aria-label", re.compile(r"à " + str(video["start"] // 60) + ":" + str(video["start"] % 60).zfill(2) + r"$"))
                             assert len(requetes_video) == compteur
                             assert not affiches_externes, "Aucune affiche tierce avant activation"
                             expect(page.locator("course-video iframe")).to_have_count(0)
-                            expect(page.locator(".video-confidentialite")).to_be_visible()
-                            page.locator("course-video .video-play").click()
+                            expect(page.locator("#information-video")).to_be_visible()
+                            page.locator("#video-activer").click()
                             expect(page.locator("course-video iframe")).to_have_count(1)
                             iframe = page.locator("course-video iframe")
                             assert "dnt=1" in iframe.get_attribute("src")
                             assert f"#t={video['start']}s" in iframe.get_attribute("src")
                             page.get_by_role("button", name="Arrêter la vidéo", exact=True).click()
                             expect(page.locator("course-video iframe")).to_have_count(0)
-                            page.locator("course-video .video-play").click()
+                            page.locator("#video-activer").click()
+                            # Le rendu Elm installe le lecteur au prochain paint ;
+                            # ne pas injecter un événement dans l'ancien SDK détruit.
+                            observation = page.evaluate("() => { const l=lecteursSimules.at(-1);return {detruit: l?.detruit === true, connecte:l?.iframe.isConnected === true, iframeCourant:l?.iframe === document.querySelector('course-video iframe')}; }")
+                            if observation["detruit"]:
+                                print({"fixtureAttendLecteur": lecon["id"], "avantAttente": observation}, flush=True)
+                            page.wait_for_function("() => { const l=lecteursSimules.at(-1);return l && !l.detruit && l.iframe.isConnected && l.iframe === document.querySelector('course-video iframe'); }")
+                            expect(page.get_by_text("Ouverture de la vidéo…", exact=True)).to_have_count(0)
                             page.evaluate("window.lecteursSimules.at(-1).evenements.timeupdate({seconds: 125})")
                             ouvrir(page, parcours, lecon, 1)
                             assert page.evaluate("window.lecteursSimules.at(-1).detruit") is True
                             ouvrir(page, parcours, lecon)
-                            expect(page.locator("course-video .video-play")).to_have_attribute("aria-label", re.compile(r"Reprendre.*2:05"))
+                            expect(page.locator("#video-activer")).to_have_attribute("aria-label", re.compile(r"Reprendre.*2:05"))
                             page.evaluate("window.echecVideoSimule=true")
-                            page.locator("course-video .video-play").click()
-                            expect(page.locator("course-video .video-fallback")).to_be_visible()
-                            expect(page.locator("course-video a")).to_have_attribute("target", "_blank")
-                            page.locator("course-video .quiet").click()
-                            page.wait_for_function("document.activeElement.className === 'video-play'")
+                            page.locator("#video-activer").click()
+                            expect(page.locator("#lecteur-video").get_by_role("status")).to_be_visible()
+                            expect(page.locator("#video-externe-secours")).to_have_attribute("target", "_blank")
+                            page.get_by_role("button", name="Réessayer ici", exact=True).click()
+                            page.wait_for_function("document.activeElement.id === 'video-activer'")
                             page.evaluate("window.echecVideoSimule=false")
-                            page.locator("course-video .video-beginning").click()
+                            page.get_by_role("button", name="Depuis le début", exact=True).click()
                             expect(page.locator("course-video iframe")).to_have_attribute("src", re.compile(r"#t=0s$"))
                 bilan["pagesVideo"] = 12
 
@@ -275,4 +284,6 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--site", type=Path)
+    main(parser.parse_args().site)

@@ -5,46 +5,56 @@ window.installerAtelier = (app) => {
   const cle = "mrjam.atelier-preuves.v1";
   const envoyer = (evenement) => app.ports.atelierEvenement.send(evenement);
   const erreur = (message) => envoyer({ type: "erreur-stockage", message });
-  app.ports.atelierCommande.subscribe(({ operation, document: travail }) => {
-    if (operation === "sauvegarder") {
-      try {
-        localStorage.setItem(cle, JSON.stringify(travail));
-      } catch {
-        erreur("Le navigateur refuse la sauvegarde locale.");
-      }
-    } else if (operation === "recentrer") {
-      document.getElementById("atelier-surface")?.scrollTo(0, 0);
-    } else if (operation === "exporter") {
-      const blob = new Blob([JSON.stringify(travail, null, 2) + "\n"], {
-        type: "application/json",
-      });
-      const adresse = URL.createObjectURL(blob);
-      const lien = document.createElement("a");
-      lien.href = adresse;
-      lien.download = "atelier-preuves.json";
-      lien.click();
-      setTimeout(() => URL.revokeObjectURL(adresse), 1000);
-    } else if (operation === "importer") {
-      const fichier = document.createElement("input");
-      fichier.type = "file";
-      fichier.accept = ".json,application/json";
-      fichier.setAttribute("aria-label", "Importer une preuve JSON");
-      fichier.addEventListener("change", async () => {
-        const choix = fichier.files?.[0];
-        if (!choix) return;
-        if (choix.size > 2_000_000) {
-          erreur("Ce fichier dépasse la limite de 2 Mo.");
-          return;
-        }
+  app.ports.atelierCommande.subscribe(
+    ({ operation, document: travail, intervalle }) => {
+      if (operation === "sauvegarder") {
         try {
-          envoyer({ type: "import", texte: await choix.text() });
+          localStorage.setItem(cle, JSON.stringify(travail));
         } catch {
-          erreur("La lecture du fichier a échoué.");
+          erreur("Le navigateur refuse la sauvegarde locale.");
         }
-      });
-      fichier.click();
-    }
-  });
+      } else if (operation === "recentrer") {
+        document.getElementById("atelier-surface")?.scrollTo(0, 0);
+      } else if (operation === "exporter") {
+        exporter(travail);
+      } else if (operation === "importer") {
+        importer();
+      } else if (operation === "defiler") {
+        defiler(intervalle);
+      }
+    },
+  );
+  function exporter(travail) {
+    const blob = new Blob([JSON.stringify(travail, null, 2) + "\n"], {
+      type: "application/json",
+    });
+    const adresse = URL.createObjectURL(blob);
+    const lien = document.createElement("a");
+    lien.href = adresse;
+    lien.download = "atelier-preuves.json";
+    lien.click();
+    setTimeout(() => URL.revokeObjectURL(adresse), 1000);
+  }
+  function importer() {
+    const fichier = document.createElement("input");
+    fichier.type = "file";
+    fichier.accept = ".json,application/json";
+    fichier.setAttribute("aria-label", "Importer une preuve JSON");
+    fichier.addEventListener("change", async () => {
+      const choix = fichier.files?.[0];
+      if (!choix) return;
+      if (choix.size > 2_000_000) {
+        erreur("Ce fichier dépasse la limite de 2 Mo.");
+        return;
+      }
+      try {
+        envoyer({ type: "import", texte: await choix.text() });
+      } catch {
+        erreur("La lecture du fichier a échoué.");
+      }
+    });
+    fichier.click();
+  }
   try {
     const sauvegarde = localStorage.getItem(cle);
     if (sauvegarde !== null) envoyer({ type: "restaurer", texte: sauvegarde });
@@ -54,7 +64,7 @@ window.installerAtelier = (app) => {
 
   let geste = null;
   let bloquerClic = false;
-  let frame = null;
+
   // Une pièce se prend par sa surface, pas seulement par son libellé.
   // Les cavités restent défilables et les commandes gardent leur action.
   const poigneeAuPoint = (element) => {
@@ -63,19 +73,16 @@ window.installerAtelier = (app) => {
     if (element.closest('button, input, textarea, select, a, [role="button"]'))
       return null;
     const surface = element.closest(
-      ".mrjam-bloc-entete, .mrjam-bloc-pied, .mrjam-bloc-epine, .mrjam-bloc-traverse, .mrjam-proposition",
+      '[data-mrjam-construction="entete"], [data-mrjam-construction="pied"], [data-mrjam-construction="epine"], [data-mrjam-construction="traverse"], [data-mrjam-construction="objet"]',
     );
     return surface?.closest("#atelier [data-atelier-piece]") ?? null;
   };
   const nettoyer = () => {
     if (!geste) return;
-    geste.fantome?.remove();
-    geste.zone?.removeAttribute("data-depot-actif");
-    geste.poignee.removeAttribute("data-saisie-active");
-    document.getElementById("atelier")?.classList.remove("en-deplacement");
+    envoyer({ type: "fin-geste" });
     const { poignee, id } = geste;
     geste = null;
-    cancelAnimationFrame(frame);
+
     if (poignee.hasPointerCapture(id)) poignee.releasePointerCapture(id);
   };
   const cibleAuPoint = (x, y) => {
@@ -88,7 +95,9 @@ window.installerAtelier = (app) => {
     // dans le modèle logique. Une formule garde ses emplacements spécifiques.
     if (
       !/^(prop:|atome:|connecteur:)/.test(geste.source) &&
-      !element?.closest(".mrjam-bloc, [data-atelier-cible]")
+      !element?.closest(
+        '[data-mrjam-construction="bloc"], [data-atelier-cible]',
+      )
     ) {
       const fond = element?.closest("#atelier [data-atelier-fond]");
       if (fond) return fond;
@@ -97,20 +106,26 @@ window.installerAtelier = (app) => {
   };
   const actualiser = () => {
     if (!geste?.actif) return;
-    const { x, y, fantome } = geste;
-    fantome.style.transform = `translate(${x + 12}px, ${y + 12}px)`;
-    const zone = cibleAuPoint(x, y);
-    if (zone !== geste.zone) {
-      geste.zone?.removeAttribute("data-depot-actif");
-      zone?.setAttribute("data-depot-actif", "true");
-      geste.zone = zone;
-    }
+    const { x, y } = geste;
+    geste.zone = cibleAuPoint(x, y);
+    const cible =
+      geste.zone?.dataset.atelierCible ??
+      geste.zone?.dataset.atelierFond ??
+      null;
+    envoyer({
+      type: "geste",
+      source: geste.source,
+      cible,
+      x,
+      y,
+      largeur: geste.largeur,
+    });
   };
-  const defiler = () => {
+  const defiler = (delta) => {
     if (!geste?.actif) return;
     const sous = document.elementFromPoint(geste.x, geste.y);
     const panneau = sous?.closest(
-      "[data-atelier-defile], .mrjam-atelier-palette",
+      '[data-atelier-defile], [data-mrjam-construction="palette"]',
     );
     if (panneau) {
       const cadre = panneau.getBoundingClientRect();
@@ -123,17 +138,37 @@ window.installerAtelier = (app) => {
             : 0;
       };
       panneau.scrollBy(
-        vitesse(geste.x, cadre.left, cadre.right),
-        vitesse(geste.y, cadre.top, cadre.bottom),
+        (vitesse(geste.x, cadre.left, cadre.right) *
+          Math.min(50, Math.max(0, delta))) /
+          (1000 / 60),
+        (vitesse(geste.y, cadre.top, cadre.bottom) *
+          Math.min(50, Math.max(0, delta))) /
+          (1000 / 60),
       );
     }
     actualiser();
-    frame = requestAnimationFrame(defiler);
   };
+  // Chromium peut ajuster un toucher près d'un bouton vers ce bouton voisin.
+  // La prise vise la surface peinte au point réel, sans bloquer les gestes
+  // natifs ailleurs ni les taps ordinaires sur les commandes.
+  document.addEventListener(
+    "touchstart",
+    (e) => {
+      const point = e.touches[0];
+      if (!point) return;
+      const prise = poigneeAuPoint(
+        document.elementFromPoint(point.clientX, point.clientY),
+      );
+      if (prise && prise !== poigneeAuPoint(e.target)) e.preventDefault();
+    },
+    { passive: false },
+  );
   document.addEventListener("pointerdown", (e) => {
     if (!e.isPrimary || (e.pointerType !== "touch" && e.button !== 0) || geste)
       return;
-    const poignee = poigneeAuPoint(e.target);
+    const poignee =
+      poigneeAuPoint(document.elementFromPoint(e.clientX, e.clientY)) ??
+      poigneeAuPoint(e.target);
     if (!poignee) return;
     geste = {
       id: e.pointerId,
@@ -145,7 +180,7 @@ window.installerAtelier = (app) => {
       y: e.clientY,
       actif: false,
       zone: null,
-      fantome: null,
+      largeur: 0,
     };
   });
   document.addEventListener(
@@ -159,29 +194,12 @@ window.installerAtelier = (app) => {
         Math.hypot(e.clientX - geste.departX, e.clientY - geste.departY) >= 7
       ) {
         geste.actif = true;
-        document.getElementById("atelier")?.classList.add("en-deplacement");
         geste.poignee.setPointerCapture(e.pointerId);
-        const modele =
-          geste.source.startsWith("prop:") ||
-          geste.source.startsWith("atome:") ||
-          geste.source.startsWith("connecteur:")
-            ? geste.poignee
-            : geste.poignee.closest(".mrjam-bloc") || geste.poignee;
-        const fantome = modele.cloneNode(true);
-        fantome.classList.add("atelier-fantome");
-        fantome.setAttribute("aria-hidden", "true");
-        for (const el of [fantome, ...fantome.querySelectorAll("*")]) {
-          el.removeAttribute("id");
-          el.removeAttribute("data-atelier-cible");
-          el.removeAttribute("data-bloc");
-          el.removeAttribute("data-testid");
-          el.setAttribute("tabindex", "-1");
-        }
-        fantome.style.width = `${Math.min(500, modele.getBoundingClientRect().width)}px`;
-        document.body.append(fantome);
-        geste.fantome = fantome;
-        geste.poignee.setAttribute("data-saisie-active", "true");
-        frame = requestAnimationFrame(defiler);
+        const modele = /^(prop:|atome:|connecteur:)/.test(geste.source)
+          ? geste.poignee
+          : geste.poignee.closest('[data-mrjam-construction="bloc"]') ||
+            geste.poignee;
+        geste.largeur = Math.min(500, modele.getBoundingClientRect().width);
       }
       if (geste.actif) {
         e.preventDefault();

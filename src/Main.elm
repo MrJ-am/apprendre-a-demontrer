@@ -5,7 +5,6 @@ import Atelier.Sauvegarde as SauvegardeAtelier
 import Atelier.Vue as VueAtelier
 import Browser
 import Browser.Dom
-import Browser.Events
 import Browser.Navigation as Nav
 import Char
 import Course exposing (Course, Kind(..), Lesson, Step, Track)
@@ -13,13 +12,18 @@ import Dict exposing (Dict)
 import Element as UI exposing (Element)
 import Element.Region as Region
 import Exercise
-import Html exposing (..)
-import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
 import Json.Decode as D
 import Json.Encode as E
 import MrJam
+import MrJam.Accessibilite as A
+import MrJam.Animations as Animations
+import MrJam.Documents as Documents
+import MrJam.Ecran as Ecran
+import MrJam.Mathematiques as Math
+import MrJam.Transitions as Transitions
+import MrJam.Videos as Videos
 import Task
+import Time
 import Url exposing (Url)
 
 
@@ -27,6 +31,9 @@ port reportState : E.Value -> Cmd msg
 
 
 port agentAction : (D.Value -> msg) -> Sub msg
+
+
+port reductionAnimations : (Bool -> msg) -> Sub msg
 
 
 port focusElement : String -> Cmd msg
@@ -50,6 +57,10 @@ type alias Model =
     , recap : Bool
     , pending : Maybe String
     , largeur : Int
+    , hauteur : Int
+    , indice : Transitions.Transition Bool
+    , hauteurIndice : Int
+    , video : Videos.Modele
     , atelier : Atelier.Modele
     }
 
@@ -66,7 +77,13 @@ type Msg
     | Review
     | SelectLesson String
     | Agent D.Value
-    | Dimensionne Int
+    | Dimensionne Ecran.Dimensions
+    | ImageIndice Time.Posix
+    | ReductionAnimations Bool
+    | IndiceMesure String (Result Browser.Dom.Error Browser.Dom.Element)
+    | ZonePrete String (Result Browser.Dom.Error Browser.Dom.Element)
+    | RapportPret E.Value (Result Browser.Dom.Error Browser.Dom.Element)
+    | Video Videos.Message
     | MessageAtelier Atelier.Message
 
 
@@ -85,7 +102,7 @@ main =
         { init = init
         , view = view
         , update = update
-        , subscriptions = \_ -> Sub.batch [ agentAction Agent, atelierEvenement (Atelier.Evenement >> MessageAtelier), Browser.Events.onResize (\largeur _ -> Dimensionne largeur) ]
+        , subscriptions = \model -> Sub.batch [ agentAction Agent, atelierEvenement (Atelier.Evenement >> MessageAtelier), Ecran.changements Dimensionne, reductionAnimations ReductionAnimations, Transitions.abonnement ImageIndice model.indice, Transitions.abonnementGeste (route model == [ "atelier" ] && model.atelier.geste /= Nothing) (Atelier.ImageGeste >> MessageAtelier) ]
         , onUrlRequest = LinkClicked
         , onUrlChange = UrlChanged
         }
@@ -95,9 +112,9 @@ init : D.Value -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url key =
     let
         model =
-            { course = D.decodeValue Course.decoder flags |> Result.mapError D.errorToString, key = key, url = url, responses = Dict.empty, recap = False, pending = Nothing, largeur = 0, atelier = Atelier.initial }
+            { course = D.decodeValue Course.decoder flags |> Result.mapError D.errorToString, key = key, url = url, responses = Dict.empty, recap = False, pending = Nothing, largeur = 0, hauteur = 0, indice = Transitions.initialiser False, hauteurIndice = 0, video = Videos.initial, atelier = Atelier.initial }
     in
-    ( model, Cmd.batch [ emit model, Task.perform (\dimensions -> Dimensionne (round dimensions.viewport.width)) Browser.Dom.getViewport ] )
+    ( model, Cmd.batch [ emit model, Ecran.initiale Dimensionne ] )
 
 
 route : Model -> List String
@@ -218,6 +235,9 @@ update msg model =
             ( updated, emit updated )
     in
     case msg of
+        MessageAtelier (Atelier.ImageGeste delta) ->
+            ( model, atelierCommande (E.object [ ( "operation", E.string "defiler" ), ( "intervalle", E.float (clamp 0 50 delta) ) ]) )
+
         MessageAtelier message ->
             let
                 nouvelAtelier =
@@ -249,12 +269,53 @@ update msg model =
             in
             ( { model | atelier = nouvelAtelier }, commande )
 
-        Dimensionne largeur ->
-            ( { model | largeur = largeur }, Cmd.none )
+        Dimensionne dimensions ->
+            ( { model | largeur = dimensions.largeur, hauteur = dimensions.hauteur }, mesurerIndice model )
+
+        ImageIndice maintenant ->
+            ( { model | indice = Transitions.mettreAJour maintenant model.indice }, Cmd.none )
+
+        ReductionAnimations reduire ->
+            ( { model | indice = Transitions.reduire reduire model.indice }, Cmd.none )
+
+        IndiceMesure etape resultat ->
+            if (position model |> Maybe.map (.step >> .id)) == Just etape && Transitions.courant model.indice then
+                case resultat of
+                    Ok element ->
+                        ( { model | hauteurIndice = ceiling element.element.height }, Cmd.none )
+
+                    Err _ ->
+                        ( model, Cmd.none )
+
+            else
+                ( model, Cmd.none )
+
+        ZonePrete cible resultat ->
+            ( model, resultat |> Result.map (always (focusElement cible)) |> Result.withDefault Cmd.none )
+
+        RapportPret valeur resultat ->
+            case resultat of
+                Ok _ ->
+                    ( model, reportState valeur )
+
+                Err _ ->
+                    case D.decodeValue (D.field "requestId" D.string) valeur of
+                        Ok request ->
+                            ( model, reportState (E.object [ ( "requestId", E.string request ), ( "error", E.string "La vue de la leçon ne répond pas." ) ]) )
+
+                        Err _ ->
+                            ( model, reportState valeur )
+
+        Video message ->
+            let
+                ( video, commande ) =
+                    Videos.mettreAJour message model.video
+            in
+            ( { model | video = video }, Cmd.map Video commande )
 
         LinkClicked (Browser.Internal url) ->
             if url.fragment == Just "lesson-heading" then
-                ( model, focusElement "lesson-heading" )
+                ( model, focaliser "lesson-heading" )
 
             else
                 navigate model (Url.toString url)
@@ -265,9 +326,10 @@ update msg model =
         UrlChanged url ->
             let
                 updated =
-                    { model | url = url, recap = False }
+                    { model | url = url, recap = False, video = Videos.quitter model.video }
+                        |> repositionnerIndice
             in
-            ( { updated | pending = Nothing }, Cmd.batch [ emit updated, focusElement "lesson-heading" ] )
+            ( { updated | pending = Nothing }, Cmd.batch [ emit updated, focaliser "lesson-heading", mesurerIndice updated ] )
 
         Edit value ->
             withPosition
@@ -286,7 +348,7 @@ update msg model =
                         old =
                             response model pos.step
                     in
-                    ( save model pos.step { old | value = String.left 500 (old.value ++ symbol), verdict = Nothing }, Cmd.batch [ emit (save model pos.step { old | value = String.left 500 (old.value ++ symbol), verdict = Nothing }), focusElement "answer-input" ] )
+                    ( save model pos.step { old | value = String.left 500 (old.value ++ symbol), verdict = Nothing }, Cmd.batch [ emit (save model pos.step { old | value = String.left 500 (old.value ++ symbol), verdict = Nothing }), focaliser "answer-input" ] )
                 )
 
         Verify ->
@@ -296,7 +358,7 @@ update msg model =
                         updated =
                             submit model pos (response model pos.step).value
                     in
-                    ( updated, Cmd.batch [ emit updated, focusElement "feedback" ] )
+                    ( updated, Cmd.batch [ emit updated, focaliser "feedback" ] )
                 )
 
         Hint ->
@@ -305,8 +367,14 @@ update msg model =
                     let
                         old =
                             response model pos.step
+
+                        updated =
+                            save model pos.step { old | hint = not old.hint }
+
+                        anime =
+                            { updated | indice = Transitions.aller 220 (not old.hint) model.indice }
                     in
-                    changed (save model pos.step { old | hint = not old.hint })
+                    ( anime, Cmd.batch [ emit anime, mesurerIndice anime ] )
                 )
 
         Previous ->
@@ -326,7 +394,7 @@ update msg model =
                             updated =
                                 { model | recap = True }
                         in
-                        ( updated, Cmd.batch [ emit updated, focusElement "lesson-heading" ] )
+                        ( updated, Cmd.batch [ emit updated, focaliser "lesson-heading" ] )
                 )
 
         Review ->
@@ -374,7 +442,7 @@ update msg model =
                                         updated =
                                             submit { model | pending = Just request } pos (String.left 500 answer)
                                     in
-                                    ( { updated | pending = Nothing }, Cmd.batch [ emit updated, focusElement "feedback" ] )
+                                    ( { updated | pending = Nothing }, Cmd.batch [ emit updated, focaliser "feedback" ] )
                                 )
 
                     else if action == "navigate" then
@@ -487,42 +555,42 @@ emit model =
                                 ]
                            )
     in
-    reportState (E.object (request :: information))
+    case model.pending of
+        Nothing ->
+            -- Les changements ordinaires et l'historique publient l'état tout
+            -- de suite. Seule une réponse RPC attend la vue correspondante.
+            reportState (E.object (request :: information))
+
+        Just _ ->
+            Task.attempt (RapportPret (E.object (request :: information))) (Browser.Dom.getElement "lesson-heading")
 
 
-richInline : String -> List (Html Msg)
-richInline source =
-    source
-        |> String.split "$"
-        |> List.indexedMap
-            (\i segment ->
-                if modBy 2 i == 0 then
-                    text segment
-
-                else
-                    node "math-tex" [ attribute "formula" segment ] []
-            )
+focaliser : String -> Cmd Msg
+focaliser cible =
+    Task.attempt (ZonePrete cible) (Browser.Dom.getElement cible)
 
 
-rich : String -> Html Msg
-rich source =
-    span [ class "rich" ] (richInline source)
+mesurerIndice : Model -> Cmd Msg
+mesurerIndice model =
+    if Transitions.courant model.indice then
+        position model
+            |> Maybe.map (\pos -> Task.attempt (IndiceMesure pos.step.id) (Browser.Dom.getElement "hint-content"))
+            |> Maybe.withDefault Cmd.none
+
+    else
+        Cmd.none
 
 
-math : String -> Html Msg
-math source =
-    node "math-tex" [ attribute "formula" source, attribute "display-mode" "true" ] []
+repositionnerIndice : Model -> Model
+repositionnerIndice model =
+    { model
+        | indice =
+            Transitions.initialiser (position model |> Maybe.map (\pos -> (response model pos.step).hint) |> Maybe.withDefault False)
+                |> Transitions.reduire model.indice.reduite
+        , hauteurIndice = 0
+    }
 
 
-role : String -> Attribute msg
-role =
-    attribute "role"
-
-
-{-| Les compositions pédagogiques restent ici. Les contrôles ordinaires
-appellent MrJam ; seules les saisies historiques attendent les composants
-riches de la bibliothèque, sans changer la révision commune imposée.
--}
 view : Model -> Browser.Document Msg
 view model =
     { title =
@@ -533,13 +601,11 @@ view model =
             position model |> Maybe.map (\p -> p.lesson.title ++ " · Apprendre à démontrer") |> Maybe.withDefault "Apprendre à démontrer"
     , body =
         if route model == [ "atelier" ] then
-            [ a [ class "skip-link", href "#lesson-heading" ] [ text "Aller au contenu" ]
-            , UI.layout [] (UI.map MessageAtelier (VueAtelier.vue model.largeur model.atelier))
-            ]
+            [ UI.layout [ A.evitement "lesson-heading" ] (UI.map MessageAtelier (VueAtelier.vue { largeur = model.largeur, hauteur = model.hauteur } model.atelier)) ]
 
         else
-            [ a [ class "skip-link", href "#lesson-heading" ] [ text "Aller au contenu" ]
-            , MrJam.page "Apprendre à démontrer"
+            [ MrJam.pageAccessible "lesson-heading"
+                "Apprendre à démontrer"
                 [ MrJam.actions [ MrJam.lien "Les parcours" "#/parcours", MrJam.lien "Atelier de preuves — prototype" "#/atelier" ]
                 , case model.course of
                     Err _ ->
@@ -583,22 +649,22 @@ view model =
 
 repere : String -> Element Msg -> Element Msg
 repere identifiant =
-    UI.el [ UI.width UI.fill, UI.htmlAttribute (id identifiant), UI.htmlAttribute (tabindex -1) ]
+    Documents.repereFocusable identifiant
 
 
 texteRiche : String -> Element Msg
 texteRiche contenu =
-    UI.paragraph [ UI.width UI.fill, UI.spacing 6 ] (List.map UI.html (richInline contenu))
+    Math.texte contenu
 
 
 formule : String -> Element Msg
 formule contenu =
-    UI.el [ UI.width (UI.minimum 0 UI.fill) ] (UI.html (math contenu))
+    Math.formule contenu
 
 
 navigation : String -> List (Element Msg) -> Element Msg
 navigation libelle contenu =
-    UI.el [ UI.width UI.fill, UI.htmlAttribute (role "navigation"), UI.htmlAttribute (attribute "aria-label" libelle) ] (MrJam.actions contenu)
+    Documents.navigation libelle contenu
 
 
 sidebar : Model -> Course -> Position -> Element Msg
@@ -629,7 +695,7 @@ sidebar model course pos =
                     SelectLesson
 
             else
-                UI.el [ UI.width UI.fill, UI.htmlAttribute (role "navigation"), UI.htmlAttribute (attribute "aria-label" "Leçons") ] <|
+                UI.el [ UI.width UI.fill, Region.navigation, Region.description "Leçons" ] <|
                     MrJam.pile <|
                         List.indexedMap
                             (\i lecon ->
@@ -742,7 +808,7 @@ exerciseView model pos =
             ]
         , MrJam.carte
             [ MrJam.texteSecondaire "À VOUS DE JOUER"
-            , UI.paragraph [ UI.width UI.fill, Region.heading 2, UI.htmlAttribute (id "question-heading") ] (List.map UI.html (richInline pos.step.question))
+            , UI.paragraph [ UI.width UI.fill, Region.heading 2, A.identifiant "question-heading" ] (Math.ligne pos.step.question)
             , saisieReponse pos.step r
             , if pos.step.kind == Rewrite then
                 navigation "Symboles logiques"
@@ -758,14 +824,12 @@ exerciseView model pos =
               else
                 UI.el
                     [ UI.width UI.fill
-                    , UI.htmlAttribute
-                        (id
-                            (if pos.step.kind == Rewrite then
-                                "syntax-help"
+                    , A.identifiant
+                        (if pos.step.kind == Rewrite then
+                            "syntax-help"
 
-                             else
-                                "answer-help"
-                            )
+                         else
+                            "answer-help"
                         )
                     ]
                 <|
@@ -787,8 +851,17 @@ exerciseView model pos =
                     "Un indice"
                 )
                 Hint
-            , if r.hint then
-                UI.el [ UI.width UI.fill, UI.htmlAttribute (id "hint-content"), Region.announce ] (texteRiche pos.step.hint)
+            , if r.hint || Transitions.actif model.indice then
+                let
+                    contenu =
+                        UI.el [ UI.width UI.fill, A.identifiant "hint-content", Region.announce ] (texteRiche pos.step.hint)
+                in
+                if Transitions.actif model.indice then
+                    UI.el [ UI.width UI.fill, A.identifiant "hint-transition" ]
+                        (Animations.deploiement model.hauteurIndice model.indice contenu)
+
+                else
+                    contenu
 
               else
                 UI.none
@@ -830,7 +903,7 @@ saisieReponse etape reponse =
                 (List.map
                     (\possibilite ->
                         ( possibilite.id
-                        , UI.paragraph [ UI.width UI.fill ] (List.map UI.html (richInline possibilite.label))
+                        , UI.paragraph [ UI.width UI.fill ] (Math.ligne possibilite.label)
                         )
                     )
                     etape.choices
@@ -878,7 +951,7 @@ feedbackView step r =
 
         Just verdict ->
             repere "feedback" <|
-                UI.el [ UI.width UI.fill, UI.htmlAttribute (role "status"), UI.htmlAttribute (attribute "aria-live" "polite") ] <|
+                UI.el [ UI.width UI.fill, A.etat ] <|
                     MrJam.pile
                         [ MrJam.avis
                             (if isCorrect r then
@@ -1057,18 +1130,11 @@ videoView model pos =
                 ]
 
           else
-            UI.el [ UI.width (UI.minimum 0 UI.fill) ] <|
-                UI.html <|
-                    div [ class "video-integration" ]
-                        [ node "course-video"
-                            [ attribute "video-title" video.title
-                            , attribute "src" (videoUrl video)
-                            , attribute "poster" video.poster
-                            , attribute "start" (String.fromInt video.start)
-                            , attribute "watch-url" (videoWatchUrl video)
-                            ]
-                            []
-                        ]
+            UI.map Video
+                (Videos.vue
+                    { titre = video.title, url = videoUrl video, affiche = video.poster, debut = video.start, externe = videoWatchUrl video }
+                    model.video
+                )
         , MrJam.texteSecondaire
             (if video.start > 0 then
                 "Passage conseillé à " ++ clock video.start ++ " · La vidéo reste accessible en entier."
@@ -1080,7 +1146,7 @@ videoView model pos =
             UI.none
 
           else
-            UI.html (a [ href (videoWatchUrl video), target "_blank", rel "noopener noreferrer", class "video-external" ] [ text "Ouvrir la vidéo ↗" ])
+            MrJam.lienExterne "Ouvrir la vidéo ↗" (videoWatchUrl video)
         , MrJam.separateur
         , MrJam.texteSecondaire
             (if started then

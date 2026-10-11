@@ -9,29 +9,41 @@ import Atelier.Regles as R
 import Atelier.Types exposing (..)
 import Dict
 import Element as UI exposing (Element)
+import Element.Background as Fond
+import Element.Border as Bordure
 import Element.Font as Police
 import Element.Region as Region
-import Html.Attributes as A
 import MrJam as M
+import MrJam.Accessibilite as A
 import MrJam.Blocs as B
 import MrJam.Identite as Identite
+import MrJam.Manipulation as Manipulation
 import Set
 
 
-attribut : String -> String -> UI.Attribute msg
-attribut nom valeur =
-    UI.htmlAttribute
-        (if nom == "class" then
-            A.class valeur
+{-| Un aperçu réutilise les pièces, sans recopier leurs identifiants ni cibles.
+-}
+marquer : Bool -> (String -> UI.Attribute msg) -> String -> UI.Attribute msg
+marquer apercu marque valeur =
+    if apercu then
+        UI.alpha 1
 
-         else
-            A.attribute nom valeur
-        )
+    else
+        marque valeur
+
+
+zoneDestination : Bool -> Modele -> String -> List (UI.Attribute msg)
+zoneDestination apercu m valeur =
+    if apercu then
+        []
+
+    else
+        Manipulation.cible m.geste valeur
 
 
 repere : String -> Element msg -> Element msg
 repere id =
-    UI.el [ UI.width (UI.minimum 0 UI.fill), attribut "id" id ]
+    UI.el [ UI.width (UI.minimum 0 UI.fill), A.identifiant id ]
 
 
 texte : String -> Element msg
@@ -41,7 +53,7 @@ texte =
 
 petit : String -> Element msg
 petit s =
-    UI.paragraph [ UI.width UI.shrink, attribut "class" "mrjam-legende" ] [ UI.text s ]
+    UI.paragraph [ UI.width UI.shrink, Police.size 12 ] [ UI.text s ]
 
 
 ligne : List (Element msg) -> Element msg
@@ -49,9 +61,18 @@ ligne =
     UI.row [ UI.spacing 5 ]
 
 
-source : String -> String -> Element Message
-source id libelle =
-    UI.el [ attribut "data-atelier-source" id, attribut "class" "atelier-poignee", attribut "data-testid" id ] (B.poignee libelle (Choisir id))
+source : Bool -> Modele -> String -> String -> Element Message
+source apercu m id libelle =
+    UI.el
+        ([ marquer apercu Manipulation.source id, marquer apercu Manipulation.test id ]
+            ++ (if apercu then
+                    []
+
+                else
+                    Manipulation.prise m.geste id
+               )
+        )
+        (B.poignee libelle (Choisir id))
 
 
 operateur : Formule -> ( String, List Formule )
@@ -93,26 +114,31 @@ avecOperateur signe enfants =
 
 
 formuleFixe : Formule -> Element msg
-formuleFixe f =
+formuleFixe =
+    formuleNiveau 0
+
+
+formuleNiveau : Int -> Formule -> Element msg
+formuleNiveau niveau f =
     let
         ( signe, enfants ) =
             operateur f
     in
     (case f of
         Trou _ ->
-            B.logement []
+            B.logementImbrique []
 
         _ ->
-            B.proposition []
+            B.propositionNiveau niveau []
     )
-        (avecOperateur (UI.text signe) (List.map formuleFixe enfants))
+        (avecOperateur (UI.text signe) (List.map (formuleNiveau (niveau + 1)) enfants))
 
 
 {-| Chaque sous-proposition possède une adresse syntaxique. Le dépôt se fait
 sur le logement réellement désigné, même après zoom ou défilement du canevas.
 -}
-formuleDirecte : Modele -> String -> List Int -> Formule -> Element Message
-formuleDirecte m base chemin f =
+formuleDirecte : Bool -> Modele -> String -> List Int -> Formule -> Element Message
+formuleDirecte apercu m base chemin f =
     let
         reference =
             base
@@ -137,34 +163,42 @@ formuleDirecte m base chemin f =
                 Placer destination
 
         attributs =
-            [ attribut "data-atelier-cible" destination
-            , attribut "data-atelier-source" ("prop:" ++ reference)
-            , attribut "class" "atelier-poignee"
-            , attribut "data-sous-formule" reference
-            ]
+            [ marquer apercu Manipulation.source ("prop:" ++ reference), marquer apercu Manipulation.sousFormule reference ]
+                ++ (if apercu then
+                        []
+
+                    else
+                        Manipulation.prise m.geste ("prop:" ++ reference)
+                   )
+                ++ (if apercu then
+                        []
+
+                    else
+                        Manipulation.cible m.geste destination
+                   )
 
         bouton =
-            B.commande [ attribut "aria-label" ("Modifier " ++ reference), UI.htmlAttribute (A.title (F.afficher f)) ] (UI.text signe) action
+            B.commande [ Region.description ("Modifier " ++ reference), A.infoBulle (F.afficher f) ] (UI.text signe) action
     in
     (case f of
         Trou _ ->
-            B.logement attributs
+            B.logementImbrique attributs
 
         _ ->
-            B.proposition attributs
+            B.propositionNiveau (List.length chemin) attributs
     )
-        (avecOperateur bouton (List.indexedMap (\i enfant -> formuleDirecte m base (chemin ++ [ i ]) enfant) enfants))
+        (avecOperateur bouton (List.indexedMap (\i enfant -> formuleDirecte apercu m base (chemin ++ [ i ]) enfant) enfants))
 
 
 champFormule : String -> String -> Formule -> Element Message
 champFormule cible libelle f =
-    UI.el [ attribut "data-formule" cible ]
-        (ligne [ petit libelle, B.proposition [] (B.commande [ attribut "aria-label" ("Modifier " ++ cible) ] (UI.text (F.afficher f)) (EditerFormule cible)) ])
+    UI.el [ Manipulation.formule cible ]
+        (ligne [ petit libelle, B.proposition [] (B.commande [ Region.description ("Modifier " ++ cible) ] (UI.text (F.afficher f)) (EditerFormule cible)) ])
 
 
 champDirect : Modele -> String -> Formule -> Element Message
 champDirect m cible f =
-    UI.el [ attribut "data-formule" cible ] (formuleDirecte m cible [] f)
+    UI.el [ Manipulation.formule cible ] (formuleDirecte False m cible [] f)
 
 
 classique : Bibliotheque -> Regle -> Bool
@@ -242,8 +276,8 @@ titreCourt bibliotheque regle =
             R.nom bibliotheque regle
 
 
-zone : Modele -> G.Cible -> Formule -> Bool -> Element Message
-zone m cible attendu vide =
+zone : Bool -> Modele -> G.Cible -> Formule -> Bool -> Element Message
+zone apercu m cible attendu vide =
     let
         identite =
             "preuve:" ++ G.cibleTexte cible
@@ -262,21 +296,32 @@ zone m cible attendu vide =
                 "+"
     in
     B.cavite
-        [ attribut "data-atelier-cible" identite
-        , attribut "data-testid" identite
-        , attribut "class"
+        ([ marquer apercu Manipulation.test identite
+         , UI.width
             (if depart then
-                "depart"
-
-             else if vide then
-                "vide"
+                UI.px 200
 
              else
-                "interstice"
+                UI.shrink
             )
-        ]
+         , UI.paddingXY
+            (if depart then
+                17
+
+             else
+                4
+            )
+            (if depart then
+                20
+
+             else
+                2
+            )
+         ]
+            ++ zoneDestination apercu m identite
+        )
         (B.commande
-            [ attribut "aria-label"
+            [ Region.description
                 (if vide then
                     "Démontrer " ++ F.afficher attendu
 
@@ -289,8 +334,8 @@ zone m cible attendu vide =
         )
 
 
-sequence : Bool -> Modele -> String -> Int -> Contexte -> Formule -> List Preuve -> Element Message
-sequence lecture m parent indice contexte attendu preuves =
+sequence : Bool -> Bool -> Modele -> String -> Int -> Contexte -> Formule -> List Preuve -> Element Message
+sequence lecture apercu m parent indice contexte attendu preuves =
     let
         avancer ( index, preuve ) ( ctx, accumulees ) =
             let
@@ -302,9 +347,9 @@ sequence lecture m parent indice contexte attendu preuves =
                         []
 
                     else
-                        [ zone m { parent = parent, indice = indice, position = index } attendu False ]
+                        [ zone apercu m { parent = parent, indice = indice, position = index } attendu False ]
             in
-            ( suivant, accumulees ++ avant ++ [ bloc lecture m ctx preuve ] )
+            ( suivant, accumulees ++ avant ++ [ bloc lecture apercu m ctx preuve ] )
 
         ( _, vues ) =
             List.foldl avancer ( contexte, [] ) (List.indexedMap Tuple.pair preuves)
@@ -315,13 +360,13 @@ sequence lecture m parent indice contexte attendu preuves =
                     []
 
                 else
-                    [ zone m { parent = parent, indice = indice, position = List.length preuves } attendu (List.isEmpty preuves) ]
+                    [ zone apercu m { parent = parent, indice = indice, position = List.length preuves } attendu (List.isEmpty preuves) ]
                )
         )
 
 
-bloc : Bool -> Modele -> Contexte -> Preuve -> Element Message
-bloc lecture m contexte ((Bloc b) as preuve) =
+bloc : Bool -> Bool -> Modele -> Contexte -> Preuve -> Element Message
+bloc lecture apercu m contexte ((Bloc b) as preuve) =
     let
         bibliotheque =
             m.document.bibliotheque
@@ -347,7 +392,7 @@ bloc lecture m contexte ((Bloc b) as preuve) =
                     UI.text (titreCourt bibliotheque b.regle)
 
                    else
-                    source ("bloc:" ++ b.id) (titreCourt bibliotheque b.regle)
+                    source apercu m ("bloc:" ++ b.id) (titreCourt bibliotheque b.regle)
                  ]
                     ++ List.map
                         (\( p, f ) ->
@@ -355,14 +400,14 @@ bloc lecture m contexte ((Bloc b) as preuve) =
                                 formuleFixe f
 
                             else
-                                champDirect m ("param:" ++ b.id ++ ":" ++ p) f
+                                UI.el [ marquer apercu Manipulation.formule ("param:" ++ b.id ++ ":" ++ p) ] (formuleDirecte apercu m ("param:" ++ b.id ++ ":" ++ p) [] f)
                         )
                         params
                     ++ [ if lecture then
                             UI.none
 
                          else
-                            B.commande [ attribut "aria-label" "Inspecter", UI.htmlAttribute (A.title "Inspecter, dupliquer, créer un théorème") ] (UI.text "⋯") (Selectionner b.id)
+                            B.commande [ Region.description "Inspecter", A.infoBulle "Inspecter, dupliquer, créer un théorème" ] (UI.text "⋯") (Selectionner b.id)
                        ]
                 )
 
@@ -392,9 +437,9 @@ bloc lecture m contexte ((Bloc b) as preuve) =
                                         UI.none
 
                                       else
-                                        B.commande [ attribut "aria-label" "Faits dans cette cavité", UI.htmlAttribute (A.title "Faits disponibles ici") ] (UI.text "☰") (ChoisirCavite { parent = b.id, indice = i, position = List.length ps })
+                                        B.commande [ Region.description "Faits dans cette cavité", A.infoBulle "Faits disponibles ici" ] (UI.text "☰") (ChoisirCavite { parent = b.id, indice = i, position = List.length ps })
                                     ]
-                                , sequence lecture m b.id i (N.ajouterHypotheses e.hypotheses contexte) e.conclusion ps
+                                , sequence lecture apercu m b.id i (N.ajouterHypotheses e.hypotheses contexte) e.conclusion ps
                                 ]
                         )
                         (List.indexedMap Tuple.pair c.entrees)
@@ -413,7 +458,7 @@ bloc lecture m contexte ((Bloc b) as preuve) =
                 , ligne
                     [ UI.text "donc"
                     , formuleFixe conclusion
-                    , UI.el [ UI.htmlAttribute (A.title message), attribut "aria-label" message ]
+                    , UI.el [ A.infoBulle message, Region.description message ]
                         (UI.text
                             (case resultat of
                                 Ok _ ->
@@ -441,12 +486,12 @@ bloc lecture m contexte ((Bloc b) as preuve) =
          else
             statut
         )
-        ([ attribut "data-bloc" b.id ]
+        ([ marquer apercu Manipulation.bloc b.id ]
             ++ (if lecture then
                     []
 
                 else
-                    [ attribut "data-atelier-piece" ("bloc:" ++ b.id) ]
+                    [ marquer apercu Manipulation.piece ("bloc:" ++ b.id) ]
                )
         )
         entete
@@ -459,8 +504,8 @@ bloc lecture m contexte ((Bloc b) as preuve) =
         pied
 
 
-paletteRegle : Modele -> Regle -> Element Message
-paletteRegle m regle =
+paletteRegle : Bool -> Modele -> Regle -> Element Message
+paletteRegle apercu m regle =
     let
         id =
             case regle of
@@ -490,9 +535,10 @@ paletteRegle m regle =
         conclusion =
             contrat |> Result.map .conclusion |> Result.withDefault (Trou "sortie")
     in
-    B.emboitable B.Neutre
-        [ attribut "data-atelier-piece" id ]
-        (source id (titreCourt m.document.bibliotheque regle))
+    B.emboitableAvec B.Miniature
+        B.Neutre
+        [ marquer apercu Manipulation.piece id ]
+        (source apercu m id (titreCourt m.document.bibliotheque regle))
         cavites
         (ligne
             [ UI.text "→"
@@ -519,7 +565,7 @@ faits m =
 
           else
             UI.column [ UI.spacing 12 ]
-                (Dict.toList ctx |> List.map (\( id, v ) -> B.emboitable B.Neutre [ attribut "data-atelier-piece" ("fait:" ++ id) ] (ligne [ source ("fait:" ++ id) "utiliser", formuleFixe v.conclusion ]) [] UI.none))
+                (Dict.toList ctx |> List.map (\( id, v ) -> B.emboitable B.Neutre [ Manipulation.piece ("fait:" ++ id) ] (ligne [ source False m ("fait:" ++ id) "utiliser", formuleFixe v.conclusion ]) [] UI.none))
         ]
 
 
@@ -547,12 +593,12 @@ arbreFormule m chemin f =
     in
     (case f of
         Trou _ ->
-            B.logement
+            B.logementImbrique
 
         _ ->
-            B.proposition
+            B.propositionNiveau (List.length chemin)
     )
-        [ attribut "data-atelier-cible" cible, attribut "data-chemin" adresse ]
+        ([ Manipulation.chemin adresse ] ++ Manipulation.cible m.geste cible)
         (avecOperateur bouton (List.indexedMap (\i enfant -> arbreFormule m (chemin ++ [ i ]) enfant) enfants))
 
 
@@ -568,7 +614,7 @@ palettePropositions m =
                     operateur contenu
 
                 bouton =
-                    B.commande [ attribut "aria-label" signe ]
+                    B.commande [ Region.description signe ]
                         (UI.text signe)
                         (if m.cibleFormule /= Nothing then
                             Connecteur r
@@ -577,12 +623,12 @@ palettePropositions m =
                             Choisir ("connecteur:" ++ r)
                         )
             in
-            B.proposition [ attribut "data-atelier-source" ("connecteur:" ++ r), attribut "class" "atelier-poignee" ]
-                (avecOperateur bouton (List.map (\_ -> B.logement [] (UI.text "…")) enfants))
+            B.proposition ([ Manipulation.source ("connecteur:" ++ r) ] ++ Manipulation.prise m.geste ("connecteur:" ++ r))
+                (avecOperateur bouton (List.map (\_ -> B.logementImbrique [] (UI.text "…")) enfants))
     in
     UI.column [ UI.spacing 14, UI.alignLeft ]
         ([ petit "Glisser dans un emplacement vert."
-         , UI.wrappedRow [ UI.spacing 6, UI.width UI.fill ] (List.map (\a -> B.proposition [ attribut "data-atelier-piece" ("atome:" ++ a) ] (source ("atome:" ++ a) a)) [ "A", "B", "C", "D", "P", "Q", "R", "S" ])
+         , UI.wrappedRow [ UI.spacing 6, UI.width UI.fill ] (List.map (\a -> B.proposition [ Manipulation.piece ("atome:" ++ a) ] (source False m ("atome:" ++ a) a)) [ "A", "B", "C", "D", "P", "Q", "R", "S" ])
          ]
             ++ List.map connecteur [ ( "et", "∧" ), ( "ou", "∨" ), ( "implique", "⇒" ), ( "non", "¬" ), ( "equivalent", "⇔" ), ( "faux", "⊥" ) ]
         )
@@ -592,11 +638,11 @@ composeur : Modele -> Element Message
 composeur m =
     UI.column [ UI.width UI.fill, UI.spacing 12 ]
         [ palettePropositions m
-        , UI.el [ attribut "class" "mrjam-outils" ]
+        , UI.el [ UI.width UI.fill ]
             (M.pile
                 [ M.sousTitre "Proposition"
                 , arbreFormule m [] m.brouillon
-                , source "prop:brouillon" (F.afficher m.brouillon)
+                , source False m "prop:brouillon" (F.afficher m.brouillon)
                 , M.bouton "Utiliser cette proposition" AppliquerFormule
                 , M.champ "Nom de l’atome" m.nomAtome NomAtome
                 , M.boutonSecondaire "Insérer cet atome" InsererAtome
@@ -708,7 +754,7 @@ palette m =
                         faits m
 
                     "inspecter" ->
-                        UI.el [ attribut "class" "mrjam-outils" ] (inspecteur m)
+                        UI.el [ UI.width UI.fill ] (inspecteur m)
 
                     "formules" ->
                         palettePropositions m
@@ -729,12 +775,12 @@ palette m =
                             petit "Vos théorèmes apparaîtront ici. Inspectez un bloc terminé, puis choisissez Créer un théorème."
 
                         else
-                            UI.column [ UI.spacing 18, attribut "class" "mrjam-palette-blocs" ] (List.map (\d -> paletteRegle m (Application d.id d.version)) defs)
+                            UI.column [ UI.spacing 18 ] (List.map (\d -> paletteRegle False m (Application d.id d.version)) defs)
 
                     _ ->
-                        UI.column [ UI.spacing 18, attribut "class" "mrjam-palette-blocs" ] (List.map (paletteRegle m) regles)
+                        UI.column [ UI.spacing 18 ] (List.map (paletteRegle False m) regles)
     in
-    UI.column [ UI.width (UI.minimum 0 UI.fill), UI.spacing 14, attribut "id" "atelier-palette" ]
+    UI.column [ UI.width (UI.minimum 0 UI.fill), UI.spacing 14, A.identifiant "atelier-palette" ]
         [ UI.wrappedRow [ UI.width UI.fill, UI.spacing 3 ]
             (List.map
                 (\( p, famille, nom ) -> B.onglet (p == m.panneau) famille nom (Panneau p))
@@ -744,8 +790,8 @@ palette m =
         ]
 
 
-vue : Int -> Modele -> Element Message
-vue largeur m =
+vue : { largeur : Int, hauteur : Int } -> Modele -> Element Message
+vue dimensions m =
     let
         doc =
             m.document
@@ -779,14 +825,14 @@ vue largeur m =
                             [ Region.heading 1
                             , Police.bold
                             , Police.size
-                                (if largeur < 600 then
+                                (if dimensions.largeur < 600 then
                                     16
 
                                  else
                                     20
                                 )
-                            , attribut "id" "lesson-heading"
-                            , UI.htmlAttribute (A.tabindex -1)
+                            , A.identifiant "lesson-heading"
+                            , A.tabulation -1
                             ]
                             (UI.text "Atelier de preuves")
                         ]
@@ -796,7 +842,7 @@ vue largeur m =
                     [ UI.el
                         [ UI.width
                             (UI.px
-                                (if largeur < 500 then
+                                (if dimensions.largeur < 500 then
                                     148
 
                                  else
@@ -805,47 +851,63 @@ vue largeur m =
                             )
                         ]
                         (M.selecteur "Exemple" Ex.titres m.exemple Exemple)
-                    , B.commande [ attribut "aria-label" "Construire l’énoncé", UI.htmlAttribute (A.title "Charger l’énoncé à construire") ] (UI.text "Énoncé") (Charger False)
-                    , B.commande [ attribut "aria-label" "Charger la solution manipulable", UI.htmlAttribute (A.title "Charger la solution manipulable") ] (UI.text "Solution") (Charger True)
+                    , B.commande [ Region.description "Construire l’énoncé", A.infoBulle "Charger l’énoncé à construire" ] (UI.text "Énoncé") (Charger False)
+                    , B.commande [ Region.description "Charger la solution manipulable", A.infoBulle "Charger la solution manipulable" ] (UI.text "Solution") (Charger True)
                     , UI.el [ UI.alignRight ] (ligne [ B.outil "Réduire" "−" (Zoomer -10), UI.text (String.fromInt m.zoom ++ "%"), B.outil "Agrandir" "+" (Zoomer 10), B.outil "Recentrer" "⌖" Recentrer ])
                     ]
                 ]
 
         projet =
-            UI.el [ attribut "class" "mrjam-projet" ]
+            UI.el
+                [ UI.width UI.fill
+                , UI.paddingXY 16
+                    (if dimensions.hauteur < 500 then
+                        6
+
+                     else
+                        12
+                    )
+                , Fond.color (UI.rgb 1 1 1)
+                , Bordure.widthEach { bottom = 1, top = 0, left = 0, right = 0 }
+                , Bordure.color (UI.rgb255 221 228 225)
+                ]
                 (UI.column [ UI.spacing 5, UI.width UI.fill ]
                     [ ligne [ petit "OBJECTIF", champDirect m "objectif" doc.objectif ]
                     , UI.wrappedRow [ UI.width UI.fill, UI.spacing 5 ]
                         ([ petit "DONNÉES" ]
                             ++ List.map (\h -> champDirect m ("premisse:" ++ h.id) h.formule) doc.premisses
-                            ++ [ B.commande [ attribut "aria-label" "Déclarer une prémisse", UI.htmlAttribute (A.title "Ajouter une donnée") ] (UI.text "+") AjouterPremisse ]
+                            ++ [ B.commande [ Region.description "Déclarer une prémisse", A.infoBulle "Ajouter une donnée" ] (UI.text "+") AjouterPremisse ]
                         )
                     ]
                 )
 
         canevas =
-            UI.column [ UI.width UI.fill, UI.height UI.fill, attribut "id" "atelier-canevas" ]
+            UI.column [ UI.width UI.fill, UI.height UI.fill, A.identifiant "atelier-canevas" ]
                 [ projet
                 , UI.el
-                    [ attribut "class" "mrjam-canevas"
-                    , attribut "id" "atelier-surface"
-                    , attribut "data-atelier-defile" "canevas"
-                    , attribut "data-atelier-fond" ("preuve:racine|0|" ++ String.fromInt (List.length doc.preuves))
-                    , attribut "aria-label" "Espace d’assemblage des preuves"
-                    , UI.htmlAttribute (A.tabindex 0)
+                    [ UI.width (UI.minimum 0 UI.fill)
+                    , UI.height (UI.minimum 0 UI.fill)
+                    , UI.scrollbars
+                    , UI.padding 16
+                    , A.identifiant "atelier-surface"
+                    , Manipulation.defilement
+                    , Manipulation.fond ("preuve:racine|0|" ++ String.fromInt (List.length doc.preuves))
+                    , Region.description "Espace d’assemblage des preuves"
+                    , A.tabulation 0
                     ]
                     (UI.column
-                        [ attribut "class" "mrjam-canevas-contenu"
-                        , UI.htmlAttribute (A.style "zoom" (String.fromFloat (toFloat m.zoom / 100)))
+                        [ UI.width UI.shrink
+                        , UI.height UI.shrink
+                        , Manipulation.zoom m.zoom
                         , UI.spacing 18
                         ]
-                        [ sequence False m "racine" 0 (N.contexteInitial doc.premisses) doc.objectif doc.preuves
+                        [ sequence False False m "racine" 0 (N.contexteInitial doc.premisses) doc.objectif doc.preuves
                         , case m.inspection of
                             Nothing ->
                                 UI.none
 
                             Just preuve ->
-                                M.pile [ petit "Démonstration instanciée · lecture", bloc True m (Ed.selectionnee m |> Maybe.map Tuple.second |> Maybe.withDefault Dict.empty) preuve, M.boutonSecondaire "Fermer la démonstration" FermerInspection ]
+                                M.pile [ petit "Démonstration instanciée · lecture", bloc True False m (Ed.selectionnee m |> Maybe.map Tuple.second |> Maybe.withDefault Dict.empty) preuve, M.boutonSecondaire "Fermer la démonstration" FermerInspection ]
                         ]
                     )
                 ]
@@ -853,11 +915,11 @@ vue largeur m =
         statut =
             UI.column [ UI.width UI.fill, UI.spacing 3 ]
                 [ UI.wrappedRow [ UI.width UI.fill, UI.spacing 8 ]
-                    [ UI.el [ attribut "id" "atelier-verification", Police.bold ] (UI.text verification)
+                    [ UI.el [ A.identifiant "atelier-verification", Police.bold ] (UI.text verification)
                     , UI.el [ UI.alignRight ] (M.lien "Les parcours" "#/parcours")
                     , Identite.signature
                     ]
-                , UI.el [ attribut "id" "atelier-message", attribut "role" "status", attribut "aria-live" "polite" ] (petit m.message)
+                , UI.el [ A.identifiant "atelier-message", A.etat, Region.announce ] (petit m.message)
                 , if m.stockageBloque then
                     M.actions [ M.bouton "Exporter avant de continuer" Exporter, M.boutonSecondaire "Reprendre la sauvegarde locale" ReprendreStockage ]
 
@@ -865,4 +927,38 @@ vue largeur m =
                     UI.none
                 ]
     in
-    UI.el [ attribut "id" "atelier", UI.width UI.fill ] (B.espace commandes (palette m) canevas statut)
+    UI.el
+        ([ A.identifiant "atelier", UI.width UI.fill ]
+            ++ (case m.geste of
+                    Nothing ->
+                        []
+
+                    Just geste ->
+                        [ Manipulation.fantome geste (apercuSource m geste.source) ]
+               )
+        )
+        (B.espace dimensions commandes (palette m) canevas statut)
+
+
+{-| L'aperçu partage les mêmes constructeurs de pièces que la palette/le canevas.
+Aucun document, historique ni certificat n'est modifié par ce rendu.
+-}
+apercuSource : Modele -> String -> Element Message
+apercuSource m identifiant =
+    case Ed.lireSource m identifiant of
+        Just (Ed.Nouvelle regle) ->
+            paletteRegle True m regle
+
+        Just (Ed.Deplacement id) ->
+            G.trouver id m.document.preuves
+                |> Maybe.map (\donnees -> bloc True True m (G.position id m.document.preuves |> Maybe.andThen (Ed.contexte m) |> Maybe.map Tuple.first |> Maybe.withDefault Dict.empty) (Bloc donnees))
+                |> Maybe.withDefault UI.none
+
+        Just (Ed.Fait _ formule) ->
+            B.emboitableAvec B.Miniature B.Neutre [] (ligne [ UI.text "utiliser", formuleFixe formule ]) [] UI.none
+
+        Just (Ed.Proposition formule) ->
+            formuleFixe formule
+
+        Nothing ->
+            UI.none

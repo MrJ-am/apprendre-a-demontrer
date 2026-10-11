@@ -1,4 +1,5 @@
 """Prises tactiles hors libellé : événements natifs CDP, sans injection du modèle."""
+import os
 from functools import partial
 from http.server import ThreadingHTTPServer
 from threading import Thread
@@ -11,16 +12,16 @@ def glisser(page, cdp, origine, arrivee):
     cdp.send('Input.dispatchTouchEvent',{'type':'touchStart','touchPoints':[{'x':x,'y':y}]})
     for i in range(1,17):
         cdp.send('Input.dispatchTouchEvent',{'type':'touchMove','touchPoints':[{'x':x+(tx-x)*i/16,'y':y+(ty-y)*i/16}]})
-    expect(page.locator('.atelier-fantome')).to_have_count(1)
+    expect(page.locator('[data-mrjam-fantome]')).to_have_count(1)
     expect(page.locator('[data-depot-actif]')).to_have_count(1)
     cdp.send('Input.dispatchTouchEvent',{'type':'touchEnd','touchPoints':[]})
-    expect(page.locator('.atelier-fantome')).to_have_count(0)
+    expect(page.locator('[data-mrjam-fantome]')).to_have_count(0)
     # Laisser finir le geste natif avant de commencer un tap indépendant.
     page.wait_for_timeout(600)
 
 
 def fond_jaune(page, piece):
-    entete=piece.locator('.mrjam-bloc-entete').first
+    entete=piece.locator('[data-mrjam-construction="entete"]').first
     entete.scroll_into_view_if_needed();bb=entete.bounding_box()
     x=min(bb['x']+bb['width']-10,page.viewport_size['width']-15);y=bb['y']+8
     assert page.evaluate('p=>!document.elementFromPoint(p.x,p.y).closest("[data-atelier-source]")',{'x':x,'y':y})
@@ -32,7 +33,7 @@ def centre(cible):
 
 
 def main():
-    serveur=ThreadingHTTPServer(('127.0.0.1',0),partial(Silencieux,directory=str(RACINE/'dist')))
+    serveur=ThreadingHTTPServer(('127.0.0.1',0),partial(Silencieux,directory=os.environ.get('ATELIER_SITE',str(RACINE/'dist'))))
     Thread(target=serveur.serve_forever,daemon=True).start()
     try:
         with sync_playwright() as p:

@@ -1,32 +1,5 @@
 (() => {
   "use strict";
-  class MathTex extends HTMLElement {
-    static get observedAttributes() {
-      return ["formula", "display-mode"];
-    }
-    connectedCallback() {
-      this.render();
-    }
-    attributeChangedCallback() {
-      if (this.isConnected) this.render();
-    }
-    render() {
-      const formula = this.getAttribute("formula") || "";
-      if (window.katex) {
-        window.katex.render(formula, this, {
-          displayMode: this.hasAttribute("display-mode"),
-          throwOnError: false,
-          strict: "warn",
-          trust: false,
-          output: "htmlAndMathml",
-        });
-      } else {
-        this.textContent = formula;
-      }
-    }
-  }
-  if (!customElements.get("math-tex"))
-    customElements.define("math-tex", MathTex);
   const course = window.courseData;
   if (!course || !window.Elm?.Main) {
     document.getElementById("app").textContent =
@@ -38,6 +11,7 @@
     flags: course,
   });
   window.installerAtelier?.(app);
+  window.MrJamAnimations.relier(app.ports.reductionAnimations);
   let latest = null;
   let sequence = 0;
   const pending = new Map();
@@ -47,34 +21,28 @@
     if (!entry) return;
     pending.delete(state.requestId);
     clearTimeout(entry.timer);
-    requestAnimationFrame(() =>
-      requestAnimationFrame(() => {
-        if (state.error) entry.reject(new Error(state.error));
-        else entry.resolve({ ...state, requestId: undefined });
-      }),
-    );
+    if (state.error) entry.reject(new Error(state.error));
+    else entry.resolve({ ...state, requestId: undefined });
   });
-  app.ports.focusElement.subscribe((id) =>
-    requestAnimationFrame(() => {
-      const target = document.getElementById(id);
-      if (!target) return;
-      target.focus({ preventScroll: true });
-      if (id === "lesson-heading") {
-        const top = target.getBoundingClientRect().top;
-        if (top < 0 || top > innerHeight * 0.65)
-          target.scrollIntoView({ block: "start", behavior: "auto" });
-      } else if (id === "feedback") {
-        const rect = target.getBoundingClientRect();
-        if (rect.top > innerHeight - 100)
-          target.scrollIntoView({
-            block: "center",
-            behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
-              ? "auto"
-              : "smooth",
-          });
-      }
-    }),
-  );
+  app.ports.focusElement.subscribe((id) => {
+    const target = document.getElementById(id);
+    if (!target) return;
+    target.focus({ preventScroll: true });
+    if (id === "lesson-heading") {
+      const top = target.getBoundingClientRect().top;
+      if (top < 0 || top > innerHeight * 0.65)
+        target.scrollIntoView({ block: "start", behavior: "auto" });
+    } else if (id === "feedback") {
+      const rect = target.getBoundingClientRect();
+      if (rect.top > innerHeight - 100)
+        target.scrollIntoView({
+          block: "center",
+          behavior: matchMedia("(prefers-reduced-motion: reduce)").matches
+            ? "auto"
+            : "smooth",
+        });
+    }
+  });
   const send = (payload) =>
     new Promise((resolve, reject) => {
       const requestId = String(++sequence);
