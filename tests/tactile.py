@@ -37,7 +37,7 @@ def main():
     Thread(target=serveur.serve_forever,daemon=True).start()
     try:
         with sync_playwright() as p:
-            navigateur=p.chromium.launch()
+            navigateur=p.chromium.launch(**({"executable_path": os.environ["CHROMIUM"]} if os.environ.get("CHROMIUM") else {}))
             for largeur in (390,768):
                 contexte=navigateur.new_context(viewport={'width':largeur,'height':900},is_mobile=True,has_touch=True)
                 page=contexte.new_page();erreurs=[];page.on('pageerror',lambda e:erreurs.append(str(e)))

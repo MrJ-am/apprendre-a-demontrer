@@ -135,7 +135,7 @@ def main():
     resultats=[]; erreurs=[]
     try:
         with sync_playwright() as p:
-            navigateur=p.chromium.launch()
+            navigateur=p.chromium.launch(**({"executable_path": os.environ["CHROMIUM"]} if os.environ.get("CHROMIUM") else {}))
             contexte=navigateur.new_context(viewport={'width':1440,'height':1100},accept_downloads=True,reduced_motion='reduce')
             page=contexte.new_page();page.on('pageerror',lambda e:erreurs.append(str(e)))
             page.goto(adresse);page.wait_for_selector('#atelier')
