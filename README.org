@@ -15,6 +15,13 @@ Les 12 leçons sont accessibles indépendamment. Chaque étape propose une quest
 
 Chaque leçon s’ouvre sur sa vidéo, puis propose de commencer ou de reprendre les exercices. Les deux entrées « Comprendre en vidéo » et « À vous de jouer » restent accessibles pendant la leçon. Revenir à la vidéo conserve la question courante, les réponses et les indices ; le lecteur Vimeo retrouve sa position pendant l’utilisation de la page. Le bouton « Les parcours » donne accès à l’ensemble des leçons. Les liens directs vers une question restent valides.
 
+* Préparation de l'environnement VPS
+
+La publication automatique est gelée. L'environnement Rust/Elm est défini dans
+vps-infrastructure/environment ; les règles proposées et le rejeu Elm dans
+mrjam-validation. Logique reste statique et conserve son style épinglé.
+Cette préparation n'est pas une qualification des parcours navigateur.
+
 * Développer
 
 Prévoir Node.js 22 ou plus récent et Python 3.10 ou plus récent.

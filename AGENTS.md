@@ -1,33 +1,26 @@
 # Composant Logique
 
-L’assemblage, les commandes locales et toute la CI/CD appartiennent à
-[MrJ-am/vps-infrastructure](https://github.com/MrJ-am/vps-infrastructure).
-Lire le [contrat central](https://github.com/MrJ-am/vps-infrastructure/blob/main/coordination/CONTRATS.org),
-le [manifeste](https://github.com/MrJ-am/vps-infrastructure/blob/main/assemblage/manifest.json)
-et les [commandes de développement](https://github.com/MrJ-am/vps-infrastructure/blob/main/assemblage/DEVELOPPEMENT.md).
-Interfaces Elm : elm-ui pour la présentation et elm-animator pour les transitions,
-mutualisés dans style-mrjam. Pas de Html/Html.Styled/elm-css, CSS/HTML applicatif ou
-animation ad hoc. Adaptateurs techniques étroits, documentés/testés ; Element.html
-et htmlAttribute bornés. elm-review central obligatoire, sans suppressions/exclusions
-générales ; tests des règles et parcours Continuous UI (interruptions/inversions,
-focus/clavier/reduced-motion, rafraîchissement arrêté). Lire le
-[contrat frontend](https://github.com/MrJ-am/vps-infrastructure/blob/main/assemblage/FRONTENDS.md).
+La préparation Rust/Elm du 28 octobre 2026 gèle tous les déploiements.
+L'assemblage applicatif est dans [mrjam-plateforme](https://github.com/MrJ-am/mrjam-plateforme),
+les propositions de règles indépendantes dans [mrjam-validation](https://github.com/MrJ-am/mrjam-validation),
+et l'environnement de développement dans [vps-infrastructure/environment](https://github.com/MrJ-am/vps-infrastructure/tree/main/environment).
+La forge cible est https://forge.mrj.am ; son raccordement et les ACL restent à établir.
+Ne créer ni workflow, ni déclencheur de déploiement dans ce dépôt.
+Une vérification locale ne vaut ni qualification complète ni autorisation de production.
+Conserver les révisions exactes des dépendances, les licences et les ressources réservées.
+Aucune donnée personnelle, aucun accès de production, aucun secret dans le dépôt.
+L'historique Git conserve les versions antérieures ; aucune réécriture forcée.
 
-Ce dépôt conserve ses sources, contrats et tests ; publier son commit avant
-référencement central. Aucun workflow satellite, publication autonome, échange
-obligatoire entre conversations ou acquittement. L’intégration centrale et les
-tests pertinents valident un changement.
+Présentation avec elm-ui et transitions avec elm-animator dans style-mrjam.
+Les applications gardent leur état métier. Pas de présentation HTML/CSS parallèle,
+de suppression générale des règles ou de mise à jour implicite du style vers HEAD.
+Les adaptateurs techniques restent étroits, nommés et testés ; les parcours clavier,
+focus, interruptions, inversion, reduced-motion et repos restent à qualifier.
+Les règles canoniques proposées sont dans mrjam-validation/review.
+La compilation et elm-review sont rejouables avec son dossier frontend-qualification.
 
-Préserver les modifications concurrentes, les données et les secrets. Commits
-français, push sans force ; aucune PR ni modification de visibilité ou licence.
-Une compilation ou un test local ne prouve pas une publication : citer les
-révisions et les contrôles de la version réellement servie. Les anciennes règles
-sont conservées dans `coordination/historique/AGENTS-avant-composants-20261011.md`.
-
-Le projet est statique : interface, correcteur et état pédagogique restent en
-Elm/ElmUI. Aucun backend ou système ASDF artificiel. JavaScript est réservé à
-KaTeX, au navigateur et aux intégrations légitimes. L’infrastructure construit
-et publie les ressources aux domaines et chemins existants.
+Logique reste un site statique : interface, correcteur et état pédagogique en Elm.
+Node et Python servent à la construction et aux tests locaux.
 
 Modifier les contenus dans `cours/parcours.org` ; générer et vérifier
 `data/course.json` par les commandes centrales, sans édition manuelle des données
